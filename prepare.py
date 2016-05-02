@@ -12,12 +12,13 @@ Base = declarative_base()
 class Document(Base):
     __tablename__ = 'document'
     id = sa.Column(sa.Integer, primary_key=True)
-    path = sa.Column(sa.Text)
-    text = sa.Column(sa.Text)
-    warnings = sa.Column(JSONB)
-    flags = sa.Column(JSONB)
-    size_disk = sa.Column(sa.Integer)
-    size_text = sa.Column(sa.Integer)
+    path = sa.Column(sa.Text, unique=True, nullable=False)
+    es = sa.Column(sa.Boolean, nullable=False, default=True)
+    text = sa.Column(sa.Text, nullable=False)
+    warnings = sa.Column(JSONB, nullable=False)
+    flags = sa.Column(JSONB, nullable=False)
+    size_disk = sa.Column(sa.Integer, nullable=False)
+    size_text = sa.Column(sa.Text, nullable=False)
 
 def text_from_html(html):
     soup = BeautifulSoup(html)
