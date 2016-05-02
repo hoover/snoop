@@ -13,38 +13,43 @@ class Document(Base):
     id = sa.Column(sa.Text, primary_key=True)
     path = sa.Column(sa.Text)
 
-def decode_person(header):
-    (name_bytes, addr) = email.utils.parseaddr(header)
-    name_parts = [
-        bytes.decode(encoding or 'latin-1')
-        for (bytes, encoding) in email.header.decode_header(name_bytes)
-    ]
-    return ' '.join(name_parts + [addr.decode('latin-1')])
+class EmailParser(object):
 
-def people(message):
-    for header in ['from', 'to', 'cc', 'resent-to', 'recent-cc', 'reply-to']:
-        for p in (decode_person(h) for h in message.get_all(header, [])):
-            yield p
+    def __init__(self, file):
+        self.file = file
 
-def parts(message):
-    if message.is_multipart():
-        for part in message.get_payload():
-            for p in parts(part):
+    def decode_person(self, header):
+        (name_bytes, addr) = email.utils.parseaddr(header)
+        name_parts = [
+            bytes.decode(encoding or 'latin-1')
+            for (bytes, encoding) in email.header.decode_header(name_bytes)
+        ]
+        return ' '.join(name_parts + [addr.decode('latin-1')])
+
+    def people(self, message):
+        for header in ['from', 'to', 'cc', 'resent-to', 'recent-cc', 'reply-to']:
+            for p in (self.decode_person(h) for h in message.get_all(header, [])):
                 yield p
-    else:
-        yield message
 
-def read_mail(file):
-    with file.open('rb') as f:
-        (size, extra) = f.read(11).split('\n', 1)
-        raw = extra + f.read(int(size) - len(extra))
+    def parts(self, message):
+        if message.is_multipart():
+            for part in message.get_payload():
+                for p in self.parts(part):
+                    yield p
+        else:
+            yield message
 
-    message = email.message_from_string(raw)
-    for p in people(message):
-        print(p)
+    def parse(self):
+        with self.file.open('rb') as f:
+            (size, extra) = f.read(11).split('\n', 1)
+            raw = extra + f.read(int(size) - len(extra))
 
-    for part in parts(message):
-        print(part.get_content_type())
+        message = email.message_from_string(raw)
+        for p in self.people(message):
+            print(p)
+
+        for part in self.parts(message):
+            print(part.get_content_type())
 
 def process(file):
     if file.is_dir():
@@ -53,7 +58,7 @@ def process(file):
     else:
         if file.suffixes[-1:] == ['.emlx']:
             print(file)
-            read_mail(file)
+            EmailParser(file).parse()
 
 def main():
     import sys
