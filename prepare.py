@@ -3,10 +3,12 @@ import re
 from pathlib import Path
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.dialects.postgresql import JSONB
 from bs4 import BeautifulSoup
 
 engine = sa.create_engine('postgresql:///maldini')
+Session = sessionmaker(bind=engine)
 Base = declarative_base()
 
 class Document(Base):
@@ -86,12 +88,13 @@ class EmailParser(object):
             if text:
                 text_parts.append(text)
 
-        return (' '.join(text_parts), self.warnings, self.flags)
+        return (' '.join(text_parts), self.warnings, sorted(self.flags), 0)
 
 class Walker(object):
 
-    def __init__(self, root):
+    def __init__(self, root, session):
         self.root = Path(root)
+        self.session = session
 
     def walk(self, file=None):
         if file is None:
@@ -102,16 +105,28 @@ class Walker(object):
                 self.walk(child)
         else:
             if file.suffixes[-1:] == ['.emlx']:
-                print(file.relative_to(self.root))
-                (text, warnings, flags) = EmailParser(file).parse()
-                print(text)
-                print(warnings)
-                print(flags)
+                path = unicode(file.relative_to(self.root))
+                (text, warnings, flags, size_disk) = EmailParser(file).parse()
+                row = (
+                    self.session
+                    .query(Document)
+                    .filter_by(path=path)
+                    .first()
+                    or Document(path=path)
+                )
+                row.text = text
+                row.warnings = warnings
+                row.flags = flags
+                row.size_text = len(text)
+                row.size_disk = size_disk
+                self.session.add(row)
 
 def main():
     import sys
     Base.metadata.create_all(engine)
-    Walker(sys.argv[1]).walk()
+    session = Session()
+    Walker(sys.argv[1], session).walk()
+    session.commit()
 
 if __name__ == '__main__':
     main()
