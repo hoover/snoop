@@ -96,23 +96,28 @@ class EmailParser(object):
 
 class Walker(object):
 
-    def __init__(self, generation, root, session):
+    def __init__(self, generation, root, prefix, session):
         self.generation = generation
         self.root = Path(root)
+        self.prefix = Path(prefix) if prefix else None
         self.session = session
 
 
     @classmethod
     def walk(cls, *args):
-        cls(*args).handle()
+        self = cls(*args)
+        return self.handle(self.root / self.prefix if self.prefix else None)
 
     def handle(self, file=None):
+        count = 0
+
         if file is None:
             file = self.root
 
         if file.is_dir():
             for child in file.iterdir():
-                self.handle(child)
+                count += self.handle(child)
+
         else:
             if file.suffixes[-1:] == ['.emlx']:
                 path = unicode(file.relative_to(self.root))
@@ -124,7 +129,8 @@ class Walker(object):
                     or Document(path=path)
                 )
                 if row.generation == self.generation:
-                    return
+                    return count
+
                 (text, warnings, flags, size_disk) = EmailParser.parse(file)
                 row.text = text
                 row.warnings = warnings
@@ -133,13 +139,20 @@ class Walker(object):
                 row.size_disk = size_disk
                 row.generation = self.generation
                 self.session.add(row)
+                count += 1
+
+        return count
 
 def main():
     import sys
     Base.metadata.create_all(engine)
     session = Session()
-    Walker.walk(int(sys.argv[1]), sys.argv[2], session)
+    generation = int(sys.argv[1])
+    root = sys.argv[2]
+    prefix = sys.argv[3] if len(sys.argv) > 3 else None
+    count = Walker.walk(generation, root, prefix, session)
     session.commit()
+    print('%d files' % count)
 
 if __name__ == '__main__':
     main()
