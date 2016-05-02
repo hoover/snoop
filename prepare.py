@@ -1,7 +1,9 @@
 import email, email.header, email.utils
+import re
 from pathlib import Path
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
+from bs4 import BeautifulSoup
 
 MAIL_HEADERS = ['From', 'To', 'Date']
 
@@ -13,10 +15,20 @@ class Document(Base):
     id = sa.Column(sa.Text, primary_key=True)
     path = sa.Column(sa.Text)
 
+def text_from_html(html):
+    soup = BeautifulSoup(html)
+    for node in soup(["script", "style"]):
+        node.extract()
+    return re.sub(r'\s+', ' ', soup.get_text().strip())
+
 class EmailParser(object):
 
     def __init__(self, file):
         self.file = file
+        self.warnings = []
+
+    def warn(self, text):
+        self.warnings.append(text)
 
     def decode_person(self, header):
         (name_bytes, addr) = email.utils.parseaddr(header)
@@ -39,6 +51,16 @@ class EmailParser(object):
         else:
             yield message
 
+    def get_part_text(self, part):
+        charset = part.get_content_charset()
+        content_type = part.get_content_type()
+        payload = lambda: part.get_payload(decode=True).decode(charset or 'latin-1')
+        if content_type == 'text/plain':
+            return payload()
+        if content_type == 'text/html':
+            return text_from_html(payload())
+        self.warn("Unknown part content type: %r" % content_type)
+
     def parse(self):
         with self.file.open('rb') as f:
             (size, extra) = f.read(11).split('\n', 1)
@@ -48,8 +70,13 @@ class EmailParser(object):
         for p in self.people(message):
             print(p)
 
+        text_parts = []
         for part in self.parts(message):
-            print(part.get_content_type())
+            text = self.get_part_text(part)
+            if text:
+                text_parts.append(text)
+
+        print('TEXT: ' + ' '.join(text_parts))
 
 def process(file):
     if file.is_dir():

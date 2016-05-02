@@ -2,3 +2,4 @@ pip-tools
 sqlalchemy
 psycopg2
 pathlib
+beautifulsoup4
