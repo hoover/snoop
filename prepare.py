@@ -24,7 +24,7 @@ class Document(Base):
     generation = sa.Column(sa.Integer, nullable=False)
 
 def text_from_html(html):
-    soup = BeautifulSoup(html)
+    soup = BeautifulSoup(html, 'html.parser')
     for node in soup(["script", "style"]):
         node.extract()
     return re.sub(r'\s+', ' ', soup.get_text().strip())
