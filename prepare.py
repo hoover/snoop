@@ -26,9 +26,13 @@ class EmailParser(object):
     def __init__(self, file):
         self.file = file
         self.warnings = []
+        self.flags = set()
 
     def warn(self, text):
         self.warnings.append(text)
+
+    def flag(self, flag):
+        self.flags.add(flag)
 
     def decode_person(self, header):
         (name_bytes, addr) = email.utils.parseaddr(header)
@@ -60,6 +64,7 @@ class EmailParser(object):
         if content_type == 'text/html':
             return text_from_html(payload())
         self.warn("Unknown part content type: %r" % content_type)
+        self.flag('unknown_attachment')
 
     def parse(self):
         with self.file.open('rb') as f:
