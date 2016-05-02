@@ -74,7 +74,10 @@ class EmailParser(object):
         self.warn("Unknown part content type: %r" % content_type)
         self.flag('unknown_attachment')
 
-    def parse(self):
+    @classmethod
+    def parse(cls, *args):
+        self = cls(*args)
+
         with self.file.open('rb') as f:
             (size, extra) = f.read(11).split('\n', 1)
             raw = extra + f.read(int(size) - len(extra))
@@ -98,13 +101,18 @@ class Walker(object):
         self.root = Path(root)
         self.session = session
 
-    def walk(self, file=None):
+
+    @classmethod
+    def walk(cls, *args):
+        cls(*args).handle()
+
+    def handle(self, file=None):
         if file is None:
             file = self.root
 
         if file.is_dir():
             for child in file.iterdir():
-                self.walk(child)
+                self.handle(child)
         else:
             if file.suffixes[-1:] == ['.emlx']:
                 path = unicode(file.relative_to(self.root))
@@ -117,7 +125,7 @@ class Walker(object):
                 )
                 if row.generation == self.generation:
                     return
-                (text, warnings, flags, size_disk) = EmailParser(file).parse()
+                (text, warnings, flags, size_disk) = EmailParser.parse(file)
                 row.text = text
                 row.warnings = warnings
                 row.flags = flags
@@ -130,7 +138,7 @@ def main():
     import sys
     Base.metadata.create_all(engine)
     session = Session()
-    Walker(int(sys.argv[1]), sys.argv[2], session).walk()
+    Walker.walk(int(sys.argv[1]), sys.argv[2], session)
     session.commit()
 
 if __name__ == '__main__':
