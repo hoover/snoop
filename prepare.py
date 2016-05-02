@@ -35,8 +35,14 @@ def read_mail(file):
     for p in people(message):
         print(p)
 
-def process(folder):
-    read_mail(folder)
+def process(file):
+    if file.is_dir():
+        for child in file.iterdir():
+            process(child)
+    else:
+        if file.suffixes[-1:] == ['.emlx']:
+            print(file)
+            read_mail(file)
 
 def main():
     import sys
