@@ -28,8 +28,8 @@ def people(message):
 
 def read_mail(file):
     with file.open('rb') as f:
-        size = int(f.read(11))
-        raw = f.read(size)
+        (size, extra) = f.read(11).split('\n', 1)
+        raw = extra + f.read(int(size) - len(extra))
 
     message = email.message_from_string(raw)
     for p in people(message):
