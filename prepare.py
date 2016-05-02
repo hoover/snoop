@@ -21,6 +21,7 @@ class Document(Base):
     flags = sa.Column(JSONB, nullable=False)
     size_disk = sa.Column(sa.Integer, nullable=False)
     size_text = sa.Column(sa.Text, nullable=False)
+    generation = sa.Column(sa.Integer, nullable=False)
 
 def text_from_html(html):
     soup = BeautifulSoup(html)
@@ -92,7 +93,8 @@ class EmailParser(object):
 
 class Walker(object):
 
-    def __init__(self, root, session):
+    def __init__(self, generation, root, session):
+        self.generation = generation
         self.root = Path(root)
         self.session = session
 
@@ -106,7 +108,6 @@ class Walker(object):
         else:
             if file.suffixes[-1:] == ['.emlx']:
                 path = unicode(file.relative_to(self.root))
-                (text, warnings, flags, size_disk) = EmailParser(file).parse()
                 row = (
                     self.session
                     .query(Document)
@@ -114,18 +115,22 @@ class Walker(object):
                     .first()
                     or Document(path=path)
                 )
+                if row.generation == self.generation:
+                    return
+                (text, warnings, flags, size_disk) = EmailParser(file).parse()
                 row.text = text
                 row.warnings = warnings
                 row.flags = flags
                 row.size_text = len(text)
                 row.size_disk = size_disk
+                row.generation = self.generation
                 self.session.add(row)
 
 def main():
     import sys
     Base.metadata.create_all(engine)
     session = Session()
-    Walker(sys.argv[1], session).walk()
+    Walker(int(sys.argv[1]), sys.argv[2], session).walk()
     session.commit()
 
 if __name__ == '__main__':
