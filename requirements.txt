@@ -8,4 +8,6 @@
 click==6.6                # via pip-tools
 first==2.0.1              # via pip-tools
 pip-tools==1.6.3
+psycopg2==2.6.1
 six==1.10.0               # via pip-tools
+sqlalchemy==1.0.12

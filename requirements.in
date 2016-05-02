@@ -1,1 +1,3 @@
 pip-tools
+sqlalchemy
+psycopg2
