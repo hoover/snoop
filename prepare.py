@@ -5,8 +5,6 @@ import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
 from bs4 import BeautifulSoup
 
-MAIL_HEADERS = ['From', 'To', 'Date']
-
 engine = sa.create_engine('postgresql:///maldini')
 Base = declarative_base()
 
