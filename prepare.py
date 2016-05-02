@@ -3,6 +3,7 @@ import re
 from pathlib import Path
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.dialects.postgresql import JSONB
 from bs4 import BeautifulSoup
 
 engine = sa.create_engine('postgresql:///maldini')
@@ -10,8 +11,13 @@ Base = declarative_base()
 
 class Document(Base):
     __tablename__ = 'document'
-    id = sa.Column(sa.Text, primary_key=True)
+    id = sa.Column(sa.Integer, primary_key=True)
     path = sa.Column(sa.Text)
+    text = sa.Column(sa.Text)
+    warnings = sa.Column(JSONB)
+    flags = sa.Column(JSONB)
+    size_disk = sa.Column(sa.Integer)
+    size_text = sa.Column(sa.Integer)
 
 def text_from_html(html):
     soup = BeautifulSoup(html)
