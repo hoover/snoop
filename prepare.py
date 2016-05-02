@@ -87,22 +87,30 @@ class EmailParser(object):
 
         return (' '.join(text_parts), self.warnings, self.flags)
 
-def process(file):
-    if file.is_dir():
-        for child in file.iterdir():
-            process(child)
-    else:
-        if file.suffixes[-1:] == ['.emlx']:
-            print(file)
-            (text, warnings, flags) = EmailParser(file).parse()
-            print(text)
-            print(warnings)
-            print(flags)
+class Walker(object):
+
+    def __init__(self, root):
+        self.root = Path(root)
+
+    def walk(self, file=None):
+        if file is None:
+            file = self.root
+
+        if file.is_dir():
+            for child in file.iterdir():
+                self.walk(child)
+        else:
+            if file.suffixes[-1:] == ['.emlx']:
+                print(file.relative_to(self.root))
+                (text, warnings, flags) = EmailParser(file).parse()
+                print(text)
+                print(warnings)
+                print(flags)
 
 def main():
     import sys
     Base.metadata.create_all(engine)
-    process(Path(sys.argv[1]))
+    Walker(sys.argv[1]).walk()
 
 if __name__ == '__main__':
     main()
