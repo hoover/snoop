@@ -106,8 +106,15 @@ class Walker(object):
     @classmethod
     def walk(cls, *args):
         self = cls(*args)
-        self.count = 0
-        return self.handle(self.root / self.prefix if self.prefix else None)
+        self.processed = 0
+        self.exceptions = 0
+
+        try:
+            return self.handle(self.root / self.prefix if self.prefix else None)
+        except KeyboardInterrupt:
+            pass
+
+        return self.processed, self.exceptions
 
     def handle(self, file=None):
         if file is None:
@@ -119,8 +126,6 @@ class Walker(object):
 
         else:
             self.handle_file(file)
-
-        return self.count
 
     def handle_file(self, file):
         if file.suffixes[-1:] == ['.emlx']:
@@ -138,15 +143,20 @@ class Walker(object):
         if row.generation == self.generation:
             return
 
-        (text, warnings, flags, size_disk) = EmailParser.parse(file)
-        row.text = text
-        row.warnings = warnings
-        row.flags = flags
-        row.size_text = len(text)
-        row.size_disk = size_disk
-        row.generation = self.generation
-        self.session.add(row)
-        self.count += 1
+        try:
+            (text, warnings, flags, size_disk) = EmailParser.parse(file)
+        except Exception as e:
+            self.exceptions += 1
+
+        else:
+            row.text = text
+            row.warnings = warnings
+            row.flags = flags
+            row.size_text = len(text)
+            row.size_disk = size_disk
+            row.generation = self.generation
+            self.session.add(row)
+            self.processed += 1
 
 def main():
     import sys
@@ -155,9 +165,9 @@ def main():
     generation = int(sys.argv[1])
     root = sys.argv[2]
     prefix = sys.argv[3] if len(sys.argv) > 3 else None
-    count = Walker.walk(generation, root, prefix, session)
+    (processed, exceptions) = Walker.walk(generation, root, prefix, session)
     session.commit()
-    print('%d files' % count)
+    print('processed = %d, exceptions = %d' % (processed, exceptions))
 
 if __name__ == '__main__':
     main()
