@@ -96,11 +96,10 @@ class EmailParser(object):
 
 class Walker(object):
 
-    def __init__(self, generation, root, prefix, session):
+    def __init__(self, generation, root, prefix):
         self.generation = generation
         self.root = Path(root)
         self.prefix = Path(prefix) if prefix else None
-        self.session = session
 
 
     @classmethod
@@ -108,12 +107,15 @@ class Walker(object):
         self = cls(*args)
         self.processed = 0
         self.exceptions = 0
+        self.session = Session()
+        self.uncommitted = 0
 
         try:
             return self.handle(self.root / self.prefix if self.prefix else None)
         except KeyboardInterrupt:
             pass
 
+        self.session.commit()
         return self.processed, self.exceptions
 
     def handle(self, file=None):
@@ -159,16 +161,20 @@ class Walker(object):
             row.generation = self.generation
             self.session.add(row)
             self.processed += 1
+            self.uncommitted += 1
+
+            if self.uncommitted >= 100:
+                print('COMMIT')
+                self.session.commit()
+                self.uncommitted = 0
 
 def main():
     import sys
     Base.metadata.create_all(engine)
-    session = Session()
     generation = int(sys.argv[1])
     root = sys.argv[2]
     prefix = sys.argv[3] if len(sys.argv) > 3 else None
-    (processed, exceptions) = Walker.walk(generation, root, prefix, session)
-    session.commit()
+    (processed, exceptions) = Walker.walk(generation, root, prefix)
     print('processed = %d, exceptions = %d' % (processed, exceptions))
 
 if __name__ == '__main__':
