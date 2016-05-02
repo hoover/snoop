@@ -106,42 +106,47 @@ class Walker(object):
     @classmethod
     def walk(cls, *args):
         self = cls(*args)
+        self.count = 0
         return self.handle(self.root / self.prefix if self.prefix else None)
 
     def handle(self, file=None):
-        count = 0
-
         if file is None:
             file = self.root
 
         if file.is_dir():
             for child in file.iterdir():
-                count += self.handle(child)
+                self.handle(child)
 
         else:
-            if file.suffixes[-1:] == ['.emlx']:
-                path = unicode(file.relative_to(self.root))
-                row = (
-                    self.session
-                    .query(Document)
-                    .filter_by(path=path)
-                    .first()
-                    or Document(path=path)
-                )
-                if row.generation == self.generation:
-                    return count
+            self.handle_file(file)
 
-                (text, warnings, flags, size_disk) = EmailParser.parse(file)
-                row.text = text
-                row.warnings = warnings
-                row.flags = flags
-                row.size_text = len(text)
-                row.size_disk = size_disk
-                row.generation = self.generation
-                self.session.add(row)
-                count += 1
+        return self.count
 
-        return count
+    def handle_file(self, file):
+        if file.suffixes[-1:] == ['.emlx']:
+            self.handle_emlx(file)
+
+    def handle_emlx(self, file):
+        path = unicode(file.relative_to(self.root))
+        row = (
+            self.session
+            .query(Document)
+            .filter_by(path=path)
+            .first()
+            or Document(path=path)
+        )
+        if row.generation == self.generation:
+            return
+
+        (text, warnings, flags, size_disk) = EmailParser.parse(file)
+        row.text = text
+        row.warnings = warnings
+        row.flags = flags
+        row.size_text = len(text)
+        row.size_disk = size_disk
+        row.generation = self.generation
+        self.session.add(row)
+        self.count += 1
 
 def main():
     import sys
