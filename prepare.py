@@ -26,6 +26,14 @@ def people(message):
         for p in (decode_person(h) for h in message.get_all(header, [])):
             yield p
 
+def parts(message):
+    if message.is_multipart():
+        for part in message.get_payload():
+            for p in parts(part):
+                yield p
+    else:
+        yield message
+
 def read_mail(file):
     with file.open('rb') as f:
         (size, extra) = f.read(11).split('\n', 1)
@@ -34,6 +42,9 @@ def read_mail(file):
     message = email.message_from_string(raw)
     for p in people(message):
         print(p)
+
+    for part in parts(message):
+        print(part.get_content_type())
 
 def process(file):
     if file.is_dir():
