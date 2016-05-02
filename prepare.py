@@ -84,7 +84,7 @@ class EmailParser(object):
 
         message = email.message_from_string(raw)
         for p in self.people(message):
-            print(p)
+            pass # print(p)
 
         text_parts = []
         for part in self.parts(message):
@@ -142,6 +142,8 @@ class Walker(object):
         )
         if row.generation == self.generation:
             return
+
+        print(path)
 
         try:
             (text, warnings, flags, size_disk) = EmailParser.parse(file)
