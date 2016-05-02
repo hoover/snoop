@@ -81,7 +81,7 @@ class EmailParser(object):
             if text:
                 text_parts.append(text)
 
-        print('TEXT: ' + ' '.join(text_parts))
+        return (' '.join(text_parts), self.warnings, self.flags)
 
 def process(file):
     if file.is_dir():
@@ -90,7 +90,10 @@ def process(file):
     else:
         if file.suffixes[-1:] == ['.emlx']:
             print(file)
-            EmailParser(file).parse()
+            (text, warnings, flags) = EmailParser(file).parse()
+            print(text)
+            print(warnings)
+            print(flags)
 
 def main():
     import sys
