@@ -7,6 +7,7 @@
 
 beautifulsoup4==4.4.1
 click==6.6                # via pip-tools
+Django==1.9.6
 first==2.0.1              # via pip-tools
 pathlib==1.0.1
 pip-tools==1.6.3

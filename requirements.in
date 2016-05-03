@@ -3,3 +3,4 @@ sqlalchemy
 psycopg2
 pathlib
 beautifulsoup4
+Django
