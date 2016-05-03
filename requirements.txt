@@ -13,4 +13,3 @@ pathlib==1.0.1
 pip-tools==1.6.3
 psycopg2==2.6.1
 six==1.10.0               # via pip-tools
-sqlalchemy==1.0.12
