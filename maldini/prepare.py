@@ -2,6 +2,7 @@ import email, email.header, email.utils
 import re
 from pathlib import Path
 from bs4 import BeautifulSoup
+from .models import Document, FolderMark
 
 def text_from_html(html):
     soup = BeautifulSoup(html, 'html.parser')
@@ -97,19 +98,32 @@ class Walker(object):
         # TODO commit
         return self.processed, self.exceptions
 
+    def _path(self, file):
+        return str(file.relative_to(self.root)).decode('utf-8')
+
     def handle(self, file=None):
         if file is None:
             file = self.root
 
         if file.is_dir():
+            path = self._path(file)
+            if FolderMark.objects.filter(path=path).count():
+                print 'SKIP', path
+                return
             for child in file.iterdir():
                 self.handle(child)
+            FolderMark.objects.create(path=path)
+            print 'MARK', path
 
         else:
             self.handle_file(file)
 
     def handle_file(self, file):
-        print(repr(file))
+        path = self._path(file)
+        print 'FILE', path
+        doc, _ = Document.objects.get_or_create(path=path, defaults={'disk_size': file.stat().st_size})
+        doc.save()
+
         #if file.suffixes[-1:] == ['.emlx']:
         #    self.handle_emlx(file)
 
