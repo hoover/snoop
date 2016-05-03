@@ -1,27 +1,7 @@
 import email, email.header, email.utils
 import re
 from pathlib import Path
-import sqlalchemy as sa
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.dialects.postgresql import JSONB
 from bs4 import BeautifulSoup
-
-engine = sa.create_engine('postgresql:///maldini')
-Session = sessionmaker(bind=engine)
-Base = declarative_base()
-
-class Document(Base):
-    __tablename__ = 'document'
-    id = sa.Column(sa.Integer, primary_key=True)
-    path = sa.Column(sa.Text, unique=True, nullable=False)
-    es = sa.Column(sa.Boolean, nullable=False, default=True)
-    text = sa.Column(sa.Text, nullable=False)
-    warnings = sa.Column(JSONB, nullable=False)
-    flags = sa.Column(JSONB, nullable=False)
-    size_disk = sa.Column(sa.Integer, nullable=False)
-    size_text = sa.Column(sa.Text, nullable=False)
-    generation = sa.Column(sa.Integer, nullable=False)
 
 def text_from_html(html):
     soup = BeautifulSoup(html, 'html.parser')
@@ -107,7 +87,6 @@ class Walker(object):
         self = cls(*args)
         self.processed = 0
         self.exceptions = 0
-        self.session = Session()
         self.uncommitted = 0
 
         try:
@@ -115,7 +94,7 @@ class Walker(object):
         except KeyboardInterrupt:
             pass
 
-        self.session.commit()
+        # TODO commit
         return self.processed, self.exceptions
 
     def handle(self, file=None):
@@ -130,8 +109,9 @@ class Walker(object):
             self.handle_file(file)
 
     def handle_file(self, file):
-        if file.suffixes[-1:] == ['.emlx']:
-            self.handle_emlx(file)
+        print(repr(file))
+        #if file.suffixes[-1:] == ['.emlx']:
+        #    self.handle_emlx(file)
 
     def handle_emlx(self, file):
         path = unicode(file.relative_to(self.root))
@@ -165,7 +145,7 @@ class Walker(object):
 
             if self.uncommitted >= 100:
                 print('COMMIT')
-                self.session.commit()
+                # TODO commit
                 self.uncommitted = 0
 
 def main():

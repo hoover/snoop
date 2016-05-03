@@ -1,11 +1,13 @@
 from django.core.management.base import BaseCommand
+from django.conf import settings
+from maldini.prepare import Walker
 
 class Command(BaseCommand):
 
     help = "Traverse directory and get fiels"
 
     def add_arguments(self, parser):
-        parser.add_argument('prefix')
+        parser.add_argument('prefix', nargs='?', default=None)
 
     def handle(self, prefix, **options):
-        print repr(prefix.decode('utf-8'))
+        Walker.walk(0, settings.MALDINI_ROOT, prefix)
