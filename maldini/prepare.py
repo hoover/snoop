@@ -32,8 +32,8 @@ class EmailParser(object):
         ]
         return ' '.join(name_parts + [addr.decode('latin-1')])
 
-    def people(self, message):
-        for header in ['from', 'to', 'cc', 'resent-to', 'recent-cc', 'reply-to']:
+    def people(self, message, headers):
+        for header in headers:
             for p in (self.decode_person(h) for h in message.get_all(header, [])):
                 yield p
 
@@ -65,16 +65,14 @@ class EmailParser(object):
             raw = extra + f.read(int(size) - len(extra))
 
         message = email.message_from_string(raw)
-        for p in self.people(message):
-            pass # print(p)
-
+        people = list(self.people(message, ['from', 'to', 'cc', 'resent-to', 'recent-cc', 'reply-to']))
         text_parts = []
         for part in self.parts(message):
             text = self.get_part_text(part)
             if text:
                 text_parts.append(text)
 
-        return (' '.join(text_parts), self.warnings, sorted(self.flags), 0)
+        return (people, ' '.join(text_parts), self.warnings, sorted(self.flags), 0)
 
 class Walker(object):
 
@@ -172,8 +170,9 @@ def extract(doc):
     }
 
     if file.suffix == '.emlx':
-        (text, warnings, flags, size_disk) = EmailParser.parse(file)
-        data['text'] = text
+        (people, text, warnings, flags, size_disk) = EmailParser.parse(file)
+        data['people'] = ' '.join(people)
+        data['text'] = '\n'.join(people + [text])
 
     return data
 
