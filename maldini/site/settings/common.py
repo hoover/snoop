@@ -39,7 +39,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'maldini.wsgi.application'
+WSGI_APPLICATION = 'maldini.site.wsgi.application'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
