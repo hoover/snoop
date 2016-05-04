@@ -1,3 +1,4 @@
+from django.conf import settings
 import email, email.header, email.utils
 import re
 from pathlib import Path
@@ -161,6 +162,20 @@ class Walker(object):
                 print('COMMIT')
                 # TODO commit
                 self.uncommitted = 0
+
+def extract(doc):
+    file = Path(settings.MALDINI_ROOT) / doc.path
+    data = {
+        'title': doc.path,
+        'path': doc.path,
+        'disk_size': doc.disk_size,
+    }
+
+    if file.suffix == '.emlx':
+        (text, warnings, flags, size_disk) = EmailParser.parse(file)
+        data['text'] = text
+
+    return data
 
 def main():
     import sys
