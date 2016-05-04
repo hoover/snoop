@@ -13,6 +13,9 @@ def push(doc):
     try:
         data = extract(doc)
 
+    except KeyboardInterrupt:
+        raise
+
     except:
         #doc.fail = True
         doc.status = {'error': True}
