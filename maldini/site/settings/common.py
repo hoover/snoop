@@ -1,5 +1,3 @@
-SECRET_KEY = 'cv*n06ctu6i3-y)wma5q#5d*-g26i#zx5dxfxt!*hmahhqrm$%'
-
 ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
