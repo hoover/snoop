@@ -15,7 +15,8 @@ def push(doc):
 
     except:
         #doc.fail = True
-        #doc.save()
+        doc.status = {'error': True}
+        doc.save()
         print 'ERROR'
         return
 
