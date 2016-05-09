@@ -18,5 +18,9 @@ class Prop(models.Model):
             ('key', 'value'),
         ]
 
+class Cache(models.Model):
+    document = models.ForeignKey(Document, db_index=True)
+    data = models.TextField()
+
 class FolderMark(models.Model):
     path = models.CharField(max_length=4000, unique=True, db_index=True)
