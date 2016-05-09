@@ -1,12 +1,11 @@
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from .models import Document
 from .prepare import extract
 
-def text(request, id):
+def document(request, id):
     doc = get_object_or_404(Document, id=id)
     data = extract(doc)
-    return HttpResponse(
-        data.get('text', '-- no text --'),
-        content_type='text/plain',
-    )
+    return render(request, 'document.html', {
+        'data': data,
+    })

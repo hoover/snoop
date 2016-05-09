@@ -172,6 +172,9 @@ def extract(doc):
     if file.suffix == '.emlx':
         (people, text, warnings, flags, size_disk) = EmailParser.parse(file)
         data['people'] = ' '.join(people)
+        data['from'] = people[0]
+        data['to'] = people[1:]
+        data['content'] = text
         data['text'] = '\n'.join(people + [text])
 
     return data

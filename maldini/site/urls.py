@@ -4,5 +4,5 @@ from .. import views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^doc/(?P<id>\d+)$', views.text),
+    url(r'^doc/(?P<id>\d+)$', views.document),
 ]

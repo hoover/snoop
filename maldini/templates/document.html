@@ -1,0 +1,21 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+h1 { font-family: monospace; font-size: 16px; }
+code { white-space: pre-wrap; }
+.content { border: 1px solid #bbb; white-space: pre-wrap; }
+</style>
+<body>
+
+<h1>{{ data.path }}</h1>
+
+<p>From: <code>{{ data.from }}</code></p>
+
+<p>
+  To:
+  {% for person in data.to %}
+    <code>{{ person }}</code>
+  {% endfor %}
+</p>
+
+<pre class="content">{{ data.content }}</pre>
