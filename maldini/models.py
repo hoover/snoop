@@ -8,5 +8,15 @@ class Document(models.Model):
     push = models.BooleanField(default=False)
     status = JSONField(default=dict)
 
+class Prop(models.Model):
+    document = models.ForeignKey(Document, db_index=True)
+    key = models.CharField(max_length=100)
+    value = models.CharField(max_length=1000)
+
+    class Meta:
+        index_together = [
+            ('key', 'value'),
+        ]
+
 class FolderMark(models.Model):
     path = models.CharField(max_length=4000, unique=True, db_index=True)
