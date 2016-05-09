@@ -1,1 +1,2 @@
 /maldini/site/settings/local.py
+*.pyc
