@@ -40,13 +40,5 @@ class Command(BaseCommand):
     def handle(self, **options):
 
         offset = 0
-        while True:
-            chunk = list(Document.objects.order_by('id').all()[offset:offset+100])
-
-            if not chunk:
-                break
-
-            for doc in chunk:
-                push(doc)
-
-            offset += 100
+        for doc in Document.objects.order_by('id').all().iterator():
+            push(doc)
