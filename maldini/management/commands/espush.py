@@ -1,37 +1,12 @@
+import simplejson as json
 from pathlib import Path
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from elasticsearch import Elasticsearch
-from maldini.models import Document
+from maldini.models import Document, Generation, Failure, Cache
 from maldini.prepare import extract
 
 es = Elasticsearch(settings.ELASTICSEARCH_URL)
-
-def push(doc):
-    print(doc.id, doc.path)
-
-    try:
-        data = extract(doc)
-
-    except KeyboardInterrupt:
-        raise
-
-    except:
-        #doc.fail = True
-        doc.status = {'error': True}
-        doc.save()
-        print 'ERROR'
-        return
-
-    es.index(
-        index='hoover-6',
-        doc_type='doc',
-        id=doc.id,
-        body=data,
-    )
-    #doc.push = False
-    #doc.save()
-
 
 class Command(BaseCommand):
 
@@ -40,5 +15,29 @@ class Command(BaseCommand):
     def handle(self, **options):
 
         offset = 0
-        for doc in Document.objects.order_by('id').all().iterator():
-            push(doc)
+        for doc in Document.objects.exclude(generation__n=1).order_by('id').all().iterator():
+            print(doc.id, doc.path)
+
+            try:
+                data = extract(doc)
+
+            except KeyboardInterrupt:
+                raise
+
+            except:
+                Failure.objects.create(document=doc)
+                print 'ERROR'
+
+            else:
+                Cache.objects.create(document=doc, data=json.dumps(data))
+
+            Generation.objects.create(document=doc, n=1)
+
+            #es.index(
+            #    index='hoover-6',
+            #    doc_type='doc',
+            #    id=doc.id,
+            #    body=data,
+            #)
+            #doc.push = False
+            #doc.save()
