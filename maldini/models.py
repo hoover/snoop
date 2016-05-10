@@ -18,7 +18,8 @@ class Prop(models.Model):
         index_together = [('key', 'value')]
 
 class Cache(models.Model):
-    document = models.ForeignKey(Document, unique=True, db_index=True)
+    document = models.OneToOneField(Document, db_index=True,
+        on_delete=models.CASCADE)
     data = models.TextField()
 
 class FolderMark(models.Model):
