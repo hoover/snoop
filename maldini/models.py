@@ -8,14 +8,14 @@ class Document(models.Model):
     push = models.BooleanField(default=False)
     status = JSONField(default=dict)
 
-class Prop(models.Model):
-    document = models.ForeignKey(Document, db_index=True)
-    key = models.CharField(max_length=100)
-    value = models.CharField(max_length=1000, blank=True)
+class Failure(models.Model):
+    document = models.OneToOneField(Document, db_index=True,
+        on_delete=models.CASCADE)
 
-    class Meta:
-        unique_together = [('document', 'key')]
-        index_together = [('key', 'value')]
+class Generation(models.Model):
+    document = models.OneToOneField(Document, db_index=True,
+        on_delete=models.CASCADE)
+    n = models.IntegerField()
 
 class Cache(models.Model):
     document = models.OneToOneField(Document, db_index=True,
