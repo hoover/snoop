@@ -1,6 +1,7 @@
 from django.conf import settings
 import email, email.header, email.utils
 import re
+from pprint import pformat
 from pathlib import Path
 from bs4 import BeautifulSoup
 from .models import Document, FolderMark
@@ -45,6 +46,13 @@ class EmailParser(object):
         else:
             yield message
 
+    def parts_tree(self, message):
+        if message.is_multipart():
+            children = [self.parts_tree(p) for p in message.get_payload()]
+            return [dict(message), children]
+        else:
+            return [dict(message), len(message.get_payload())]
+
     def get_part_text(self, part):
         charset = part.get_content_charset()
         content_type = part.get_content_type()
@@ -56,23 +64,42 @@ class EmailParser(object):
         self.warn("Unknown part content type: %r" % content_type)
         self.flag('unknown_attachment')
 
+    def get_attachments(self, message):
+        for part in self.parts(message):
+            disposition = part.get('content-disposition')
+            if not disposition: continue
+            m = re.match(r'^attachment;\s+filename=(.*)$', disposition)
+            if not m: continue
+            yield m.group(1)
+
     @classmethod
-    def parse(cls, *args):
-        self = cls(*args)
+    def parse(cls, file, parts=False):
+        self = cls(file)
 
         with self.file.open('rb') as f:
             (size, extra) = f.read(11).split('\n', 1)
             raw = extra + f.read(int(size) - len(extra))
 
         message = email.message_from_string(raw)
-        people = list(self.people(message, ['from', 'to', 'cc', 'resent-to', 'recent-cc', 'reply-to']))
+        [person_from] = self.people(message, ['from'])
+        people_to = list(self.people(message, ['to', 'cc', 'resent-to', 'recent-cc', 'reply-to']))
         text_parts = []
         for part in self.parts(message):
             text = self.get_part_text(part)
             if text:
                 text_parts.append(text)
 
-        return (people, ' '.join(text_parts), self.warnings, sorted(self.flags), 0)
+        rv = {
+            'subject': message.get('subject'),
+            'from': person_from,
+            'to': people_to,
+            'date': message.get('date'),
+            'text': '\n'.join(text_parts),
+            'attachments': list(self.get_attachments(message)),
+        }
+        if parts:
+            rv['parts'] = pformat(self.parts_tree(message))
+        return rv
 
 class Walker(object):
 
@@ -170,12 +197,8 @@ def extract(doc):
     }
 
     if file.suffix == '.emlx':
-        (people, text, warnings, flags, size_disk) = EmailParser.parse(file)
-        data['people'] = ' '.join(people)
-        data['from'] = people[0]
-        data['to'] = people[1:]
-        data['content'] = text
-        data['text'] = '\n'.join(people + [text])
+        data['type'] = 'email'
+        data.update(EmailParser.parse(file, parts=True))
 
     return data
 

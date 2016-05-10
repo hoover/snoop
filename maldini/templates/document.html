@@ -1,7 +1,7 @@
 <!doctype html>
 <meta charset="utf-8">
 <style>
-h1 { font-family: monospace; font-size: 16px; }
+h1 { font-family: monospace; font-size: 16px; white-space: pre-wrap; }
 code { white-space: pre-wrap; }
 .content { border: 1px solid #bbb; white-space: pre-wrap; }
 </style>
@@ -9,13 +9,18 @@ code { white-space: pre-wrap; }
 
 <h1>{{ data.path }}</h1>
 
-<p>From: <code>{{ data.from }}</code></p>
-
+<p><b>Type:</b> <code>{{ data.type }}</code></p>
+<p><b>From:</b> <code>{{ data.from }}</code></p>
 <p>
-  To:
+  <b>To:</b>
   {% for person in data.to %}
     <code>{{ person }}</code>
   {% endfor %}
 </p>
+<p><b>Date:</b> <code>{{ data.date }}</code></p>
+<p><b>Subject:</b> <code>{{ data.subject }}</code></p>
+<p><b>Attachments:</b> <code>{{ data.attachments }}</code></p>
 
-<pre class="content">{{ data.content }}</pre>
+<pre class="content">{{ data.text }}</pre>
+
+<pre class="content">{{ data.parts }}</pre>
