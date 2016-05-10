@@ -4,3 +4,4 @@ pathlib
 beautifulsoup4
 Django
 elasticsearch
+simplejson

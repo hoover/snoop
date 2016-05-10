@@ -13,5 +13,6 @@ first==2.0.1              # via pip-tools
 pathlib==1.0.1
 pip-tools==1.6.3
 psycopg2==2.6.1
+simplejson==3.8.2
 six==1.10.0               # via pip-tools
 urllib3==1.15.1           # via elasticsearch
