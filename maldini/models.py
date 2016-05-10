@@ -11,7 +11,7 @@ class Document(models.Model):
 class Prop(models.Model):
     document = models.ForeignKey(Document, db_index=True)
     key = models.CharField(max_length=100)
-    value = models.CharField(max_length=1000)
+    value = models.CharField(max_length=1000, blank=True)
 
     class Meta:
         unique_together = [('document', 'key')]
