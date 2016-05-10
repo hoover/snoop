@@ -189,7 +189,7 @@ class Walker(object):
                 self.uncommitted = 0
 
 def extract(doc):
-    file = Path(settings.MALDINI_ROOT) / doc.path
+    file = Path(settings.MALDINI_ROOT) / doc.path.encode('utf-8')
     data = {
         'title': doc.path,
         'path': doc.path,
