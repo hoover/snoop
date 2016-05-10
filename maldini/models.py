@@ -14,12 +14,11 @@ class Prop(models.Model):
     value = models.CharField(max_length=1000)
 
     class Meta:
-        index_together = [
-            ('key', 'value'),
-        ]
+        unique_together = [('document', 'key')]
+        index_together = [('key', 'value')]
 
 class Cache(models.Model):
-    document = models.ForeignKey(Document, db_index=True)
+    document = models.ForeignKey(Document, unique=True, db_index=True)
     data = models.TextField()
 
 class FolderMark(models.Model):
