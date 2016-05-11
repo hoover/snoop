@@ -20,6 +20,7 @@ class Command(BaseCommand):
 
             try:
                 data = extract(doc)
+                data_json = json.dumps(data)
 
             except KeyboardInterrupt:
                 raise
@@ -29,7 +30,7 @@ class Command(BaseCommand):
                 print 'ERROR'
 
             else:
-                Cache.objects.create(document=doc, data=json.dumps(data))
+                Cache.objects.create(document=doc, data=data_json)
 
             Generation.objects.create(document=doc, n=1)
 
