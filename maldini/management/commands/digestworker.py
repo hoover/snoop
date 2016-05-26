@@ -34,5 +34,5 @@ class Command(BaseCommand):
                         defaults={'data': data},
                     )
 
-                if verbosity > 1:
+                if verbosity > 0:
                     print(document.id, outcome)

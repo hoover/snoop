@@ -15,5 +15,5 @@ class Command(BaseCommand):
         query = 'SELECT id FROM maldini_document WHERE %s' % where
         for document in models.Document.objects.raw(query):
             digest_queue.put({'id': document.id})
-            if verbosity > 1:
+            if verbosity > 0:
                 print(document.id)

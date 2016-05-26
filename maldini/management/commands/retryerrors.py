@@ -16,7 +16,7 @@ class Command(BaseCommand):
             if document_id not in seen:
                 digest_queue.put({'id': document_id})
                 seen.add(document_id)
-                if verbosity > 1:
+                if verbosity > 0:
                     print(document_id)
 
             error.delete()
