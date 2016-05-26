@@ -190,7 +190,7 @@ class Walker(object):
                 # TODO commit
                 self.uncommitted = 0
 
-def extract(doc):
+def digest(doc):
     file = Path(settings.MALDINI_ROOT) / doc.path
     data = {
         'title': doc.path,

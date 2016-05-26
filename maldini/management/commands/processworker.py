@@ -1,7 +1,7 @@
 import simplejson as json
 from django.core.management.base import BaseCommand
 from maldini import models
-from maldini.digest import extract
+from maldini.digest import digest
 
 class Command(BaseCommand):
 
@@ -9,7 +9,7 @@ class Command(BaseCommand):
 
     def handle(self, **options):
         for document in models.Document.objects.iterator():
-            data = extract(document)
+            data = digest(document)
             models.Digest.objects.update_or_create(
                 id=document.id,
                 defaults={'data': json.dumps(data)},

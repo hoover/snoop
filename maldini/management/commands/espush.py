@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 from elasticsearch import Elasticsearch
 from maldini.models import Document, Generation, Failure, Cache
-from maldini.digest import extract
+from maldini.digest import digest
 
 es = Elasticsearch(settings.ELASTICSEARCH_URL)
 
@@ -19,7 +19,7 @@ class Command(BaseCommand):
             print(doc.id, doc.path)
 
             try:
-                data = extract(doc)
+                data = digest(doc)
                 data_json = json.dumps(data)
 
             except KeyboardInterrupt:
