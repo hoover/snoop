@@ -81,7 +81,7 @@ class EmailParser(object):
             raw = extra + f.read(int(size) - len(extra))
 
         message = email.message_from_string(raw)
-        [person_from] = self.people(message, ['from'])
+        person_from = (list(self.people(message, ['from'])) + [''])[0]
         people_to = list(self.people(message, ['to', 'cc', 'resent-to', 'recent-cc', 'reply-to']))
         text_parts = []
         for part in self.parts(message):
