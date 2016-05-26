@@ -125,7 +125,7 @@ class Walker(object):
         return self.processed, self.exceptions
 
     def _path(self, file):
-        return str(file.relative_to(self.root)).decode('utf-8')
+        return str(file.relative_to(self.root))
 
     def handle(self, file=None):
         if file is None:
@@ -189,7 +189,7 @@ class Walker(object):
                 self.uncommitted = 0
 
 def extract(doc):
-    file = Path(settings.MALDINI_ROOT) / doc.path.encode('utf-8')
+    file = Path(settings.MALDINI_ROOT) / doc.path
     data = {
         'title': doc.path,
         'path': doc.path,
