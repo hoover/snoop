@@ -15,5 +15,4 @@ class FolderMark(models.Model):
 
 class Error(models.Model):
     document_id = models.IntegerField()
-    data = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
