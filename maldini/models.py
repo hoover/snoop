@@ -22,5 +22,9 @@ class Cache(models.Model):
         on_delete=models.CASCADE)
     data = models.TextField()
 
+class Digest(models.Model):
+    id = models.IntegerField(primary_key=True)
+    data = models.TextField()
+
 class FolderMark(models.Model):
     path = models.CharField(max_length=4000, unique=True, db_index=True)
