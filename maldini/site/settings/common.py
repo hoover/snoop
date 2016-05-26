@@ -63,3 +63,39 @@ USE_L10N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'logfile': {
+            'format': ('%(asctime)s %(process)d '
+                       '%(levelname)s %(name)s %(message)s'),
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+    },
+    'loggers': {
+        'django.request': {
+            'level': 'WARNING',
+            'propagate': False,
+            'handlers': ['stderr'],
+        },
+        'maldini': {
+            'level': 'INFO',
+            'propagate': False,
+            'handlers': ['stderr'],
+        },
+        '': {
+            'level': 'WARNING',
+            'propagate': True,
+            'handlers': ['stderr'],
+        },
+    },
+    'handlers': {
+        'stderr': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'logfile',
+        },
+    },
+}
