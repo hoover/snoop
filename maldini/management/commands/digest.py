@@ -5,7 +5,7 @@ from maldini.digest import digest
 
 class Command(BaseCommand):
 
-    help = "Process one document"
+    help = "Digest one document"
 
     def add_arguments(self, parser):
         parser.add_argument('document_id', type=int)

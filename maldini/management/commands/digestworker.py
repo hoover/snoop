@@ -5,7 +5,7 @@ from maldini.digest import digest
 
 class Command(BaseCommand):
 
-    help = "Run the `process` worker"
+    help = "Run the `digest` worker"
 
     def handle(self, **options):
         for document in models.Document.objects.iterator():
