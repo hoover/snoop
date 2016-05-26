@@ -134,19 +134,19 @@ class Walker(object):
         if file.is_dir():
             path = self._path(file)
             if FolderMark.objects.filter(path=path).count():
-                print 'SKIP', path
+                print('SKIP', path)
                 return
             for child in file.iterdir():
                 self.handle(child)
             FolderMark.objects.create(path=path)
-            print 'MARK', path
+            print('MARK', path)
 
         else:
             self.handle_file(file)
 
     def handle_file(self, file):
         path = self._path(file)
-        print 'FILE', path
+        print('FILE', path)
         doc, _ = Document.objects.get_or_create(path=path, defaults={'disk_size': file.stat().st_size})
         doc.save()
 
