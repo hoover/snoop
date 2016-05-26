@@ -17,3 +17,6 @@ def _cleanup():
     cursor = connection.cursor()
     cursor.execute('drop table queue')
     cursor.execute('drop function pq_notify()')
+
+def get(name):
+    return pq.PQ(connection)[name]
