@@ -10,7 +10,7 @@ class Command(BaseCommand):
     def handle(self, **options):
         for document in models.Document.objects.iterator():
             data = extract(document)
-            models.Cache.objects.update_or_create(
-                document=document,
+            models.Digest.objects.update_or_create(
+                id=document.id,
                 defaults={'data': json.dumps(data)},
             )
