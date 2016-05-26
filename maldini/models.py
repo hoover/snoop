@@ -12,3 +12,8 @@ class Digest(models.Model):
 
 class FolderMark(models.Model):
     path = models.CharField(max_length=4000, unique=True, db_index=True)
+
+class Error(models.Model):
+    document_id = models.IntegerField()
+    data = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
