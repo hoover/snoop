@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 from elasticsearch import Elasticsearch
 from maldini.models import Document, Generation, Failure, Cache
-from maldini.prepare import extract
+from maldini.digest import extract
 
 es = Elasticsearch(settings.ELASTICSEARCH_URL)
 

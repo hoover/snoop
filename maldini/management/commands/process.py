@@ -1,7 +1,7 @@
 import simplejson as json
 from django.core.management.base import BaseCommand
 from maldini import models
-from maldini.prepare import extract
+from maldini.digest import extract
 
 class Command(BaseCommand):
 
