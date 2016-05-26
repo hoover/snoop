@@ -18,11 +18,21 @@ class Command(BaseCommand):
                     break
 
                 document = models.Document.objects.get(id=task.data['id'])
-                data = digest(document)
-                models.Digest.objects.update_or_create(
-                    id=document.id,
-                    defaults={'data': json.dumps(data)},
-                )
+
+                try:
+                    with transaction.atomic():
+                        data = json.dumps(digest(document))
+
+                except:
+                    outcome = 'ERR'
+                    models.Error.objects.create(document_id=document.id)
+
+                else:
+                    outcome = 'OK'
+                    models.Digest.objects.update_or_create(
+                        id=document.id,
+                        defaults={'data': data},
+                    )
 
                 if verbosity > 1:
-                    print(document.id)
+                    print(document.id, outcome)
