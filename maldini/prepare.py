@@ -12,6 +12,12 @@ def text_from_html(html):
         node.extract()
     return re.sub(r'\s+', ' ', soup.get_text().strip())
 
+def _decode_header(headervalue):
+    return [
+        value.decode(encoding) if encoding else value
+        for (value, encoding) in email.header.decode_header(headervalue)
+    ]
+
 class EmailParser(object):
 
     def __init__(self, file):
@@ -26,12 +32,8 @@ class EmailParser(object):
         self.flags.add(flag)
 
     def decode_person(self, header):
-        (name_bytes, addr) = email.utils.parseaddr(header)
-        name_parts = [
-            bytes.decode(encoding or 'latin-1')
-            for (bytes, encoding) in email.header.decode_header(name_bytes)
-        ]
-        return ' '.join(name_parts + [addr.decode('latin-1')])
+        (name, addr) = email.utils.parseaddr(header)
+        return ' '.join(_decode_header(name) + [addr])
 
     def people(self, message, headers):
         for header in headers:
@@ -77,10 +79,10 @@ class EmailParser(object):
         self = cls(file)
 
         with self.file.open('rb') as f:
-            (size, extra) = f.read(11).split('\n', 1)
+            (size, extra) = f.read(11).split(b'\n', 1)
             raw = extra + f.read(int(size) - len(extra))
 
-        message = email.message_from_string(raw)
+        message = email.message_from_bytes(raw)
         person_from = (list(self.people(message, ['from'])) + [''])[0]
         people_to = list(self.people(message, ['to', 'cc', 'resent-to', 'recent-cc', 'reply-to']))
         text_parts = []
