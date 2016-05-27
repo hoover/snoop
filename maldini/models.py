@@ -4,6 +4,7 @@ from django.contrib.postgres.fields import JSONField
 class Document(models.Model):
     container = models.ForeignKey('Document', null=True)
     path = models.CharField(max_length=4000)
+    content_type = models.CharField(max_length=100, blank=True)
     disk_size = models.BigIntegerField()
 
     class Meta:
