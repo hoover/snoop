@@ -3,8 +3,13 @@ import email, email.header, email.utils
 import re
 from pprint import pformat
 from pathlib import Path
+from tempfile import TemporaryFile
+import subprocess
 from bs4 import BeautifulSoup
 from .models import Document, FolderMark
+
+def pdftotext(input):
+    return subprocess.check_output(['pdftotext', '-', '-'], stdin=input)
 
 def text_from_html(html):
     soup = BeautifulSoup(html, 'html.parser')
@@ -48,6 +53,14 @@ class EmailParser(object):
         else:
             yield '.'.join(number_bits), message
 
+    def open_part(self, number):
+        message = self._message()
+        part = dict(self.parts(message))[number]
+        tmp = TemporaryFile()
+        tmp.write(part.get_payload(decode=True))
+        tmp.seek(0)
+        return tmp
+
     def parts_tree(self, message):
         if message.is_multipart():
             children = [self.parts_tree(p) for p in message.get_payload()]
@@ -79,15 +92,17 @@ class EmailParser(object):
                 'filename': m.group('filename'),
             }
 
-    @classmethod
-    def parse(cls, file, parts=False):
-        self = cls(file)
-
+    def _message(self):
         with self.file.open('rb') as f:
             (size, extra) = f.read(11).split(b'\n', 1)
             raw = extra + f.read(int(size) - len(extra))
 
-        message = email.message_from_bytes(raw)
+        return email.message_from_bytes(raw)
+
+    @classmethod
+    def parse(cls, file, parts=False):
+        self = cls(file)
+        message = self._message()
         person_from = (list(self.people(message, ['from'])) + [''])[0]
         people_to = list(self.people(message, ['to', 'cc', 'resent-to', 'recent-cc', 'reply-to']))
         text_parts = []
@@ -195,6 +210,18 @@ class Walker(object):
                 # TODO commit
                 self.uncommitted = 0
 
+def open_document(doc):
+    if doc.container is None:
+        file = Path(settings.MALDINI_ROOT) / doc.path
+        return file.open('rb')
+
+    if doc.container.path.endswith('.emlx'):
+        file = Path(settings.MALDINI_ROOT) / doc.container.path
+        email = EmailParser(file)
+        return email.open_part(doc.path)
+
+    raise RuntimeError
+
 def digest(doc):
     data = {
         'title': doc.path,
@@ -207,6 +234,10 @@ def digest(doc):
         if file.suffix == '.emlx':
             data['type'] = 'email'
             data.update(EmailParser.parse(file, parts=True))
+
+    if doc.content_type == 'application/pdf':
+        with open_document(doc) as f:
+            data['text'] = pdftotext(f)
 
     return data
 
