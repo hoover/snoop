@@ -70,9 +70,10 @@ class EmailParser(object):
         for part in self.parts(message):
             disposition = part.get('content-disposition')
             if not disposition: continue
-            m = re.match(r'^attachment;\s+filename=(.*)$', disposition)
+            m = re.match(r'^(inline|attachment);\s+filename=(?P<filename>.*)$',
+                disposition)
             if not m: continue
-            yield m.group(1)
+            yield m.group('filename')
 
     @classmethod
     def parse(cls, file, parts=False):
