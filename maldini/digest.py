@@ -40,13 +40,13 @@ class EmailParser(object):
             for p in (self.decode_person(h) for h in message.get_all(header, [])):
                 yield p
 
-    def parts(self, message):
+    def parts(self, message, number_bits=[]):
         if message.is_multipart():
-            for part in message.get_payload():
-                for p in self.parts(part):
+            for i, part in enumerate(message.get_payload(), 1):
+                for p in self.parts(part, number_bits + [str(i)]):
                     yield p
         else:
-            yield message
+            yield '.'.join(number_bits), message
 
     def parts_tree(self, message):
         if message.is_multipart():
@@ -67,13 +67,13 @@ class EmailParser(object):
         self.flag('unknown_attachment')
 
     def get_attachments(self, message):
-        for part in self.parts(message):
+        for number, part in self.parts(message):
             disposition = part.get('content-disposition')
             if not disposition: continue
             m = re.match(r'^(inline|attachment);\s+filename=(?P<filename>.*)$',
                 disposition)
             if not m: continue
-            yield m.group('filename')
+            yield number, m.group('filename')
 
     @classmethod
     def parse(cls, file, parts=False):
@@ -87,7 +87,7 @@ class EmailParser(object):
         person_from = (list(self.people(message, ['from'])) + [''])[0]
         people_to = list(self.people(message, ['to', 'cc', 'resent-to', 'recent-cc', 'reply-to']))
         text_parts = []
-        for part in self.parts(message):
+        for _, part in self.parts(message):
             text = self.get_part_text(part)
             if text:
                 text_parts.append(text)
@@ -98,7 +98,7 @@ class EmailParser(object):
             'to': people_to,
             'date': message.get('date'),
             'text': '\n'.join(text_parts),
-            'attachments': list(self.get_attachments(message)),
+            'attachments': dict(self.get_attachments(message)),
         }
         if parts:
             rv['parts'] = pformat(self.parts_tree(message))
