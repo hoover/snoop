@@ -21,7 +21,8 @@ class Command(BaseCommand):
 
                 try:
                     with transaction.atomic():
-                        data = json.dumps(digest(document))
+                        data = digest(document)
+                        data_json = json.dumps(data)
 
                 except:
                     outcome = 'ERR'
@@ -31,8 +32,17 @@ class Command(BaseCommand):
                     outcome = 'OK'
                     models.Digest.objects.update_or_create(
                         id=document.id,
-                        defaults={'data': data},
+                        defaults={'data': data_json},
                     )
+
+                    for name in data.get('attachments', {}).keys():
+                        child, created = models.Document.objects.get_or_create(
+                            container=document,
+                            path=name,
+                            disk_size=0,
+                        )
+                        if created and verbosity > 0:
+                            print('child', name, child.id)
 
                 if verbosity > 0:
                     print(document.id, outcome)
