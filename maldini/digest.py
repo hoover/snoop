@@ -73,7 +73,11 @@ class EmailParser(object):
             m = re.match(r'^(inline|attachment);\s+filename=(?P<filename>.*)$',
                 disposition)
             if not m: continue
-            yield number, m.group('filename')
+            content_type = part.get('content-type', '').split(';')[0].strip()
+            yield number, {
+                'content_type': content_type,
+                'filename': m.group('filename'),
+            }
 
     @classmethod
     def parse(cls, file, parts=False):

@@ -35,14 +35,17 @@ class Command(BaseCommand):
                         defaults={'data': data_json},
                     )
 
-                    for name in data.get('attachments', {}).keys():
-                        child, created = models.Document.objects.get_or_create(
+                    for name, info in data.get('attachments', {}).items():
+                        child, _ = models.Document.objects.update_or_create(
                             container=document,
                             path=name,
-                            disk_size=0,
+                            defaults={
+                                'disk_size': 0,
+                                'content_type': info['content_type'],
+                            },
                         )
-                        if created and verbosity > 0:
-                            print('child', name, child.id)
+                        if verbosity > 0:
+                            print('child', child.id)
 
                 if verbosity > 0:
                     print(document.id, outcome)
