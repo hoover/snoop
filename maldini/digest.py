@@ -160,7 +160,7 @@ class Walker(object):
         row = (
             self.session
             .query(Document)
-            .filter_by(path=path)
+            .filter_by(container=None, path=path)
             .first()
             or Document(path=path)
         )
