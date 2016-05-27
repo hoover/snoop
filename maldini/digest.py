@@ -200,7 +200,6 @@ def digest(doc):
     data = {
         'title': doc.path,
         'path': doc.path,
-        'suffix': file.suffix.strip('.'),
         'disk_size': doc.disk_size,
     }
 
