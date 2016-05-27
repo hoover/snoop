@@ -196,16 +196,17 @@ class Walker(object):
                 self.uncommitted = 0
 
 def digest(doc):
-    file = Path(settings.MALDINI_ROOT) / doc.path
     data = {
         'title': doc.path,
         'path': doc.path,
         'disk_size': doc.disk_size,
     }
 
-    if file.suffix == '.emlx':
-        data['type'] = 'email'
-        data.update(EmailParser.parse(file, parts=True))
+    if doc.container_id is None:
+        file = Path(settings.MALDINI_ROOT) / doc.path
+        if file.suffix == '.emlx':
+            data['type'] = 'email'
+            data.update(EmailParser.parse(file, parts=True))
 
     return data
 
