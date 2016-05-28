@@ -19,7 +19,22 @@ code { white-space: pre-wrap; }
 </p>
 <p><b>Date:</b> <code>{{ data.date }}</code></p>
 <p><b>Subject:</b> <code>{{ data.subject }}</code></p>
-<p><b>Attachments:</b> <code>{{ data.attachments }}</code></p>
+
+{% if attachments %}
+<p><b>Attachments:</b></p>
+<ul>
+{% for attachment in attachments %}
+  <li>
+    {% if attachment.id %}
+      <a href="./{{ attachment.id }}">{{ attachment.filename }}</a>
+    {% else %}
+      {{ attachment.filename }}
+    {% endif %}
+    {{ attachment.content_type }}
+  </li>
+{% endfor %}
+</ul>
+{% endif %}
 
 <pre class="content">{{ data.text }}</pre>
 
