@@ -235,6 +235,17 @@ def digest(doc):
             data['type'] = 'email'
             data.update(EmailParser.parse(file, parts=True))
 
+        if doc.content_type == 'application/x-directory':
+            data['type'] = 'folder'
+            child_documents = Document.objects.filter(
+                container=None,
+                path__iregex=r'^' + re.escape(doc.path) + r'/[^/]+$',
+            )
+            data['files'] = [{
+                'id': child.id,
+                'filename': child.path.split('/')[-1],
+            } for child in child_documents]
+
     if doc.content_type == 'application/pdf':
         with open_document(doc) as f:
             data['type'] = 'pdf'

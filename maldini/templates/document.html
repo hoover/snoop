@@ -41,6 +41,14 @@ code { white-space: pre-wrap; }
   {% endif %}
 {% endif %}
 
+{% if data.type == 'folder' %}
+  <ul>
+  {% for file in data.files %}
+    <li><a href="{{ file.id }}">{{ file.filename }}</a></li>
+  {% endfor %}
+  </ul>
+{% endif %}
+
 <pre class="content">{{ data.text }}</pre>
 
 {% if data.type == 'email' %}
