@@ -24,6 +24,8 @@ class Command(BaseCommand):
                 alldata = json.loads(digest.data)
 
                 data = {
+                    'title': alldata.get('title'),
+                    'path': alldata.get('path'),
                     'text': alldata.get('text'),
                 }
 
