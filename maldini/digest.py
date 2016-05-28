@@ -237,6 +237,7 @@ def digest(doc):
 
     if doc.content_type == 'application/pdf':
         with open_document(doc) as f:
+            data['type'] = 'pdf'
             data['text'] = pdftotext(f)
 
     return data
