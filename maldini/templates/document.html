@@ -7,8 +7,8 @@ code { white-space: pre-wrap; }
 </style>
 <body>
 
-{% if up %}
-<p><a href="{{ up.id }}">up</a></p>
+{% if up != None %}
+<p><a href="{{ up }}">up</a></p>
 {% endif %}
 
 <h1>{{ data.path }}</h1>

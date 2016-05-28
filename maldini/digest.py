@@ -222,6 +222,16 @@ def open_document(doc):
 
     raise RuntimeError
 
+def files_in(parent_path):
+    child_documents = Document.objects.filter(
+        container=None,
+        path__iregex=r'^' + re.escape(parent_path) + r'[^/]+$',
+    )
+    return [{
+        'id': child.id,
+        'filename': child.path[len(parent_path):]
+    } for child in child_documents]
+
 def digest(doc):
     data = {
         'title': doc.path,
@@ -237,14 +247,7 @@ def digest(doc):
 
         if doc.content_type == 'application/x-directory':
             data['type'] = 'folder'
-            child_documents = Document.objects.filter(
-                container=None,
-                path__iregex=r'^' + re.escape(doc.path) + r'/[^/]+$',
-            )
-            data['files'] = [{
-                'id': child.id,
-                'filename': child.path.split('/')[-1],
-            } for child in child_documents]
+            data['files'] = files_in(doc.path + '/')
 
     if doc.content_type == 'application/pdf':
         with open_document(doc) as f:
