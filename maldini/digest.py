@@ -232,14 +232,19 @@ def files_in(parent_path):
         'filename': child.path[len(parent_path):]
     } for child in child_documents]
 
+def _path_bits(doc):
+    if doc.container:
+        yield from _path_bits(doc.container)
+    yield doc.path
+
 def digest(doc):
     data = {
-        'title': doc.path,
-        'path': doc.path,
-        'disk_size': doc.disk_size,
+        'title': '|'.join(_path_bits(doc)),
     }
 
     if doc.container_id is None:
+        data['path'] = doc.path
+
         file = Path(settings.MALDINI_ROOT) / doc.path
         if file.suffix == '.emlx':
             data['type'] = 'email'
