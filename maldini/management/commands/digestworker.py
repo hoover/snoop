@@ -11,6 +11,7 @@ class Command(BaseCommand):
 
     def handle(self, verbosity, **options):
         digest_queue = queue.get('digest')
+        index_queue = queue.get('index')
         while True:
             with transaction.atomic():
                 task = digest_queue.get(block=False)
@@ -34,6 +35,7 @@ class Command(BaseCommand):
                         id=document.id,
                         defaults={'data': data_json},
                     )
+                    index_queue.put({'id': document.id})
 
                     for name, info in data.get('attachments', {}).items():
                         child, _ = models.Document.objects.update_or_create(
