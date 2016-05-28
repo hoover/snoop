@@ -18,7 +18,16 @@ def document(request, id):
         'content_type': a['content_type'],
     } for n, a in data.get('attachments', {}).items()]
 
+    if doc.container:
+        up = doc.container
+    elif '/' in doc.path:
+        up_path = doc.path.rsplit('/', 1)[0]
+        up = Document.objects.get(container=None, path=up_path)
+    else:
+        up = None
+
     return render(request, 'document.html', {
+        'up': up,
         'data': data,
         'attachments': attachments,
     })
