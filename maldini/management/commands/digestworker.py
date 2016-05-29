@@ -38,7 +38,7 @@ class Command(BaseCommand):
                     index_queue.put({'id': document.id})
 
                     for name, info in data.get('attachments', {}).items():
-                        child, _ = models.Document.objects.update_or_create(
+                        child, created = models.Document.objects.update_or_create(
                             container=document,
                             path=name,
                             defaults={
@@ -46,8 +46,11 @@ class Command(BaseCommand):
                                 'content_type': info['content_type'],
                             },
                         )
-                        if verbosity > 0:
-                            print('child', child.id)
+
+                        if created:
+                            digest_queue.put({'id': child.id})
+                            if verbosity > 0:
+                                print('new child', child.id)
 
                 if verbosity > 0:
                     print(document.id, outcome)
