@@ -18,7 +18,11 @@ class Command(BaseCommand):
                 if not task:
                     break
 
-                document = models.Document.objects.get(id=task.data['id'])
+                try:
+                    document = models.Document.objects.get(id=task.data['id'])
+                except models.Document.DoesNotExist:
+                    print(task.data['id'], 'MISSING')
+                    continue
 
                 try:
                     with transaction.atomic():
