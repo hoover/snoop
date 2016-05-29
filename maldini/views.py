@@ -21,6 +21,9 @@ def document(request, id):
 
         data = digest(doc)
 
+        if data.get('type') == 'folder':
+            data['files'] = files_in(doc.path + '/')
+
         attachments = [{
             'filename': a['filename'],
             'id': doc.document_set.get(path=n).id,

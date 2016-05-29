@@ -252,7 +252,6 @@ def digest(doc):
 
         if doc.content_type == 'application/x-directory':
             data['type'] = 'folder'
-            data['files'] = files_in(doc.path + '/')
 
     if doc.content_type == 'application/pdf':
         with open_document(doc) as f:
