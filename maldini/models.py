@@ -21,3 +21,11 @@ class FolderMark(models.Model):
 class Error(models.Model):
     document_id = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+class Job(models.Model):
+    queue = models.CharField(max_length=100)
+    data = JSONField(null=True)
+    started = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('queue', 'data')
