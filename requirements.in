@@ -5,5 +5,4 @@ beautifulsoup4
 Django
 elasticsearch
 simplejson
-pq
 waitress
