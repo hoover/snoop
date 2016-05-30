@@ -1,23 +1,6 @@
 from contextlib import contextmanager
-from django.db import connection, transaction, IntegrityError
-import pq
+from django.db import transaction, IntegrityError
 from . import models
-
-@contextmanager
-def django_transaction(conn, **kwargs):
-    assert conn is connection
-    with transaction.atomic():
-        yield conn.cursor(**kwargs)
-
-pq.transaction = django_transaction
-
-def _create():
-    pq.PQ(connection).create()
-
-def _cleanup():
-    cursor = connection.cursor()
-    cursor.execute('drop table queue')
-    cursor.execute('drop function pq_notify()')
 
 def put(queue, data, verbose=False):
     try:
