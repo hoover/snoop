@@ -30,9 +30,17 @@ def document(request, id):
             if data.get('type') == 'folder':
                 data['files'] = files_in(doc.path + '/')
 
+            def attachment_id(n):
+                try:
+                    a = doc.document_set.get(path=n)
+                except Document.DoesNotExist:
+                    return None
+                else:
+                    return a.id
+
             attachments = [{
                 'filename': a['filename'],
-                'id': doc.document_set.get(path=n).id,
+                'id': attachment_id(n),
                 'content_type': a['content_type'],
             } for n, a in data.get('attachments', {}).items()]
 
