@@ -1,40 +1,6 @@
-import simplejson as json
 from django.core.management.base import BaseCommand
-from django.db import transaction
-from maldini import models
 from maldini import queues
-from maldini.digest import digest
-
-def perform_job(id, verbose):
-    try:
-        document = models.Document.objects.get(id=id)
-    except models.Document.DoesNotExist:
-        if verbose: print('MISSING')
-        return
-
-    data = digest(document)
-
-    for name, info in data.get('attachments', {}).items():
-        child, created = models.Document.objects.update_or_create(
-            container=document,
-            path=name,
-            defaults={
-                'disk_size': 0,
-                'content_type': info['content_type'],
-            },
-        )
-
-        if created:
-            queues.put('digest', {'id': child.id}, verbose=verbose)
-            if verbosity > 0:
-                if verbose: print('new child', child.id)
-
-    models.Digest.objects.update_or_create(
-        id=document.id,
-        defaults={'data': json.dumps(data)},
-    )
-
-    queues.put('index', {'id': document.id}, verbose=verbose)
+from maldini import workers
 
 class Command(BaseCommand):
 
@@ -52,4 +18,4 @@ class Command(BaseCommand):
 
         for work in queue_iterator:
             with work() as data:
-                perform_job(**data, verbose=verbosity>0)
+                workers.digest(**data, verbose=verbosity>0)
