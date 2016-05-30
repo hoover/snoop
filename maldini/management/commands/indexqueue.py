@@ -11,9 +11,8 @@ class Command(BaseCommand):
         parser.add_argument('where')
 
     def handle(self, where, verbosity, **options):
-        index_queue = queue.get('index')
         query = 'SELECT id FROM maldini_document WHERE %s' % where
         for document in models.Document.objects.raw(query):
-            index_queue.put({'id': document.id})
+            queue.put('index', {'id': document.id}, verbose=verbosity>0)
             if verbosity > 0:
                 print(document.id)
