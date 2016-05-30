@@ -5,7 +5,13 @@ from maldini import models
 from maldini import queue
 from maldini.digest import digest
 
-def perform_job(document):
+def perform_job(id, verbose):
+    try:
+        document = models.Document.objects.get(id=id)
+    except models.Document.DoesNotExist:
+        if verbose: print('MISSING')
+        return
+
     data = digest(document)
 
     for name, info in data.get('attachments', {}).items():
@@ -19,49 +25,31 @@ def perform_job(document):
         )
 
         if created:
-            queue.get('digest').put({'id': child.id})
+            queue.put('digest', {'id': child.id}, verbose=verbose)
             if verbosity > 0:
-                print('new child', child.id)
+                if verbose: print('new child', child.id)
 
     models.Digest.objects.update_or_create(
         id=document.id,
         defaults={'data': json.dumps(data)},
     )
 
-    queue.get('index').put({'id': document.id})
+    queue.put('index', {'id': document.id}, verbose=verbose)
 
 class Command(BaseCommand):
 
     help = "Run the `digest` worker"
 
-    def handle(self, verbosity, **options):
-        digest_queue = queue.get('digest')
-        while True:
-            task = digest_queue.get(block=False)
-            if not task:
-                break
+    def add_arguments(self, parser):
+        parser.add_argument('-x', action='store_true', dest='stop_first_error')
 
-            document_id = task.data['id']
-            print(document_id)
-            err = models.Error.objects.create(document_id=document_id)
+    def handle(self, verbosity, stop_first_error, **options):
+        queue_iterator = queue.iterate(
+            'digest',
+            verbose=verbosity > 0,
+            stop_first_error=stop_first_error,
+        )
 
-            with transaction.atomic():
-                try:
-                    document = models.Document.objects.get(id=document_id)
-                except models.Document.DoesNotExist:
-                    print('MISSING')
-                    continue
-
-                try:
-                    with transaction.atomic():
-                        perform_job(document)
-
-                except:
-                    outcome = 'ERR'
-
-                else:
-                    outcome = 'OK'
-                    err.delete()
-
-                if verbosity > 0:
-                    print(outcome)
+        for work in queue_iterator:
+            with work() as data:
+                perform_job(**data, verbose=verbosity>0)
