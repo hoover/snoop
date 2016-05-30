@@ -13,15 +13,19 @@ class Command(BaseCommand):
         digest_queue = queue.get('digest')
         index_queue = queue.get('index')
         while True:
-            with transaction.atomic():
-                task = digest_queue.get(block=False)
-                if not task:
-                    break
+            task = digest_queue.get(block=False)
+            if not task:
+                break
 
+            document_id = task.data['id']
+            print(document_id)
+            err = models.Error.objects.create(document_id=document_id)
+
+            with transaction.atomic():
                 try:
-                    document = models.Document.objects.get(id=task.data['id'])
+                    document = models.Document.objects.get(id=document_id)
                 except models.Document.DoesNotExist:
-                    print(task.data['id'], 'MISSING')
+                    print('MISSING')
                     continue
 
                 try:
@@ -29,9 +33,23 @@ class Command(BaseCommand):
                         data = digest(document)
                         data_json = json.dumps(data)
 
+                        for name, info in data.get('attachments', {}).items():
+                            child, created = models.Document.objects.update_or_create(
+                                container=document,
+                                path=name,
+                                defaults={
+                                    'disk_size': 0,
+                                    'content_type': info['content_type'],
+                                },
+                            )
+
+                            if created:
+                                digest_queue.put({'id': child.id})
+                                if verbosity > 0:
+                                    print('new child', child.id)
+
                 except:
                     outcome = 'ERR'
-                    models.Error.objects.create(document_id=document.id)
 
                 else:
                     outcome = 'OK'
@@ -40,21 +58,7 @@ class Command(BaseCommand):
                         defaults={'data': data_json},
                     )
                     index_queue.put({'id': document.id})
-
-                    for name, info in data.get('attachments', {}).items():
-                        child, created = models.Document.objects.update_or_create(
-                            container=document,
-                            path=name,
-                            defaults={
-                                'disk_size': 0,
-                                'content_type': info['content_type'],
-                            },
-                        )
-
-                        if created:
-                            digest_queue.put({'id': child.id})
-                            if verbosity > 0:
-                                print('new child', child.id)
+                    err.delete()
 
                 if verbosity > 0:
-                    print(document.id, outcome)
+                    print(outcome)
