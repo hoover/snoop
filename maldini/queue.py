@@ -19,9 +19,6 @@ def _cleanup():
     cursor.execute('drop table queue')
     cursor.execute('drop function pq_notify()')
 
-def get(name):
-    return pq.PQ(connection)[name]
-
 def put(queue, data, verbose=False):
     try:
         models.Job.objects.create(queue=queue, data=data)
