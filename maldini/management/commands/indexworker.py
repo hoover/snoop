@@ -4,7 +4,7 @@ from django.db import transaction
 from django.conf import settings
 from elasticsearch import Elasticsearch
 from maldini import models
-from maldini import queue
+from maldini import queues
 
 es = Elasticsearch(settings.ELASTICSEARCH_URL)
 
@@ -38,7 +38,7 @@ class Command(BaseCommand):
         parser.add_argument('-x', action='store_true', dest='stop_first_error')
 
     def handle(self, verbosity, stop_first_error, **options):
-        queue_iterator = queue.iterate(
+        queue_iterator = queues.iterate(
             'index',
             verbose=verbosity > 0,
             stop_first_error=stop_first_error,

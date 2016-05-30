@@ -2,7 +2,7 @@ import simplejson as json
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from maldini import models
-from maldini import queue
+from maldini import queues
 from maldini.digest import digest
 
 def perform_job(id, verbose):
@@ -25,7 +25,7 @@ def perform_job(id, verbose):
         )
 
         if created:
-            queue.put('digest', {'id': child.id}, verbose=verbose)
+            queues.put('digest', {'id': child.id}, verbose=verbose)
             if verbosity > 0:
                 if verbose: print('new child', child.id)
 
@@ -34,7 +34,7 @@ def perform_job(id, verbose):
         defaults={'data': json.dumps(data)},
     )
 
-    queue.put('index', {'id': document.id}, verbose=verbose)
+    queues.put('index', {'id': document.id}, verbose=verbose)
 
 class Command(BaseCommand):
 
@@ -44,7 +44,7 @@ class Command(BaseCommand):
         parser.add_argument('-x', action='store_true', dest='stop_first_error')
 
     def handle(self, verbosity, stop_first_error, **options):
-        queue_iterator = queue.iterate(
+        queue_iterator = queues.iterate(
             'digest',
             verbose=verbosity > 0,
             stop_first_error=stop_first_error,
