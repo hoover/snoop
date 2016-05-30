@@ -13,6 +13,6 @@ class Command(BaseCommand):
     def handle(self, where, verbosity, **options):
         query = 'SELECT id FROM maldini_document WHERE %s' % where
         for document in models.Document.objects.raw(query):
-            queue.put('digest', {'id': document.id}, verbose=True)
+            queue.put('digest', {'id': document.id}, verbose=verbosity>0)
             if verbosity > 0:
                 print(document.id)
