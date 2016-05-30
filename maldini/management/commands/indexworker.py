@@ -8,36 +8,42 @@ from maldini import queue
 
 es = Elasticsearch(settings.ELASTICSEARCH_URL)
 
+def perform_job(id, verbose):
+    try:
+        digest = models.Digest.objects.get(id=id)
+    except models.Digest.DoesNotExist:
+        if verbose: print('MISSING')
+        return
+
+    alldata = json.loads(digest.data)
+
+    data = {
+        'title': alldata.get('title'),
+        'path': alldata.get('path'),
+        'text': alldata.get('text'),
+    }
+
+    es.index(
+        index=settings.ELASTICSEARCH_INDEX,
+        doc_type='doc',
+        id=digest.id,
+        body=data,
+    )
+
 class Command(BaseCommand):
 
     help = "Run the `index` worker"
 
-    def handle(self, verbosity, **options):
-        index_queue = queue.get('index')
-        while True:
-            with transaction.atomic():
-                task = index_queue.get(block=False)
-                if not task:
-                    break
+    def add_arguments(self, parser):
+        parser.add_argument('-x', action='store_true', dest='stop_first_error')
 
-                digest = models.Digest.objects.get(id=task.data['id'])
-                alldata = json.loads(digest.data)
+    def handle(self, verbosity, stop_first_error, **options):
+        queue_iterator = queue.iterate(
+            'index',
+            verbose=verbosity > 0,
+            stop_first_error=stop_first_error,
+        )
 
-                data = {
-                    'title': alldata.get('title'),
-                    'path': alldata.get('path'),
-                    'text': alldata.get('text'),
-                }
-
-                if verbosity > 1:
-                    print(data)
-
-                es.index(
-                    index=settings.ELASTICSEARCH_INDEX,
-                    doc_type='doc',
-                    id=digest.id,
-                    body=data,
-                )
-
-                if verbosity > 0:
-                    print(digest.id)
+        for work in queue_iterator:
+            with work() as data:
+                perform_job(**data, verbose=verbosity>0)
