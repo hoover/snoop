@@ -11,15 +11,16 @@ def put(queue, data, verbose=False):
 def iterate(queue, verbose=False, stop_first_error=False):
     while True:
         with transaction.atomic():
-            job = (
-                models.Job.objects
-                .select_for_update()
-                .filter(queue=queue)
-                .filter(started=False)
-                .first()
-            )
+            try:
+                job = (
+                    models.Job.objects
+                    .select_for_update()
+                    .filter(queue=queue)
+                    .filter(started=False)
+                    [0]
+                )
 
-            if job is None:
+            except IndexError:
                 if verbose: print('No jobs available in', queue)
                 return
 
