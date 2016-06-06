@@ -30,5 +30,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(cleanup_pq, setup_pq),
+#        migrations.RunPython(cleanup_pq, setup_pq),
     ]
