@@ -8,6 +8,7 @@ class Document(models.Model):
     disk_size = models.BigIntegerField()
 
     class Meta:
+        # TODO: constraint does not apply to container=None rows
         unique_together = ('container', 'path')
 
 class Digest(models.Model):
