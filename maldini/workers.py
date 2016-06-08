@@ -50,6 +50,9 @@ def index(id, verbose):
         'title': alldata.get('title'),
         'path': alldata.get('path'),
         'text': alldata.get('text'),
+        'subject': alldata.get('subject'),
+        'date': alldata.get('date'),
+        'people': ' '.join([alldata.get('from', '')] + alldata.get('to', [])),
     }
 
     es.index(
