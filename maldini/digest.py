@@ -31,7 +31,7 @@ class EmailParser(object):
         self.flags.add(flag)
 
     def decode_person(self, header):
-        (name, addr) = email.utils.parseaddr(header)
+        (name, addr) = email.utils.parseaddr(str(header))
         return ' '.join([str(email.header.Header(name)) + addr])
 
     def people(self, message, headers):
