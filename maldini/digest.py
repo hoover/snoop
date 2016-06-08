@@ -17,12 +17,6 @@ def text_from_html(html):
         node.extract()
     return re.sub(r'\s+', ' ', soup.get_text().strip())
 
-def _decode_header(headervalue):
-    return [
-        value.decode(encoding) if encoding else value
-        for (value, encoding) in email.header.decode_header(headervalue)
-    ]
-
 class EmailParser(object):
 
     def __init__(self, file):
@@ -38,7 +32,7 @@ class EmailParser(object):
 
     def decode_person(self, header):
         (name, addr) = email.utils.parseaddr(header)
-        return ' '.join(_decode_header(name) + [addr])
+        return ' '.join([str(email.header.Header(name)) + addr])
 
     def people(self, message, headers):
         for header in headers:
@@ -71,7 +65,7 @@ class EmailParser(object):
     def get_part_text(self, part):
         charset = part.get_content_charset()
         content_type = part.get_content_type()
-        payload = lambda: part.get_payload(decode=True).decode(charset or 'latin-1')
+        payload = lambda: part.get_payload(decode=True).decode(charset or 'latin-1', errors='replace')
         if content_type == 'text/plain':
             return payload()
         if content_type == 'text/html':
@@ -112,7 +106,7 @@ class EmailParser(object):
                 text_parts.append(text)
 
         rv = {
-            'subject': message.get('subject'),
+            'subject': str(message.get('subject')),
             'from': person_from,
             'to': people_to,
             'date': message.get('date'),
