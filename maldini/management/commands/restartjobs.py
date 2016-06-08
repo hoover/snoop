@@ -10,8 +10,10 @@ class Command(BaseCommand):
         parser.add_argument('queue')
 
     def handle(self, queue, verbosity, **options):
-        for job in models.Job.objects.filter(queue=queue, started=True):
-            if verbosity > 0:
-                print(job.data)
-            job.started = False
-            job.save()
+        rows = (
+            models.Job
+            .objects
+            .filter(queue=queue, started=True)
+            .update(started=False)
+        )
+        print("updated", rows, "rows")
