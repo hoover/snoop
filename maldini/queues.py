@@ -8,17 +8,19 @@ def put(queue, data, verbose=False):
     except IntegrityError:
         if verbose: print('job already exists, skipping:', queue, data)
 
-def iterate(queue, verbose=False, stop_first_error=False):
+def iterate(queue, verbose=False, stop_first_error=False, in_order=False):
     while True:
         with transaction.atomic():
             try:
-                job = (
+                query = (
                     models.Job.objects
                     .select_for_update()
                     .filter(queue=queue)
                     .filter(started=False)
-                    [0]
                 )
+                if in_order:
+                    query = query.order_by('id')
+                job = query[0]
 
             except IndexError:
                 if verbose: print('No jobs available in', queue)

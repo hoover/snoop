@@ -22,6 +22,7 @@ class Command(BaseCommand):
             queue,
             verbose=verbosity > 0,
             stop_first_error=stop_first_error,
+            in_order=stop_first_error,
         )
 
         for work in queue_iterator:
