@@ -12,7 +12,7 @@ def pdftotext(input):
     return subprocess.check_output(['pdftotext', '-', '-'], stdin=input)
 
 def text_from_html(html):
-    soup = BeautifulSoup(html, 'html.parser')
+    soup = BeautifulSoup(html, 'lxml')
     for node in soup(["script", "style"]):
         node.extract()
     return re.sub(r'\s+', ' ', soup.get_text().strip())
