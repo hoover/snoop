@@ -89,12 +89,12 @@ class EmailParser(object):
 
     def get_attachments(self, message):
         for number, part in self.parts(message):
-            disposition = part.get('content-disposition')
+            disposition = str(part.get('content-disposition'))
             if not disposition: continue
             m = re.match(r'^(inline|attachment);\s+filename=(?P<filename>.*)$',
                 disposition)
             if not m: continue
-            content_type = part.get('content-type', '').split(';')[0].strip()
+            content_type = str(part.get('content-type', '')).split(';')[0].strip()
             yield number, {
                 'content_type': content_type,
                 'filename': m.group('filename'),
@@ -123,7 +123,7 @@ class EmailParser(object):
             'subject': str(message.get('subject')),
             'from': person_from,
             'to': people_to,
-            'date': message.get('date'),
+            'date': str(message.get('date')),
             'text': '\n'.join(text_parts),
             'attachments': dict(self.get_attachments(message)),
         }
