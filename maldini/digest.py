@@ -248,8 +248,9 @@ def digest(doc):
             data['type'] = 'folder'
 
     if doc.content_type == 'application/pdf':
-        with open_document(doc) as f:
-            data['type'] = 'pdf'
+        data['type'] = 'pdf'
+        #with open_document(doc) as f:
+            #pass
 
     return data
 
