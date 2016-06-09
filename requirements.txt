@@ -10,6 +10,7 @@ click==6.6                # via pip-tools
 Django==1.9.6
 elasticsearch==2.3.0
 first==2.0.1              # via pip-tools
+lxml==3.6.0
 pathlib==1.0.1
 pip-tools==1.6.3
 psycopg2==2.6.1

@@ -6,3 +6,4 @@ Django
 elasticsearch
 simplejson
 waitress
+lxml
