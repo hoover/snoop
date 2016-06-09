@@ -5,6 +5,7 @@ from pprint import pformat
 from pathlib import Path
 from tempfile import TemporaryFile
 import subprocess
+import codecs
 from bs4 import BeautifulSoup
 from .models import Document, FolderMark
 
@@ -63,13 +64,26 @@ class EmailParser(object):
             return [dict(message), len(message.get_payload())]
 
     def get_part_text(self, part):
-        charset = part.get_content_charset()
         content_type = part.get_content_type()
-        payload = lambda: part.get_payload(decode=True).decode(charset or 'latin-1', errors='replace')
+        def get_payload():
+            try:
+                payload_bytes = part.get_payload(decode=True)
+            except:
+                return '(error)'
+
+            charset = part.get_content_charset() or 'latin-1'
+            try:
+                codecs.lookup(charset)
+            except LookupError:
+                charset = 'latin-1'
+            return payload_bytes.decode(charset, errors='replace')
+
         if content_type == 'text/plain':
-            return payload()
+            return get_payload()
+
         if content_type == 'text/html':
-            return text_from_html(payload())
+            return text_from_html(get_payload())
+
         self.warn("Unknown part content type: %r" % content_type)
         self.flag('unknown_attachment')
 
