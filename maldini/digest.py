@@ -51,6 +51,16 @@ class EmailParser(object):
     def open_part(self, number):
         message = self._message()
         part = dict(self.parts(message))[number]
+
+        if part.get('X-Apple-Content-Length'):
+            ext = '.' + number + '.emlxpart'
+            mail_id = re.sub(r'\.partial\.emlx$', ext, self.file.name)
+            part_file = self.file.parent / mail_id
+
+            with part_file.open() as f:
+                payload = f.read()
+            part.set_payload(payload)
+
         tmp = TemporaryFile()
         tmp.write(part.get_payload(decode=True))
         tmp.seek(0)
