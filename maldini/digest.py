@@ -102,11 +102,11 @@ class EmailParser(object):
             disposition = str(part.get('content-disposition'))
             if not disposition: continue
             m = re.match(r'^(inline|attachment);\s+filename=(?P<filename>.*)$',
-                disposition)
+                disposition.lower())
             if not m: continue
             content_type = str(part.get('content-type', '')).split(';')[0].strip()
             yield number, {
-                'content_type': content_type,
+                'content_type': content_type.lower(),
                 'filename': m.group('filename'),
             }
 
