@@ -3,13 +3,12 @@ import simplejson as json
 from maldini import models
 from dateutil import parser
 import os
-
-os.putenv('TIKA_SERVER_ENDPOINT', settings.TIKA_SERVER_ENDPOINT)
-os.putenv('TIKA_CLIENT_ONLY', "True")
-
 import tika
 import tika.parser
 import tika.language
+
+tika.tika.TikaClientOnly = True
+
 
 def extract_meta(meta):
     def _get_flat(dict, *keys):
@@ -63,7 +62,7 @@ def tika_parse(sha1, buffer):
     cache, created = models.TikaCache.objects.get_or_create(sha1=sha1)
     if not created:
         return json.loads(cache.data)
-    data = tika.parser.from_buffer(buffer)
+    data = tika.parser.from_buffer(buffer, settings.TIKA_SERVER_ENDPOINT)
     cache.data = json.dumps(data)
     cache.save()
     return data
