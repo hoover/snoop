@@ -1,4 +1,7 @@
 from django.conf import settings
+import simplejson as json
+from maldini import models
+from dateutil import parser
 import os
 
 os.putenv('TIKA_SERVER_ENDPOINT', settings.TIKA_SERVER_ENDPOINT)
@@ -8,7 +11,7 @@ import tika
 import tika.parser
 import tika.language
 
-def _extract_meta(meta):
+def extract_meta(meta):
     def _get_flat(dict, *keys):
         """
         Select the first non-null item from the dict that matches a key.
@@ -49,14 +52,22 @@ def _extract_meta(meta):
         'tika':             meta
     }
 
-    return data
-
-
-def run_tika(buffer):
-    data = {}
-    parsed = tika.parser.from_buffer(buffer)
-    data['text'] = parsed['content'].strip()
-    data['lang'] = tika.language.from_buffer(data['text'])
-    data.update(_extract_meta(parsed['metadata']))
+    for key in ['date', 'date_created']:
+        if key in data:
+            data[key] = parser.parse(data[key]).isoformat()
 
     return data
+
+
+def tika_parse(sha1, buffer):
+    cache, created = models.TikaCache.objects.get_or_create(sha1=sha1)
+    if not created:
+        return json.loads(cache.data)
+    data = tika.parser.from_buffer(buffer)
+    cache.data = json.dumps(data)
+    cache.save()
+    return data
+
+def tika_lang(sha1, buffer):
+    # return tika.language.from_buffer(data['text'])
+    pass

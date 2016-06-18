@@ -7,10 +7,11 @@ from tempfile import TemporaryFile
 import subprocess
 import codecs
 import hashlib
-from .tikalib import run_tika
+from .tikalib import tika_parse, extract_meta
 from bs4 import BeautifulSoup
 from .models import Document
 import dateutil.parser
+from io import StringIO
 
 def pdftotext(input):
     return subprocess.check_output(['pdftotext', '-', '-'], stdin=input)
@@ -145,6 +146,9 @@ class EmailParser(object):
         return rv
 
 def open_document(doc):
+    if doc.content_type == 'application/x-directory':
+        return StringIO()
+
     if doc.container is None:
         file = Path(settings.MALDINI_ROOT) / doc.path
         return file.open('rb')
@@ -206,37 +210,41 @@ def guess_filetype(doc):
     return content_type_map.get(content_type)
 
 def digest(doc):
-    data = {
-        'title': '|'.join(_path_bits(doc)),
-        'lang': None
-    }
-
-    if doc.container_id is None:
-        data['path'] = doc.path
-
-        file = Path(settings.MALDINI_ROOT) / doc.path
-        if file.suffix == '.emlx':
-            data.update(EmailParser.parse(file, parts=True))
-
-        elif file.suffix == '.eml':
-            # TODO
-            pass
-
-    filetype = guess_filetype(doc)
-    data['type'] = filetype
-
-    if filetype not in ['doc', 'pdf']:
-        return data
-
     with open_document(doc) as f:
-        md5, sha1, fsize = _calculate_hashes(f)
-        f.seek(0)
 
-        data['md5'] = md5
-        data['sha1'] = sha1
+        if not doc.sha1:
+            md5, sha1, fsize = _calculate_hashes(f)
+            f.seek(0)
+            if not doc.disk_size:
+                doc.disk_size = fsize
+            doc.sha1 = sha1
+            doc.md5 = md5
+            doc.save()
 
-        if fsize <= settings.MAX_TIKA_FILE_SIZE:
-            buffer = f.read()
-            data.update(run_tika(buffer))
+        data = {
+            'title': '|'.join(_path_bits(doc)),
+            'lang': None,
+            'sha1': doc.sha1,
+            'md5': doc.md5,
+        }
 
-    return data
+        if doc.container_id is None:
+            data['path'] = doc.path
+
+            file = Path(settings.MALDINI_ROOT) / doc.path
+            if file.suffix == '.emlx':
+                data.update(EmailParser.parse(file, parts=True))
+
+            elif file.suffix == '.eml':
+                # TODO
+                pass
+
+        filetype = guess_filetype(doc)
+        data['type'] = filetype
+
+        if filetype in ['doc', 'pdf'] and doc.disk_size <= settings.MAX_TIKA_FILE_SIZE:
+            parsed = tika_parse(doc.sha1, f.read())
+            data['text'] = parsed.get('content', '').strip()
+            data.update(extract_meta(parsed['metadata']))
+
+        return data
