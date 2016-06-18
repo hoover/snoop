@@ -16,8 +16,8 @@ curl -XPUT localhost:9200/$1 -d '
         "sha1": {"type": "string", "index": "not_analyzed"},
         "filetype": {"type": "string", "index": "not_analyzed"},
         "lang": {"type": "string", "index": "not_analyzed"},
-        "created-at": {"type": "date", "index": "not_analyzed"},
-        "saved-at": {"type": "date", "index": "not_analyzed"}
+        "date": {"type": "date", "index": "not_analyzed"},
+        "date_created": {"type": "date", "index": "not_analyzed"}
       }
     }
   }

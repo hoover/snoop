@@ -10,6 +10,7 @@ import hashlib
 from .tikalib import run_tika
 from bs4 import BeautifulSoup
 from .models import Document
+import dateutil.parser
 
 def pdftotext(input):
     return subprocess.check_output(['pdftotext', '-', '-'], stdin=input)
@@ -135,7 +136,7 @@ class EmailParser(object):
             'subject': str(message.get('subject')),
             'from': person_from,
             'to': people_to,
-            'date': str(message.get('date')),
+            'date': dateutil.parser.parse(message.get('date')).isoformat(),
             'text': '\n'.join(text_parts),
             'attachments': dict(self.get_attachments(message)),
         }
