@@ -2,6 +2,11 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from .models import Document
 from .digest import files_in, digest, open_document
+from dateutil import parser
+
+def _format_date(date_value):
+    return parser.parse(date_value).strftime("%Y-%m-%d")
+
 
 def document(request, id):
     up = None
@@ -51,6 +56,10 @@ def document(request, id):
                 up = Document.objects.get(container=None, path=up_path).id
             else:
                 up = 0
+
+    for field in ['date', 'date_created']:
+        if data.get(field):
+            data[field] = _format_date(data[field])
 
     return render(request, 'document.html', {
         'up': up,

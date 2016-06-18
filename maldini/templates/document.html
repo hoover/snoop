@@ -19,6 +19,10 @@ code { white-space: pre-wrap; }
 
 <p><b>Type:</b> <code>{{ data.type }}</code></p>
 
+{% if data.lang %}
+<p><b>Language:</b> <code>{{ data.lang }}</code></p>
+{% endif %}
+
 {% if data.type == 'email' %}
   <p><b>From:</b> <code>{{ data.from }}</code></p>
   <p>
@@ -53,6 +57,11 @@ code { white-space: pre-wrap; }
     <li><a href="{{ file.id }}">{{ file.filename }}</a></li>
   {% endfor %}
   </ul>
+{% endif %}
+
+{% if data.type == 'pdf' or data.type == 'doc' %}
+    <p><b>Created:</b> <code>{{data.date_created}}</code></p>
+    <p><b>Modified:</b> <code>{{data.date}}</code></p>
 {% endif %}
 
 <pre class="content">{{ data.text }}</pre>
