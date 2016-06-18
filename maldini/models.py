@@ -7,6 +7,9 @@ class Document(models.Model):
     content_type = models.CharField(max_length=100, blank=True)
     disk_size = models.BigIntegerField()
 
+    md5 = models.CharField(max_length=40, null=True)
+    sha1 = models.CharField(max_length=50, null=True)
+
     class Meta:
         # TODO: constraint does not apply to container=None rows
         unique_together = ('container', 'path')
