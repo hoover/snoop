@@ -13,7 +13,9 @@ code { white-space: pre-wrap; }
 
 <h1>{{ data.title }}</h1>
 
+{% if data.type != 'folder' %}
 <p><a href="?raw=on">original</a></p>
+{%  endif %}
 
 <p><b>Type:</b> <code>{{ data.type }}</code></p>
 
