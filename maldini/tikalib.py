@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.db import transaction
 import simplejson as json
 from maldini import models
 from dateutil import parser
@@ -58,6 +59,7 @@ def extract_meta(meta):
     return data
 
 
+@transaction.atomic
 def tika_parse(sha1, buffer):
     cache, created = models.TikaCache.objects.get_or_create(sha1=sha1)
     if not created:
