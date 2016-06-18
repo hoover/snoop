@@ -52,3 +52,20 @@ class Walker(object):
             'content_type': mime_type(file.name) or '',
         })
         doc.save()
+
+def _fix_mimetypes():
+    for doc in models.Document.objects.iterator():
+        if doc.content_type:
+            lower_content_type = doc.content_type.lower()
+            if doc.content_type != lower_content_type:
+                print('lowercasing', doc.id, doc.content_type)
+                doc.content_type = lower_content_type
+                doc.save()
+
+        else:
+            if doc.container_id is None:
+                content_type = mime_type(Path(doc.path).name)
+                if content_type:
+                    print('adding', doc.id, content_type)
+                    doc.content_type = content_type
+                    doc.save()
