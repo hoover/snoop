@@ -1,8 +1,6 @@
 from django.conf import settings
 import os
 
-os.putenv('TIKA_URL', settings.TIKA_URL)
-os.putenv('TIKA_VERSION', settings.TIKA_VERSION)
 os.putenv('TIKA_SERVER_ENDPOINT', settings.TIKA_SERVER_ENDPOINT)
 os.putenv('TIKA_CLIENT_ONLY', "True")
 
