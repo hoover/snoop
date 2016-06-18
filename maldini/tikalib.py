@@ -53,7 +53,7 @@ def extract_meta(meta):
     }
 
     for key in ['date', 'date_created']:
-        if key in data:
+        if data.get(key):
             data[key] = parser.parse(data[key]).isoformat()
 
     return data
