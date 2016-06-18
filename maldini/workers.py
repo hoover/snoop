@@ -16,6 +16,11 @@ def digest(id, verbose):
 
     data = digest_module.digest(document)
 
+    document.md5 = data.get('md5')
+    document.sha1 = data.get('sha1')
+    document.content_type = data.get('content-type', document.content_type)
+    document.save()
+
     for name, info in data.get('attachments', {}).items():
         child, created = models.Document.objects.update_or_create(
             container=document,
@@ -53,6 +58,11 @@ def index(id, verbose):
         'subject': alldata.get('subject'),
         'date': alldata.get('date'),
         'people': ' '.join([alldata.get('from', '')] + alldata.get('to', [])),
+        'filetype': alldata.get('type'),
+        'sha1': alldata.get('sha1'),
+        'md5': alldata.get('md5'),
+        'lang': alldata.get('lang'),
+        'date_created': alldata.get('date_created'),
     }
 
     es.index(

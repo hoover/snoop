@@ -6,6 +6,8 @@ from pathlib import Path
 from tempfile import TemporaryFile
 import subprocess
 import codecs
+import hashlib
+from .tikalib import run_tika
 from bs4 import BeautifulSoup
 from .models import Document
 
@@ -168,9 +170,44 @@ def _path_bits(doc):
         yield from _path_bits(doc.container)
     yield doc.path
 
+def _calculate_hashes(opened_file):
+    BUF_SIZE = 65536
+
+    md5 = hashlib.md5()
+    sha1 = hashlib.sha1()
+
+    while True:
+        data = opened_file.read(BUF_SIZE)
+        if not data:
+            break
+        md5.update(data)
+        sha1.update(data)
+
+    fsize = opened_file.tell()
+
+    return (md5.hexdigest(), sha1.hexdigest(), fsize)
+
+def guess_filetype(doc):
+    content_type_map = {
+        'application/x-directory': 'folder',
+        'application/vnd.oasis.opendocument.text': 'doc',
+        'application/pdf': 'pdf',
+        'application/msword': 'doc',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'doc',
+        'application/vnd.ms-excel': 'xls',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xls',
+        'text/plain': 'text',
+        'text/html': 'html',
+    }
+
+    content_type = doc.content_type.split(';')[0]  # for: text/plain; charset=ISO-1234
+
+    return content_type_map.get(content_type)
+
 def digest(doc):
     data = {
         'title': '|'.join(_path_bits(doc)),
+        'lang': None
     }
 
     if doc.container_id is None:
@@ -178,15 +215,27 @@ def digest(doc):
 
         file = Path(settings.MALDINI_ROOT) / doc.path
         if file.suffix == '.emlx':
-            data['type'] = 'email'
             data.update(EmailParser.parse(file, parts=True))
 
-        if doc.content_type == 'application/x-directory':
-            data['type'] = 'folder'
+        elif file.suffix == '.eml':
+            # TODO
+            pass
 
-    if doc.content_type == 'application/pdf':
-        data['type'] = 'pdf'
-        #with open_document(doc) as f:
-            #pass
+    filetype = guess_filetype(doc)
+    data['type'] = filetype
+
+    if filetype not in ['doc', 'pdf']:
+        return data
+
+    with open_document(doc) as f:
+        md5, sha1, fsize = _calculate_hashes(f)
+        f.seek(0)
+
+        data['md5'] = md5
+        data['sha1'] = sha1
+
+        if fsize <= settings.MAX_TIKA_FILE_SIZE:
+            buffer = f.read()
+            data.update(run_tika(buffer))
 
     return data

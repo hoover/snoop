@@ -44,14 +44,13 @@ def _extract_meta(meta):
     data = {
         'content-type':     _get_flat(meta, 'Content-Type', 'content-type'),
         'author':           _get_flat(meta, 'Author', 'meta:author', 'creator'),
-        'created_at':       _get_flat(meta, 'Creation-Date', 'dcterms:created', 'meta:created', 'created'),
-        'saved_at':         _get_flat(meta, 'Last-Modified', 'Last-Saved-Date', 'dcterms:modified',
+        'date_created':     _get_flat(meta, 'Creation-Date', 'dcterms:created', 'meta:created', 'created'),
+        'date':             _get_flat(meta, 'Last-Modified', 'Last-Saved-Date', 'dcterms:modified',
                                       'meta:modified', 'created'),
         'encrypted-pdf':    _get_bool(meta, 'pdf:encrypted'),
         'tika':             meta
     }
 
-    data['date'] = data['created_at'] or data['saved_at']
     return data
 
 
