@@ -7,3 +7,6 @@ elasticsearch
 simplejson
 waitress
 lxml
+tika
+python-dateutil
+
