@@ -203,6 +203,7 @@ def guess_filetype(doc):
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xls',
         'text/plain': 'text',
         'text/html': 'html',
+        'message/x-emlx': 'email',
     }
 
     content_type = doc.content_type.split(';')[0]  # for: text/plain; charset=ISO-1234
