@@ -33,3 +33,7 @@ class Job(models.Model):
 
     class Meta:
         unique_together = ('queue', 'data')
+
+class TikaCache(models.Model):
+    sha1 = models.CharField(max_length=50, db_index=True)
+    data = models.TextField()
