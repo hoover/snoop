@@ -277,15 +277,3 @@ def digest(doc):
             #pass
 
     return data
-
-def main():
-    import sys
-    Base.metadata.create_all(engine)
-    generation = int(sys.argv[1])
-    root = sys.argv[2]
-    prefix = sys.argv[3] if len(sys.argv) > 3 else None
-    (processed, exceptions) = Walker.walk(generation, root, prefix)
-    print('processed = %d, exceptions = %d' % (processed, exceptions))
-
-if __name__ == '__main__':
-    main()
