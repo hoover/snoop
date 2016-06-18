@@ -1,5 +1,12 @@
 from pathlib import Path
+import mimetypes
 from . import models
+
+mimetypes.add_type('message/x-emlx', '.emlx')
+mimetypes.add_type('message/x-emlxpart', '.emlxpart')
+
+def mime_type(name):
+    return mimetypes.guess_type(name, strict=False)[0]
 
 class Walker(object):
 
@@ -40,5 +47,8 @@ class Walker(object):
     def handle_file(self, file):
         path = self._path(file)
         print('FILE', path)
-        doc, _ = models.Document.objects.get_or_create(path=path, defaults={'disk_size': file.stat().st_size})
+        doc, _ = models.Document.objects.get_or_create(path=path, defaults={
+            'disk_size': file.stat().st_size,
+            'content_type': mime_type(file.name) or '',
+        })
         doc.save()
