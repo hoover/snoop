@@ -12,17 +12,10 @@ class Walker(object):
     @classmethod
     def walk(cls, *args):
         self = cls(*args)
-        self.processed = 0
-        self.exceptions = 0
-        self.uncommitted = 0
-
         try:
             return self.handle(self.root / self.prefix if self.prefix else None)
         except KeyboardInterrupt:
             pass
-
-        # TODO commit
-        return self.processed, self.exceptions
 
     def _path(self, file):
         return str(file.relative_to(self.root))
@@ -49,41 +42,3 @@ class Walker(object):
         print('FILE', path)
         doc, _ = models.Document.objects.get_or_create(path=path, defaults={'disk_size': file.stat().st_size})
         doc.save()
-
-        #if file.suffixes[-1:] == ['.emlx']:
-        #    self.handle_emlx(file)
-
-    def handle_emlx(self, file):
-        path = unicode(file.relative_to(self.root))
-        row = (
-            self.session
-            .query(models.Document)
-            .filter_by(container=None, path=path)
-            .first()
-            or models.Document(path=path)
-        )
-        if row.generation == self.generation:
-            return
-
-        print(path)
-
-        try:
-            (text, warnings, flags, size_disk) = EmailParser.parse(file)
-        except Exception as e:
-            self.exceptions += 1
-
-        else:
-            row.text = text
-            row.warnings = warnings
-            row.flags = flags
-            row.size_text = len(text)
-            row.size_disk = size_disk
-            row.generation = self.generation
-            self.session.add(row)
-            self.processed += 1
-            self.uncommitted += 1
-
-            if self.uncommitted >= 100:
-                print('COMMIT')
-                # TODO commit
-                self.uncommitted = 0
