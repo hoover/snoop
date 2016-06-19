@@ -68,18 +68,12 @@ class EmailParser(object):
         else:
             yield '.'.join(number_bits), message
 
+    def _get_part_content(self, part, number):
+        pass
+
     def open_part(self, number):
         part = dict(self.parts(self.message))[number]
-
-        if part.get('X-Apple-Content-Length'):
-            ext = '.' + number + '.emlxpart'
-            mail_id = re.sub(r'\.partial\.emlx$', ext, self.path.name)
-            part_file = self.path.parent / mail_id
-
-            with part_file.open() as f:
-                payload = f.read()
-            part.set_payload(payload)
-
+        self._get_part_content(part, number)
         tmp = TemporaryFile()
         tmp.write(part.get_payload(decode=True))
         tmp.seek(0)
@@ -158,6 +152,17 @@ class EmailParser(object):
         return rv
 
 class EmlxParser(EmailParser):
+
+    def _get_part_content(self, part, number):
+        if part.get('X-Apple-Content-Length'):
+            ext = '.' + number + '.emlxpart'
+            mail_id = re.sub(r'\.partial\.emlx$', ext, self.path.name)
+            part_file = self.path.parent / mail_id
+
+            with part_file.open() as f:
+                payload = f.read()
+            part.set_payload(payload)
+
     def _message(self):
         (size, extra) = self.file.read(11).split(b'\n', 1)
         raw = extra + self.file.read(int(size) - len(extra))
