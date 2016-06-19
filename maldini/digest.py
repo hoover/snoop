@@ -150,6 +150,14 @@ class EmlxParser(EmailParser):
         raw = extra + self.file.read(int(size) - len(extra))
         return email.message_from_bytes(raw)
 
+def open_email(f, path):
+    if path.suffix == '.emlx':
+        return EmlxParser(f, path)
+    elif path.suffix == '.eml':
+        return EmailParser(f, path)
+
+    raise RuntimeError
+
 def open_document(doc):
     if doc.content_type == 'application/x-directory':
         return StringIO()
@@ -158,15 +166,11 @@ def open_document(doc):
         path = Path(settings.MALDINI_ROOT) / doc.path
         return path.open('rb')
 
-    if doc.container.path.endswith('.emlx'):
-        path = Path(settings.MALDINI_ROOT) / doc.container.path
-        with path.open('rb') as f:
-            return EmlxParser(f, path).open_part(doc.path)
-
-    if doc.container.path.endswith('.eml'):
-        path = Path(settings.MALDINI_ROOT) / doc.container.path
-        with path.open('rb') as f:
-            return EmailParser(f, path).open_part(doc.path)
+    else:
+        parent_path = Path(settings.MALDINI_ROOT) / doc.container.path
+        if parent_path.suffix in ['.eml', '.emlx']:
+            with parent_path.open('rb') as f:
+                return open_email(f, parent_path).open_part(doc.path)
 
     raise RuntimeError
 
@@ -244,12 +248,8 @@ def digest(doc):
             data['path'] = doc.path
 
             path = Path(settings.MALDINI_ROOT) / doc.path
-            if path.suffix == '.emlx':
-                email = EmlxParser(f, path)
-                data.update(email.get_data())
-                data['parts'] = email.get_tree()
-            elif path.suffix == '.eml':
-                email = EmailParser(f, path)
+            if path.suffix in ['.emlx', '.eml']:
+                email = open_email(f, path)
                 data.update(email.get_data())
                 data['parts'] = email.get_tree()
 
