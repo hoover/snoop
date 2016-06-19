@@ -22,10 +22,6 @@ class Digest(models.Model):
 class FolderMark(models.Model):
     path = models.CharField(max_length=4000, unique=True, db_index=True)
 
-class Error(models.Model):
-    document_id = models.IntegerField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
 class Job(models.Model):
     queue = models.CharField(max_length=100)
     data = JSONField(null=True)
