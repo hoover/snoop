@@ -19,7 +19,12 @@ class Command(BaseCommand):
 
         def create_batch():
             models.Document.objects.bulk_create([
-                models.Document(path=p, disk_size=0, content_type=FOLDER)
+                models.Document(
+                    path=p,
+                    disk_size=0,
+                    content_type=FOLDER,
+                    filename=p.name,
+                )
                 for p in batch
             ])
             n = len(batch)

@@ -26,7 +26,7 @@ class Walker(object):
             pass
 
     def _path(self, file):
-        return str(file.relative_to(self.root))
+        return file.relative_to(self.root)
 
     def handle(self, file=None):
         if file is None:
@@ -51,6 +51,7 @@ class Walker(object):
         doc, _ = models.Document.objects.get_or_create(path=path, defaults={
             'disk_size': file.stat().st_size,
             'content_type': mime_type(file.name) or '',
+            'filename': path.name,
         })
         doc.save()
 

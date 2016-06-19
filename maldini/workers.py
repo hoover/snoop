@@ -23,6 +23,7 @@ def digest(id, verbose):
             defaults={
                 'disk_size': 0,
                 'content_type': info['content_type'],
+                'filename': info['filename'],
             },
         )
 
