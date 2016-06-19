@@ -5,6 +5,7 @@ class Document(models.Model):
     container = models.ForeignKey('Document', null=True)
     path = models.CharField(max_length=4000)
     content_type = models.CharField(max_length=100, blank=True)
+    filename = models.CharField(max_length=1000)
     disk_size = models.BigIntegerField()
 
     md5 = models.CharField(max_length=40, null=True, db_index=True)
