@@ -24,8 +24,8 @@ def text_from_html(html):
 
 class EmailParser(object):
 
-    def __init__(self, file):
-        self.file = file
+    def __init__(self, path):
+        self.path = path
         self.warnings = []
         self.flags = set()
 
@@ -58,8 +58,8 @@ class EmailParser(object):
 
         if part.get('X-Apple-Content-Length'):
             ext = '.' + number + '.emlxpart'
-            mail_id = re.sub(r'\.partial\.emlx$', ext, self.file.name)
-            part_file = self.file.parent / mail_id
+            mail_id = re.sub(r'\.partial\.emlx$', ext, self.path.name)
+            part_file = self.path.parent / mail_id
 
             with part_file.open() as f:
                 payload = f.read()
@@ -115,7 +115,7 @@ class EmailParser(object):
             }
 
     def _message(self):
-        with self.file.open('rb') as f:
+        with self.path.open('rb') as f:
             (size, extra) = f.read(11).split(b'\n', 1)
             raw = extra + f.read(int(size) - len(extra))
 
