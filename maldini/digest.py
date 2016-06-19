@@ -171,11 +171,20 @@ class EmlxParser(EmailParser):
         raw = extra + self.file.read(int(size) - len(extra))
         return email.message_from_bytes(raw)
 
-def open_email(f, path):
-    if path.suffix == '.emlx':
-        return EmlxParser(f, path)
-    elif path.suffix == '.eml':
-        return EmailParser(f)
+def doc_path(doc):
+    return Path(settings.MALDINI_ROOT) / doc.path
+
+def is_email(doc):
+    return doc.content_type in ['message/x-emlx', 'message/rfc822']
+
+def open_email(doc):
+    if doc.content_type == 'message/x-emlx':
+        with open_document(doc) as f:
+            return EmlxParser(f, doc_path(doc))
+
+    if doc.content_type == 'message/rfc822':
+        with open_document(doc) as f:
+            return EmailParser(f)
 
     raise RuntimeError
 
@@ -184,14 +193,12 @@ def open_document(doc):
         return StringIO()
 
     if doc.container is None:
-        path = Path(settings.MALDINI_ROOT) / doc.path
+        path = doc_path(doc)
         return path.open('rb')
 
     else:
-        parent_path = Path(settings.MALDINI_ROOT) / doc.container.path
-        if parent_path.suffix in ['.eml', '.emlx']:
-            with parent_path.open('rb') as f:
-                return open_email(f, parent_path).open_part(doc.path)
+        if is_email(doc.container):
+            return open_email(doc.container).open_part(doc.path)
 
     raise RuntimeError
 
@@ -245,9 +252,8 @@ def digest(doc):
         if doc.container_id is None:
             data['path'] = doc.path
 
-            path = Path(settings.MALDINI_ROOT) / doc.path
-            if path.suffix in ['.emlx', '.eml']:
-                email = open_email(f, path)
+            if is_email(doc):
+                email = open_email(doc)
                 data.update(email.get_data())
                 data['parts'] = email.get_tree()
 
