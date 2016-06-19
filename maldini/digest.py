@@ -12,6 +12,20 @@ from bs4 import BeautifulSoup
 import dateutil.parser
 from io import StringIO
 
+FILE_TYPES = {
+    'application/x-directory': 'folder',
+    'application/vnd.oasis.opendocument.text': 'doc',
+    'application/pdf': 'pdf',
+    'application/msword': 'doc',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'doc',
+    'application/vnd.ms-excel': 'xls',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xls',
+    'text/plain': 'text',
+    'text/html': 'html',
+    'message/x-emlx': 'email',
+    'message/rfc822': 'email'
+}
+
 def pdftotext(input):
     return subprocess.check_output(['pdftotext', '-', '-'], stdin=input)
 
@@ -196,23 +210,10 @@ def _calculate_hashes(opened_file):
     return (md5.hexdigest(), sha1.hexdigest(), fsize)
 
 def guess_filetype(doc):
-    content_type_map = {
-        'application/x-directory': 'folder',
-        'application/vnd.oasis.opendocument.text': 'doc',
-        'application/pdf': 'pdf',
-        'application/msword': 'doc',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'doc',
-        'application/vnd.ms-excel': 'xls',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xls',
-        'text/plain': 'text',
-        'text/html': 'html',
-        'message/x-emlx': 'email',
-        'message/rfc822': 'email'
-    }
 
     content_type = doc.content_type.split(';')[0]  # for: text/plain; charset=ISO-1234
 
-    return content_type_map.get(content_type)
+    return FILE_TYPES.get(content_type)
 
 def digest(doc):
     with open_document(doc) as f:
