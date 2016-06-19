@@ -37,9 +37,8 @@ def text_from_html(html):
 
 class EmailParser(object):
 
-    def __init__(self, file, path):
+    def __init__(self, file):
         self.file = file
-        self.path = path
         self.warnings = []
         self.flags = set()
         self.message = self._message()
@@ -153,6 +152,10 @@ class EmailParser(object):
 
 class EmlxParser(EmailParser):
 
+    def __init__(self, file, path):
+        self.path = path
+        super().__init__(file)
+
     def _get_part_content(self, part, number):
         if part.get('X-Apple-Content-Length'):
             ext = '.' + number + '.emlxpart'
@@ -172,7 +175,7 @@ def open_email(f, path):
     if path.suffix == '.emlx':
         return EmlxParser(f, path)
     elif path.suffix == '.eml':
-        return EmailParser(f, path)
+        return EmailParser(f)
 
     raise RuntimeError
 
