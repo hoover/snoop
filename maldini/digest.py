@@ -24,10 +24,13 @@ def text_from_html(html):
 
 class EmailParser(object):
 
-    def __init__(self, path):
+    def __init__(self, file, path):
+        self.file = file
         self.path = path
         self.warnings = []
         self.flags = set()
+        self.message = self._message()
+        self.data = self.parse()
 
     def warn(self, text):
         self.warnings.append(text)
@@ -53,8 +56,7 @@ class EmailParser(object):
             yield '.'.join(number_bits), message
 
     def open_part(self, number):
-        message = self._message()
-        part = dict(self.parts(message))[number]
+        part = dict(self.parts(self.message))[number]
 
         if part.get('X-Apple-Content-Length'):
             ext = '.' + number + '.emlxpart'
@@ -76,6 +78,12 @@ class EmailParser(object):
             return [dict(message), children]
         else:
             return [dict(message), len(message.get_payload())]
+
+    def get_tree(self):
+        return pformat(self.parts_tree(self.message))
+
+    def get_data(self):
+        return self.data
 
     def get_part_text(self, part):
         content_type = part.get_content_type()
@@ -115,48 +123,50 @@ class EmailParser(object):
             }
 
     def _message(self):
-        with self.path.open('rb') as f:
-            (size, extra) = f.read(11).split(b'\n', 1)
-            raw = extra + f.read(int(size) - len(extra))
+        return email.message_from_binary_file(self.file)
 
-        return email.message_from_bytes(raw)
-
-    @classmethod
-    def parse(cls, file, parts=False):
-        self = cls(file)
-        message = self._message()
-        person_from = (list(self.people(message, ['from'])) + [''])[0]
-        people_to = list(self.people(message, ['to', 'cc', 'resent-to', 'recent-cc', 'reply-to']))
+    def parse(self):
+        person_from = (list(self.people(self.message, ['from'])) + [''])[0]
+        people_to = list(self.people(self.message, ['to', 'cc', 'resent-to', 'recent-cc', 'reply-to']))
         text_parts = []
-        for _, part in self.parts(message):
+        for _, part in self.parts(self.message):
             text = self.get_part_text(part)
             if text:
                 text_parts.append(text)
 
         rv = {
-            'subject': str(message.get('subject')),
+            'subject': str(self.message.get('subject')),
             'from': person_from,
             'to': people_to,
-            'date': dateutil.parser.parse(message.get('date')).isoformat(),
+            'date': dateutil.parser.parse(self.message.get('date')).isoformat(),
             'text': '\n'.join(text_parts),
-            'attachments': dict(self.get_attachments(message)),
+            'attachments': dict(self.get_attachments(self.message)),
         }
-        if parts:
-            rv['parts'] = pformat(self.parts_tree(message))
         return rv
+
+class EmlxParser(EmailParser):
+    def _message(self):
+        (size, extra) = self.file.read(11).split(b'\n', 1)
+        raw = extra + self.file.read(int(size) - len(extra))
+        return email.message_from_bytes(raw)
 
 def open_document(doc):
     if doc.content_type == 'application/x-directory':
         return StringIO()
 
     if doc.container is None:
-        file = Path(settings.MALDINI_ROOT) / doc.path
-        return file.open('rb')
+        path = Path(settings.MALDINI_ROOT) / doc.path
+        return path.open('rb')
 
     if doc.container.path.endswith('.emlx'):
-        file = Path(settings.MALDINI_ROOT) / doc.container.path
-        email = EmailParser(file)
-        return email.open_part(doc.path)
+        path = Path(settings.MALDINI_ROOT) / doc.container.path
+        with path.open('rb') as f:
+            return EmlxParser(f, path).open_part(doc.path)
+
+    if doc.container.path.endswith('.eml'):
+        path = Path(settings.MALDINI_ROOT) / doc.container.path
+        with path.open('rb') as f:
+            return EmailParser(f, path).open_part(doc.path)
 
     raise RuntimeError
 
@@ -204,6 +214,7 @@ def guess_filetype(doc):
         'text/plain': 'text',
         'text/html': 'html',
         'message/x-emlx': 'email',
+        'message/rfc822': 'email'
     }
 
     content_type = doc.content_type.split(';')[0]  # for: text/plain; charset=ISO-1234
@@ -232,13 +243,15 @@ def digest(doc):
         if doc.container_id is None:
             data['path'] = doc.path
 
-            file = Path(settings.MALDINI_ROOT) / doc.path
-            if file.suffix == '.emlx':
-                data.update(EmailParser.parse(file, parts=True))
-
-            elif file.suffix == '.eml':
-                # TODO
-                pass
+            path = Path(settings.MALDINI_ROOT) / doc.path
+            if path.suffix == '.emlx':
+                email = EmlxParser(f, path)
+                data.update(email.get_data())
+                data['parts'] = email.get_tree()
+            elif path.suffix == '.eml':
+                email = EmailParser(f, path)
+                data.update(email.get_data())
+                data['parts'] = email.get_tree()
 
         filetype = guess_filetype(doc)
         data['type'] = filetype
