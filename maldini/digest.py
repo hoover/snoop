@@ -9,7 +9,6 @@ import codecs
 import hashlib
 from .tikalib import tika_parse, extract_meta
 from bs4 import BeautifulSoup
-from .models import Document
 import dateutil.parser
 from io import StringIO
 
@@ -173,16 +172,6 @@ def open_document(doc):
                 return open_email(f, parent_path).open_part(doc.path)
 
     raise RuntimeError
-
-def files_in(parent_path):
-    child_documents = Document.objects.filter(
-        container=None,
-        path__iregex=r'^' + re.escape(parent_path) + r'[^/]+$',
-    )
-    return [{
-        'id': child.id,
-        'filename': child.path[len(parent_path):]
-    } for child in child_documents]
 
 def _path_bits(doc):
     if doc.container:

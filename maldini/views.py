@@ -1,7 +1,8 @@
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from .models import Document
-from .digest import files_in, digest, open_document
+from .digest import digest, open_document
+from .walker import files_in
 from dateutil import parser
 
 def _format_date(date_value):

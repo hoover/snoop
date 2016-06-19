@@ -1,5 +1,6 @@
 from pathlib import Path
 import mimetypes
+import re
 from . import models
 
 mimetypes.add_type('message/x-emlx', '.emlx')
@@ -52,6 +53,16 @@ class Walker(object):
             'content_type': mime_type(file.name) or '',
         })
         doc.save()
+
+def files_in(parent_path):
+    child_documents = models.Document.objects.filter(
+        container=None,
+        path__iregex=r'^' + re.escape(parent_path) + r'[^/]+$',
+    )
+    return [{
+        'id': child.id,
+        'filename': child.path[len(parent_path):]
+    } for child in child_documents]
 
 def _fix_mimetypes():
     for doc in models.Document.objects.iterator():
