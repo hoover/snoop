@@ -180,6 +180,7 @@ def is_email(doc):
 def open_email(doc):
     if doc.content_type == 'message/x-emlx':
         with open_document(doc) as f:
+            assert doc.container_id is None, "can't parse emlx in container"
             return EmlxParser(f, doc_path(doc))
 
     if doc.content_type == 'message/rfc822':
