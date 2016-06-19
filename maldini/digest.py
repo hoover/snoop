@@ -231,38 +231,37 @@ def guess_filetype(doc):
     return FILE_TYPES.get(content_type)
 
 def digest(doc):
-    with open_document(doc) as f:
-
-        if not doc.sha1:
+    if not doc.sha1:
+        with open_document(doc) as f:
             md5, sha1, fsize = _calculate_hashes(f)
-            f.seek(0)
-            if not doc.disk_size:
-                doc.disk_size = fsize
-            doc.sha1 = sha1
-            doc.md5 = md5
-            doc.save()
+        if not doc.disk_size:
+            doc.disk_size = fsize
+        doc.sha1 = sha1
+        doc.md5 = md5
+        doc.save()
 
-        data = {
-            'title': '|'.join(_path_bits(doc)),
-            'lang': None,
-            'sha1': doc.sha1,
-            'md5': doc.md5,
-        }
+    data = {
+        'title': '|'.join(_path_bits(doc)),
+        'lang': None,
+        'sha1': doc.sha1,
+        'md5': doc.md5,
+    }
 
-        if doc.container_id is None:
-            data['path'] = doc.path
+    if doc.container_id is None:
+        data['path'] = doc.path
 
-            if is_email(doc):
-                email = open_email(doc)
-                data.update(email.get_data())
-                data['parts'] = email.get_tree()
+        if is_email(doc):
+            email = open_email(doc)
+            data.update(email.get_data())
+            data['parts'] = email.get_tree()
 
-        filetype = guess_filetype(doc)
-        data['type'] = filetype
+    filetype = guess_filetype(doc)
+    data['type'] = filetype
 
-        if filetype in settings.TIKA_FILE_TYPES and doc.disk_size <= settings.MAX_TIKA_FILE_SIZE:
+    if filetype in settings.TIKA_FILE_TYPES and doc.disk_size <= settings.MAX_TIKA_FILE_SIZE:
+        with open_document(doc) as f:
             parsed = tika_parse(doc.sha1, f.read())
-            data['text'] = (parsed.get('content') or '').strip()
-            data.update(extract_meta(parsed['metadata']))
+        data['text'] = (parsed.get('content') or '').strip()
+        data.update(extract_meta(parsed['metadata']))
 
-        return data
+    return data
