@@ -11,10 +11,12 @@ def mime_type(name):
 
 class Walker(object):
 
-    def __init__(self, generation, root, prefix):
+    def __init__(self, generation, root, prefix, restart):
         self.generation = generation
         self.root = Path(root)
         self.prefix = Path(prefix) if prefix else None
+        if restart:
+            models.FolderMark.objects.all().delete()
 
 
     @classmethod
