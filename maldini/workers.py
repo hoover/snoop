@@ -74,6 +74,8 @@ def index(id, verbose):
         'subject': alldata.get('subject'),
         'date': alldata.get('date'),
         'people': ' '.join([alldata.get('from', '')] + alldata.get('to', [])),
+        'to': alldata.get('to'),
+        'from': alldata.get('from'),
         'filetype': alldata.get('type'),
         'sha1': alldata.get('sha1'),
         'md5': alldata.get('md5'),
