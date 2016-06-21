@@ -11,6 +11,8 @@ class Document(models.Model):
     md5 = models.CharField(max_length=40, blank=True, db_index=True)
     sha1 = models.CharField(max_length=50, blank=True, db_index=True)
 
+    broken = models.CharField(max_length=100, blank=True)
+
     class Meta:
         # TODO: constraint does not apply to container=None rows
         unique_together = ('container', 'path')
