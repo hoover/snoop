@@ -127,6 +127,9 @@ class EmailParser(object):
         }
         return rv
 
+class MissingEmlxPart(Exception):
+    pass
+
 class EmlxParser(EmailParser):
 
     def __init__(self, file, path):
@@ -139,8 +142,11 @@ class EmlxParser(EmailParser):
             mail_id = re.sub(r'\.partial\.emlx$', ext, self.path.name)
             part_file = self.path.parent / mail_id
 
-            with part_file.open() as f:
-                payload = f.read()
+            try:
+                with part_file.open() as f:
+                    payload = f.read()
+            except FileNotFoundError:
+                raise MissingEmlxPart
             part.set_payload(payload)
 
     def _message(self):

@@ -4,6 +4,7 @@ from elasticsearch import Elasticsearch
 from maldini import models
 from maldini import queues
 from maldini import digest as digest_module
+from maldini import emails
 
 es = Elasticsearch(settings.ELASTICSEARCH_URL)
 
@@ -14,7 +15,13 @@ def digest(id, verbose):
         if verbose: print('MISSING')
         return
 
-    data = digest_module.digest(document)
+    try:
+        data = digest_module.digest(document)
+    except emails.MissingEmlxPart:
+        document.broken = 'missing_emlx_part'
+        document.save()
+        if verbose: print('MissingEmlxPart')
+        return
 
     for name, info in data.get('attachments', {}).items():
         child, created = models.Document.objects.update_or_create(
