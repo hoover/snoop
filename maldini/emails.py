@@ -12,6 +12,9 @@ def text_from_html(html):
         node.extract()
     return re.sub(r'\s+', ' ', soup.get_text().strip())
 
+class CorruptedFile(Exception):
+    pass
+
 class PayloadError(Exception):
     pass
 
@@ -165,6 +168,9 @@ class EmlxParser(EmailParser):
             part.set_payload(payload)
 
     def _message(self):
-        (size, extra) = self.file.read(11).split(b'\n', 1)
+        try:
+            (size, extra) = self.file.read(11).split(b'\n', 1)
+        except:
+            raise CorruptedFile
         raw = extra + self.file.read(int(size) - len(extra))
         return email.message_from_bytes(raw)

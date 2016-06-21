@@ -30,6 +30,12 @@ def digest(id, verbose):
         if verbose: print('payload_error')
         return
 
+    except emails.CorruptedFile:
+        document.broken = 'corrupted_file'
+        document.save()
+        if verbose: print('corrupted_file')
+        return
+
     for name, info in data.get('attachments', {}).items():
         child, created = models.Document.objects.update_or_create(
             container=document,
