@@ -6,6 +6,10 @@ import codecs
 import dateutil.parser
 from bs4 import BeautifulSoup
 
+
+def decode_header(header):
+    return str(email.header.make_header(email.header.decode_header(header)))
+
 def text_from_html(html):
     soup = BeautifulSoup(html, 'lxml')
     for node in soup(["script", "style"]):
@@ -120,7 +124,9 @@ class EmailParser(object):
 
     def parse(self):
         person_from = (list(self.people(self.message, ['from'])) + [''])[0]
-        people_to = list(self.people(self.message, ['to', 'cc', 'resent-to', 'recent-cc', 'reply-to']))
+        people_to = list(self.people(self.message,
+                                     ['to', 'cc', 'resent-to',
+                                      'recent-cc', 'reply-to']))
         text_parts = []
         for _, part in self.parts(self.message):
             text = self.get_part_text(part)
@@ -128,9 +134,9 @@ class EmailParser(object):
                 text_parts.append(text)
 
         rv = {
-            'subject': str(self.message.get('subject')),
-            'from': person_from,
-            'to': people_to,
+            'subject': decode_header(self.message.get('subject')),
+            'from': decode_header(person_from),
+            'to': [decode_header(h) for h in people_to],
             'text': '\n'.join(text_parts),
             'attachments': dict(self.get_attachments(self.message)),
         }
