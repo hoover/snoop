@@ -12,6 +12,9 @@ def text_from_html(html):
         node.extract()
     return re.sub(r'\s+', ' ', soup.get_text().strip())
 
+class PayloadError(Exception):
+    pass
+
 class EmailParser(object):
 
     def __init__(self, file):
@@ -51,7 +54,11 @@ class EmailParser(object):
         part = dict(self.parts(self.message))[number]
         self._get_part_content(part, number)
         tmp = TemporaryFile()
-        tmp.write(part.get_payload(decode=True))
+        try:
+            data = part.get_payload(decode=True)
+        except:
+            raise PayloadError
+        tmp.write(data)
         tmp.seek(0)
         return tmp
 

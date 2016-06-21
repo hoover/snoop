@@ -17,10 +17,17 @@ def digest(id, verbose):
 
     try:
         data = digest_module.digest(document)
+
     except emails.MissingEmlxPart:
         document.broken = 'missing_emlx_part'
         document.save()
-        if verbose: print('MissingEmlxPart')
+        if verbose: print('missing_emlx_part')
+        return
+
+    except emails.PayloadError:
+        document.broken = 'payload_error'
+        document.save()
+        if verbose: print('payload_error')
         return
 
     for name, info in data.get('attachments', {}).items():
