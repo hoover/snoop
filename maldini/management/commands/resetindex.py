@@ -16,6 +16,7 @@ MAPPINGS = {
             "lang": {"type": "string", "index": "not_analyzed"},
             "date": {"type": "date", "index": "not_analyzed"},
             "date_created": {"type": "date", "index": "not_analyzed"},
+            "attachments": {"type": "boolean"}
         }
     }
 }

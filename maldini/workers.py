@@ -81,6 +81,7 @@ def index(id, verbose):
         'md5': alldata.get('md5'),
         'lang': alldata.get('lang'),
         'date_created': alldata.get('date_created'),
+        'attachments': bool(alldata.get('attachments'))
     }
 
     es.index(
