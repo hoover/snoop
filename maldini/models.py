@@ -8,8 +8,8 @@ class Document(models.Model):
     filename = models.CharField(max_length=1000)
     disk_size = models.BigIntegerField()
 
-    md5 = models.CharField(max_length=40, null=True, db_index=True)
-    sha1 = models.CharField(max_length=50, null=True, db_index=True)
+    md5 = models.CharField(max_length=40, blank=True, db_index=True)
+    sha1 = models.CharField(max_length=50, blank=True, db_index=True)
 
     class Meta:
         # TODO: constraint does not apply to container=None rows
