@@ -134,7 +134,7 @@ class EmailParser(object):
                 text_parts.append(text)
 
         rv = {
-            'subject': decode_header(self.message.get('subject')),
+            'subject': decode_header(self.message.get('subject') or ''),
             'from': decode_header(person_from),
             'to': [decode_header(h) for h in people_to],
             'text': '\n'.join(text_parts),
