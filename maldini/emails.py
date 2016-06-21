@@ -132,9 +132,13 @@ class EmailParser(object):
             'attachments': dict(self.get_attachments(self.message)),
         }
 
-        message_date = self.message.get('date')
-        if message_date:
-            rv['date'] = dateutil.parser.parse(message_date).isoformat()
+        try:
+            message_date = self.message.get('date')
+            date = dateutil.parser.parse(message_date).isoformat()
+        except:
+            pass # we can't use the date value, so ignore it
+        else:
+            rv['date'] = date
 
         return rv
 
