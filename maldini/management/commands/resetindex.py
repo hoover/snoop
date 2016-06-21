@@ -20,6 +20,23 @@ MAPPINGS = {
     }
 }
 
+SETTINGS = {
+    "analysis": {
+        "analyzer": {
+            "default": {
+                "tokenizer": "standard",
+                "filter": ["standard", "lowercase", "ascii_folding_preserve"]
+            }
+        },
+        "filter": {
+            "ascii_folding_preserve": {
+                "type": "asciifolding",
+                "preserve_original": True
+            }
+        }
+    }
+}
+
 
 class Command(BaseCommand):
     help = "Reset the elasticsearch index"
@@ -28,4 +45,5 @@ class Command(BaseCommand):
         es.indices.delete(settings.ELASTICSEARCH_INDEX, ignore=[400, 404])
         es.indices.create(settings.ELASTICSEARCH_INDEX, {
             "mappings": MAPPINGS,
+            "settings": SETTINGS,
         })
