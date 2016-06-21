@@ -136,7 +136,7 @@ class EmailParser(object):
             message_date = self.message.get('date')
             date = dateutil.parser.parse(message_date).isoformat()
         except:
-            pass # we can't use the date value, so ignore it
+            pass  # TODO: log a warning that the date is not parsable
         else:
             rv['date'] = date
 
