@@ -128,10 +128,14 @@ class EmailParser(object):
             'subject': str(self.message.get('subject')),
             'from': person_from,
             'to': people_to,
-            'date': dateutil.parser.parse(self.message.get('date')).isoformat(),
             'text': '\n'.join(text_parts),
             'attachments': dict(self.get_attachments(self.message)),
         }
+
+        message_date = self.message.get('date')
+        if message_date:
+            rv['date'] = dateutil.parser.parse(message_date).isoformat()
+
         return rv
 
 class MissingEmlxPart(Exception):
