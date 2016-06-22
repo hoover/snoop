@@ -14,6 +14,9 @@ lxml==3.6.0
 pathlib==1.0.1
 pip-tools==1.6.5
 psycopg2==2.6.1
+py==1.4.31                # via pytest
+pytest-django==2.9.1
+pytest==2.9.2
 python-dateutil==2.5.3
 requests==2.10.0          # via tika
 simplejson==3.8.2

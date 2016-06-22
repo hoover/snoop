@@ -9,4 +9,5 @@ waitress
 lxml
 tika
 python-dateutil
-
+pytest
+pytest-django

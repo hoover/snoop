@@ -1,2 +1,4 @@
 /maldini/site/settings/local.py
+/maldini/site/settings/testing_local.py
 *.pyc
+/.cache
