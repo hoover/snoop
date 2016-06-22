@@ -8,6 +8,11 @@ from dateutil import parser
 def _format_date(date_value):
     return parser.parse(date_value).strftime("%Y-%m-%d")
 
+def document_raw(request, id):
+    doc = get_object_or_404(Document, id=id)
+    with open_document(doc) as f:
+        data = f.read()
+        return HttpResponse(data, content_type=doc.content_type)
 
 def document(request, id):
     up = None
@@ -21,10 +26,6 @@ def document(request, id):
 
     else:
         doc = get_object_or_404(Document, id=id)
-        if request.GET.get('raw') == 'on':
-            with open_document(doc) as f:
-                data = f.read()
-                return HttpResponse(data, content_type=doc.content_type)
 
         try:
             data = digest(doc)
@@ -63,6 +64,7 @@ def document(request, id):
             data[field] = _format_date(data[field])
 
     return render(request, 'document.html', {
+        'id': id,
         'up': up,
         'data': data,
         'attachments': attachments,
