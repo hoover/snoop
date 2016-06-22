@@ -7,6 +7,11 @@ MAIL_PATH_CODINGAME = "eml-1-promotional/New on CodinGame: Check it out! - " \
 MAIL_PATH_CAMPUS = "eml-2-attachment/FW: Invitation Fontys Open Day 2nd " \
                     "of February 2014 - Campus Venlo " \
                     "<campusvenlo@fontys.nl> - 2013-12-16 1700.eml"
+MAIL_PATH_AMERICAN = "eml-3-uppercaseheaders/Fwd: The American College " \
+                     "of Thessaloniki - Greece - Tarek Kouatly " \
+                     "<tarek@act.edu> - 2013-11-11 1622.eml"
+MAIL_PATH_LONG_FILENAMES = "eml-5-long-names/Attachments have " \
+                           "long file names..eml"
 
 def get_email_for_path(path):
     doc = models.Document(path=path)
@@ -41,4 +46,30 @@ def test_people():
     assert type(data['from']) is list
     assert len(data['from']) == 1
     assert "Teamnewsletter@mapbox.com" in data[0]
+
+def test_path():
+    email = get_email_for_path(MAIL_PATH_CAMPUS)
+    assert email.get_data()['path'] == MAIL_PATH_CAMPUS
+
+def test_title():
+    email = get_email_for_path(MAIL_PATH_MAPBOX)
+    data = email.get_data()
+
+    assert 'title' in data
+    assert MAIL_PATH_MAPBOX in data['title']
+
+def test_normal_attachments():
+    email = get_email_for_path(MAIL_PATH_CAMPUS)
+    attachments = email.get_data().get('attachments')
+
+    assert attachments
+    assert type(attachments) is dict
+    assert len(attachments) == 2
+
+def test_attachment_with_long_filename():
+    email = get_email_for_path(MAIL_PATH_LONG_FILENAMES)
+    attachments = email.get_data().get('attachments')
+
+    assert len(attachments) == 3
+
 
