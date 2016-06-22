@@ -28,7 +28,8 @@ class EmailParser(object):
         self.file = file
         self.warnings = []
         self.flags = set()
-        self.message = self._message()
+        self._parsed_message = None
+        self._message() # TODO refactor so we don't parse the message here
 
     def warn(self, text):
         self.warnings.append(text)
@@ -57,7 +58,7 @@ class EmailParser(object):
         pass
 
     def open_part(self, number):
-        part = dict(self.parts(self.message))[number]
+        part = dict(self.parts(self._message()))[number]
         self._get_part_content(part, number)
         tmp = TemporaryFile()
         try:
@@ -76,7 +77,7 @@ class EmailParser(object):
             return [dict(message), len(message.get_payload())]
 
     def get_tree(self):
-        return pformat(self.parts_tree(self.message))
+        return pformat(self.parts_tree(self._message()))
 
     def get_part_text(self, part):
         content_type = part.get_content_type()
@@ -116,29 +117,32 @@ class EmailParser(object):
             }
 
     def _message(self):
-        return email.message_from_binary_file(self.file)
+        if self._parsed_message is None:
+            self._parsed_message = email.message_from_binary_file(self.file)
+        return self._parsed_message
 
     def get_data(self):
-        person_from = (list(self.people(self.message, ['from'])) + [''])[0]
-        people_to = list(self.people(self.message,
+        message = self._message()
+        person_from = (list(self.people(message, ['from'])) + [''])[0]
+        people_to = list(self.people(message,
                                      ['to', 'cc', 'resent-to',
                                       'recent-cc', 'reply-to']))
         text_parts = []
-        for _, part in self.parts(self.message):
+        for _, part in self.parts(message):
             text = self.get_part_text(part)
             if text:
                 text_parts.append(text)
 
         rv = {
-            'subject': decode_header(self.message.get('subject') or ''),
+            'subject': decode_header(message.get('subject') or ''),
             'from': decode_header(person_from),
             'to': [decode_header(h) for h in people_to],
             'text': '\n'.join(text_parts),
-            'attachments': dict(self.get_attachments(self.message)),
+            'attachments': dict(self.get_attachments(message)),
         }
 
         try:
-            message_date = self.message.get('date')
+            message_date = message.get('date')
             date = dateutil.parser.parse(message_date).isoformat()
         except:
             pass  # TODO: log a warning that the date is not parsable
