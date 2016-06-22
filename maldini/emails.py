@@ -122,7 +122,7 @@ class EmailParser(object):
         return self._parsed_message
 
     def get_data(self):
-        message = self._message()
+        message = self._message()  # TODO use self.get_tree()
         person_from = (list(self.people(message, ['from'])) + [''])[0]
         people_to = list(self.people(message,
                                      ['to', 'cc', 'resent-to',
