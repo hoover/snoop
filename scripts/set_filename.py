@@ -11,11 +11,23 @@ def attachment_filenames(doc):
         for name, info in data['attachments'].items()
     }
 
-for doc in Document.objects.all().iterator():
-    if doc.filename:
-        continue
-    if doc.container_id is None:
-        doc.filename = Path(doc.path).name
-    else:
-        doc.filename = attachment_filenames(doc.container)[doc.path]
-    doc.save()
+def progress_meter(every=1000, msg="{n} items"):
+    import itertools
+    for n in itertools.count(1):
+        if n % every == 0:
+            print(msg.format(n=n))
+        yield
+
+def set_filenames():
+    meter = progress_meter(every=100)
+    for doc in Document.objects.filter(filename='').iterator():
+        if doc.filename:
+            continue
+        if doc.container_id is None:
+            doc.filename = Path(doc.path).name
+        else:
+            doc.filename = attachment_filenames(doc.container)[doc.path]
+        doc.save()
+        next(meter)
+
+set_filenames()
