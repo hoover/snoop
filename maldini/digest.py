@@ -41,6 +41,15 @@ def open_email(doc):
 
     raise RuntimeError
 
+def get_email_part(doc, part):
+    return open_email(doc).open_part(part)
+
+def parse_email(doc):
+    email = open_email(doc)
+    data = email.get_data()
+    tree = email.get_tree()
+    return (tree, data)
+
 def open_document(doc):
     if doc.content_type == 'application/x-directory':
         return StringIO()
@@ -51,7 +60,7 @@ def open_document(doc):
 
     else:
         if is_email(doc.container):
-            return open_email(doc.container).open_part(doc.path)
+            return get_email_part(doc.container, doc.path)
 
     raise RuntimeError
 
@@ -104,9 +113,9 @@ def digest(doc):
         data['path'] = doc.path
 
         if is_email(doc):
-            email = open_email(doc)
-            data.update(email.get_data())
-            data['parts'] = email.get_tree()
+            (tree, data) = parse_email(doc)
+            data.update(data)
+            data['parts'] = tree
 
     filetype = guess_filetype(doc)
     data['type'] = filetype
