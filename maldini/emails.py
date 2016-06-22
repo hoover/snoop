@@ -146,7 +146,7 @@ class EmailParser(object):
 
         try:
             message_date = message.get('date')
-            date = dateutil.parser.parse(message_date).isoformat()
+            date = email.utils.parsedate_to_datetime(message_date).isoformat()
         except:
             pass  # TODO: log a warning that the date is not parsable
         else:
