@@ -83,9 +83,7 @@ class EmailParser(object):
 
     def get_tree(self):
         tree = self.parts_tree(self._message())
-        attachments = dict(self.get_attachments(self._message()))
-        if attachments:
-            tree['attachments'] = attachments
+        tree['attachments'] = dict(self.get_attachments(self._message()))
         return tree
 
     def get_part_text(self, part):
@@ -129,7 +127,11 @@ class EmailParser(object):
         return self._parsed_message
 
     def get_data(self):
-        message = self._message()  # TODO use self.get_tree()
+        tree = self.get_tree()
+        message = email.message.Message()
+        for name, value in tree['headers'].items():
+            message[name] = value
+
         person_from = (list(self.people(message, ['from'])) + [''])[0]
         people_to = list(self.people(message,
                                      ['to', 'cc', 'resent-to',
@@ -139,7 +141,7 @@ class EmailParser(object):
             'subject': decode_header(message.get('subject') or ''),
             'from': decode_header(person_from),
             'to': [decode_header(h) for h in people_to],
-            'attachments': dict(self.get_attachments(message)),
+            'attachments': tree['attachments'],
         }
 
         try:
