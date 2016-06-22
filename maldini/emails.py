@@ -105,15 +105,13 @@ class EmailParser(object):
 
     def get_attachments(self, message):
         for number, part in self.parts(message):
-            disposition = str(part.get('content-disposition'))
-            if not disposition: continue
-            m = re.match(r'^(inline|attachment);\s+filename=(?P<filename>.*)$',
-                disposition.lower())
-            if not m: continue
-            content_type = str(part.get('content-type', '')).split(';')[0].strip()
+            if not part.get_content_disposition(): continue
+            filename = part.get_filename()
+            if not filename: continue
+
             yield number, {
-                'content_type': content_type.lower(),
-                'filename': m.group('filename'),
+                'content_type': part.get_content_type().lower(),
+                'filename': filename,
             }
 
     def _message(self):
