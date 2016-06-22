@@ -12,6 +12,7 @@ MAIL_PATH_AMERICAN = "eml-3-uppercaseheaders/Fwd: The American College " \
                      "<tarek@act.edu> - 2013-11-11 1622.eml"
 MAIL_PATH_LONG_FILENAMES = "eml-5-long-names/Attachments have " \
                            "long file names..eml"
+MAIL_PATH_NO_SUBJECT = "eml-2-attachment/message-without-subject.eml"
 
 def get_email_for_path(path):
     doc = models.Document(path=path)
@@ -20,13 +21,22 @@ def get_email_for_path(path):
     return email
 
 def test_subject():
-    doc = models.Document(path=MAIL_PATH_MAPBOX)
-
-    with digest.open_document(doc) as f:
-        email = emails.EmailParser(f)
+    email = get_email_for_path(MAIL_PATH_MAPBOX)
     data = email.get_data()
 
     assert data['subject'] == "Introducing Mapbox Android Services"
+
+def test_no_subject_or_text():
+    email = get_email_for_path(MAIL_PATH_NO_SUBJECT)
+    data = email.get_data()
+
+    assert 'subject' in data
+    assert len(data['subject']) == 0
+    assert type(data['subject']) is str
+
+    text = email.get_text()
+    assert type(text) is str
+    assert len(text) <= 2
 
 def test_text():
     email_codin = get_email_for_path(MAIL_PATH_CODINGAME)
