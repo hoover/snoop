@@ -132,7 +132,6 @@ class EmailParser(object):
             'subject': decode_header(message.get('subject') or ''),
             'from': decode_header(person_from),
             'to': [decode_header(h) for h in people_to],
-            'text': self.get_text(),
             'attachments': dict(self.get_attachments(message)),
         }
 

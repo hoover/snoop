@@ -48,6 +48,8 @@ def parse_email(doc):
     email = open_email(doc)
     data = email.get_data()
     tree = email.get_tree()
+    text = email.get_text()
+    data['text'] = text
     return (tree, data)
 
 def open_document(doc):
