@@ -70,4 +70,26 @@ def test_attachment_with_long_filename():
 
     assert len(attachments) == 3
 
+def test_tree_without_attachments():
+    email = get_email_for_path(MAIL_PATH_MAPBOX)
+    tree = email.get_tree()
 
+    assert set(tree.keys()) == {'headers', 'parts'}
+    assert len(tree['parts']) == 2
+
+    headers = {'Subject', 'To', 'From', 'Date', 'Content-Type'}
+    assert headers.issubset(set(tree['headers'].keys()))
+
+def test_tree_with_attachments():
+    email = get_email_for_path(MAIL_PATH_LONG_FILENAMES)
+    tree = email.get_tree()
+
+    assert set(tree.keys()) == {'attachments', 'headers', 'parts'}
+    assert len(tree['attachments']) == 3
+    assert len(tree['parts']) == 4
+
+    headers = {'Subject', 'To', 'From', 'Date', 'Content-Type'}
+    assert headers.issubset(set(tree['headers'].keys()))
+
+    for part in tree['parts']:
+        assert 'headers' in part.keys()

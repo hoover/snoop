@@ -1,6 +1,5 @@
 import email, email.header, email.utils
 import re
-from pprint import pformat
 from tempfile import TemporaryFile
 import codecs
 import dateutil.parser
@@ -72,12 +71,22 @@ class EmailParser(object):
     def parts_tree(self, message):
         if message.is_multipart():
             children = [self.parts_tree(p) for p in message.get_payload()]
-            return [dict(message), children]
+            return {
+                'headers': dict(message),
+                'parts': children
+            }
         else:
-            return [dict(message), len(message.get_payload())]
+            return {
+                'headers': dict(message),
+                'length': len(message.get_payload())
+            }
 
     def get_tree(self):
-        return pformat(self.parts_tree(self._message()))
+        tree = self.parts_tree(self._message())
+        attachments = dict(self.get_attachments(self._message()))
+        if attachments:
+            tree['attachments'] = attachments
+        return tree
 
     def get_part_text(self, part):
         content_type = part.get_content_type()

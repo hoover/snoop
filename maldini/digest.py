@@ -5,6 +5,7 @@ import hashlib
 from .tikalib import tika_parse, extract_meta
 from io import StringIO
 from . import emails
+from pprint import pformat
 
 FILE_TYPES = {
     'application/x-directory': 'folder',
@@ -118,7 +119,7 @@ def digest(doc):
         if is_email(doc):
             (tree, email_data) = parse_email(doc)
             data.update(email_data)
-            data['parts'] = tree
+            data['parts'] = pformat(tree, indent=4, width=120)
 
     filetype = guess_filetype(doc)
     data['type'] = filetype
