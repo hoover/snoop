@@ -29,7 +29,6 @@ class EmailParser(object):
         self.warnings = []
         self.flags = set()
         self.message = self._message()
-        self.data = self.parse()
 
     def warn(self, text):
         self.warnings.append(text)
@@ -79,9 +78,6 @@ class EmailParser(object):
     def get_tree(self):
         return pformat(self.parts_tree(self.message))
 
-    def get_data(self):
-        return self.data
-
     def get_part_text(self, part):
         content_type = part.get_content_type()
         def get_payload():
@@ -122,7 +118,7 @@ class EmailParser(object):
     def _message(self):
         return email.message_from_binary_file(self.file)
 
-    def parse(self):
+    def get_data(self):
         person_from = (list(self.people(self.message, ['from'])) + [''])[0]
         people_to = list(self.people(self.message,
                                      ['to', 'cc', 'resent-to',
