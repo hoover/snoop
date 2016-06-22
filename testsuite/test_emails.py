@@ -53,20 +53,8 @@ def test_people():
     assert len(data['to']) == 1
     assert "penultim_o@yahoo.com" in data['to']
 
-    assert type(data['from']) is list
-    assert len(data['from']) == 1
-    assert "Teamnewsletter@mapbox.com" in data[0]
-
-def test_path():
-    email = get_email_for_path(MAIL_PATH_CAMPUS)
-    assert email.get_data()['path'] == MAIL_PATH_CAMPUS
-
-def test_title():
-    email = get_email_for_path(MAIL_PATH_MAPBOX)
-    data = email.get_data()
-
-    assert 'title' in data
-    assert MAIL_PATH_MAPBOX in data['title']
+    assert type(data['from']) is str
+    assert "Teamnewsletter@mapbox.com" in data['from']
 
 def test_normal_attachments():
     email = get_email_for_path(MAIL_PATH_CAMPUS)
