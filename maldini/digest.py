@@ -115,8 +115,8 @@ def digest(doc):
         data['path'] = doc.path
 
         if is_email(doc):
-            (tree, data) = parse_email(doc)
-            data.update(data)
+            (tree, email_data) = parse_email(doc)
+            data.update(email_data)
             data['parts'] = tree
 
     filetype = guess_filetype(doc)
