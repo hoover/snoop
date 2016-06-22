@@ -1,3 +1,5 @@
+from maldini import digest, models, emails
+
 MAIL_PATH_MAPBOX = "eml-1-promotional/Introducing Mapbox Android Services - " \
               "Mapbox Team <newsletter@mapbox.com> - 2016-04-20 1603.eml"
 MAIL_PATH_CODINGAME = "eml-1-promotional/New on CodinGame: Check it out! - " \
@@ -7,8 +9,6 @@ MAIL_PATH_CAMPUS = "eml-2-attachment/FW: Invitation Fontys Open Day 2nd " \
                     "<campusvenlo@fontys.nl> - 2013-12-16 1700.eml"
 
 def test_subject():
-    from maldini import models, digest, emails
-
     doc = models.Document(path=MAIL_PATH_MAPBOX)
 
     with digest.open_document(doc) as f:
