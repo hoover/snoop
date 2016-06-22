@@ -127,17 +127,12 @@ class EmailParser(object):
         people_to = list(self.people(message,
                                      ['to', 'cc', 'resent-to',
                                       'recent-cc', 'reply-to']))
-        text_parts = []
-        for _, part in self.parts(message):
-            text = self.get_part_text(part)
-            if text:
-                text_parts.append(text)
 
         rv = {
             'subject': decode_header(message.get('subject') or ''),
             'from': decode_header(person_from),
             'to': [decode_header(h) for h in people_to],
-            'text': '\n'.join(text_parts),
+            'text': self.get_text(),
             'attachments': dict(self.get_attachments(message)),
         }
 
@@ -150,6 +145,14 @@ class EmailParser(object):
             rv['date'] = date
 
         return rv
+
+    def get_text(self):
+        text_parts = []
+        for _, part in self.parts(self._message()):
+            text = self.get_part_text(part)
+            if text:
+                text_parts.append(text)
+        return '\n'.join(text_parts)
 
 class MissingEmlxPart(Exception):
     pass
