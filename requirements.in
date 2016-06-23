@@ -11,3 +11,5 @@ tika
 python-dateutil
 pytest
 pytest-django
+Jinja2
+
