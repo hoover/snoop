@@ -185,9 +185,12 @@ class EmlxParser(EmailParser):
             part.set_payload(payload)
 
     def _message(self):
-        try:
-            (size, extra) = self.file.read(11).split(b'\n', 1)
-        except:
-            raise CorruptedFile
-        raw = extra + self.file.read(int(size) - len(extra))
-        return email.message_from_bytes(raw)
+        if self._parsed_message is None:
+            try:
+                (size, extra) = self.file.read(11).split(b'\n', 1)
+            except:
+                raise CorruptedFile
+            raw = extra + self.file.read(int(size) - len(extra))
+            self._parsed_message = email.message_from_bytes(raw)
+
+        return self._parsed_message
