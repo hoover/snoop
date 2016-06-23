@@ -127,6 +127,6 @@ def digest(doc):
         with open_document(doc) as f:
             parsed = tika_parse(doc.sha1, f.read())
         data['text'] = (parsed.get('content') or '').strip()
-        data.update(extract_meta(parsed['metadata']))
+        data.update(extract_meta(parsed.get('metadata', {})))
 
     return data
