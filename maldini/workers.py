@@ -87,7 +87,11 @@ def index(id, verbose):
         'md5': alldata.get('md5'),
         'lang': alldata.get('lang'),
         'date_created': alldata.get('date_created'),
-        'attachments': bool(alldata.get('attachments'))
+        'attachments': bool(alldata.get('attachments')),
+        'message_id': alldata.get('message_id'),
+        'in_reply_to': alldata.get('in_reply_to'),
+        'thread_index': alldata.get('thread_index'),
+        'references': alldata.get('references'),
     }
 
     es.index(

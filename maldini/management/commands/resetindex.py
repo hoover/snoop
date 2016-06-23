@@ -16,7 +16,11 @@ MAPPINGS = {
             "lang": {"type": "string", "index": "not_analyzed"},
             "date": {"type": "date", "index": "not_analyzed"},
             "date_created": {"type": "date", "index": "not_analyzed"},
-            "attachments": {"type": "boolean"}
+            "attachments": {"type": "boolean"},
+            "message_id": {"type": "string", "index": "not_analyzed"},
+            "in_reply_to": {"type": "string", "index": "not_analyzed"},
+            "thread_index": {"type": "string", "index": "not_analyzed"},
+            "references": {"type": "string", "index": "not_analyzed"},
         }
     }
 }
