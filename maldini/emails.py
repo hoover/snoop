@@ -151,13 +151,9 @@ class EmailParser(object):
             'attachments': tree.get('attachments', {}),
         }
 
-        try:
-            message_date = message.get('date')
-            date = email.utils.parsedate_to_datetime(message_date).isoformat()
-        except:
-            pass  # TODO: log a warning that the date is not parsable
-        else:
-            rv['date'] = date
+        message_date = message.get('date')
+        date = email.utils.parsedate_to_datetime(message_date).isoformat()
+        rv['date'] = date
 
         return rv
 
