@@ -10,6 +10,7 @@ import tika.language
 import hashlib
 
 tika.tika.TikaClientOnly = True
+tika.language.ServerEndpoint = settings.TIKA_SERVER_ENDPOINT
 
 
 def extract_meta(meta):
