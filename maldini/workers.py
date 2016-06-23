@@ -71,28 +71,29 @@ def index(id, verbose):
         if verbose: print('MISSING')
         return
 
-    alldata = json.loads(digest.data)
-
-    data = {
-        'title': alldata.get('title'),
-        'path': alldata.get('path'),
-        'text': alldata.get('text'),
-        'subject': alldata.get('subject'),
-        'date': alldata.get('date'),
-        'people': ' '.join([alldata.get('from', '')] + alldata.get('to', [])),
-        'to': alldata.get('to'),
-        'from': alldata.get('from'),
-        'filetype': alldata.get('type'),
-        'sha1': alldata.get('sha1'),
-        'md5': alldata.get('md5'),
-        'lang': alldata.get('lang'),
-        'date_created': alldata.get('date_created'),
-        'attachments': bool(alldata.get('attachments')),
-        'message_id': alldata.get('message_id'),
-        'in_reply_to': alldata.get('in_reply_to'),
-        'thread_index': alldata.get('thread_index'),
-        'references': alldata.get('references'),
+    digest_data = json.loads(digest.data)
+    copy_keys = {
+        'title',
+        'path',
+        'text',
+        'subject',
+        'date',
+        'to',
+        'from',
+        'sha1',
+        'md5',
+        'lang',
+        'date_created',
+        'message_id',
+        'in_reply_to',
+        'thread_index',
+        'references',
     }
+
+    data = {key: digest_data.get(key) for key in copy_keys}
+    data['filetype'] = digest_data.get('type')
+    data['attachments'] = bool(digest_data.get('attachments'))
+    data['people'] = ' '.join([digest_data.get('from', '')] + digest_data.get('to', []))
 
     es.index(
         index=settings.ELASTICSEARCH_INDEX,
