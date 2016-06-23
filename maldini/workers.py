@@ -36,6 +36,12 @@ def digest(id, verbose):
         if verbose: print('corrupted_file')
         return
 
+    else:
+        if document.broken:
+            if verbose: print('removing broken flag', document.broken)
+            document.broken = ''
+            document.save()
+
     for name, info in data.get('attachments', {}).items():
         child, created = models.Document.objects.update_or_create(
             container=document,
