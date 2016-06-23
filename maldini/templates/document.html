@@ -11,7 +11,7 @@ code { white-space: pre-wrap; }
 <p><a href="{{ up }}">up</a></p>
 {% endif %}
 
-<h1>{{ data.title }}</h1>
+<h1>{{ data.get('title') or '' }}</h1>
 
 {% if data.type != 'folder' %}
 <p><a href="./{{ id }}/raw/{{ data.filename }}">original</a></p>
@@ -27,7 +27,7 @@ code { white-space: pre-wrap; }
   <p><b>From:</b> <code>{{ data.from }}</code></p>
   <p>
     <b>To:</b>
-      <code>{{ data.to }}</code>
+      <code>{{ data.to|join(', ') }}</code>
   </p>
   <p><b>Date:</b> <code>{{ data.date }}</code></p>
   <p><b>Subject:</b> <code>{{ data.subject }}</code></p>
@@ -57,13 +57,13 @@ code { white-space: pre-wrap; }
   </ul>
 {% endif %}
 
-{% if data.type == 'pdf' or data.type == 'doc' %}
+{% if data['type'] in ['pdf', 'doc'] %}
     <p><b>Created:</b> <code>{{data.date_created}}</code></p>
     <p><b>Modified:</b> <code>{{data.date}}</code></p>
 {% endif %}
 
-<pre class="content">{{ data.text }}</pre>
+<pre class="content">{{ data.get('text', '') }}</pre>
 
 {% if data.type == 'email' %}
-  <pre class="content">{{ data.parts }}</pre>
+  <pre class="content">{{ data.get('parts', '') }}</pre>
 {% endif %}
