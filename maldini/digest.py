@@ -8,16 +8,40 @@ from . import emails
 
 FILE_TYPES = {
     'application/x-directory': 'folder',
-    'application/vnd.oasis.opendocument.text': 'doc',
     'application/pdf': 'pdf',
-    'application/msword': 'doc',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'doc',
-    'application/vnd.ms-excel': 'xls',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xls',
     'text/plain': 'text',
     'text/html': 'html',
     'message/x-emlx': 'email',
-    'message/rfc822': 'email'
+    'message/rfc822': 'email',
+
+    'application/msword': 'doc',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'doc',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.template': 'doc',
+    'application/vnd.ms-word.document.macroEnabled.12': 'doc',
+    'application/vnd.ms-word.template.macroEnabled.12': 'doc',
+    'application/vnd.oasis.opendocument.text': 'doc',
+    'application/vnd.oasis.opendocument.text-template': 'doc',
+    'application/rtf': 'doc',
+
+    'application/vnd.ms-excel': 'xls',
+    'application/vnd.openxlsformats-officedocument.spreadsheetml.sheet': 'xls',
+    'application/vnd.openxlsformats-officedocument.spreadsheetml.template': 'xls',
+    'application/vnd.ms-excel.sheet.macroEnabled.12': 'xls',
+    'application/vnd.ms-excel.template.macroEnabled.12': 'xls',
+    'application/vnd.ms-excel.addin.macroEnabled.12': 'xls',
+    'application/vnd.ms-excel.sheet.binary.macroEnabled.12': 'xls',
+    'application/vnd.oasis.opendocument.spreadsheet-template': 'xls',
+    'application/vnd.oasis.opendocument.spreadsheet': 'xls',
+
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'ppt',
+    'application/vnd.openxmlformats-officedocument.presentationml.template': 'ppt',
+    'application/vnd.openxmlformats-officedocument.presentationml.slideshow': 'ppt',
+    'application/vnd.ms-powerpoint.addin.macroEnabled.12': 'ppt',
+    'application/vnd.ms-powerpoint.presentation.macroEnabled.12': 'ppt',
+    'application/vnd.ms-powerpoint.template.macroEnabled.12': 'ppt',
+    'application/vnd.ms-powerpoint.slideshow.macroEnabled.12': 'ppt',
+    'application/vnd.oasis.opendocument.presentation': 'ppt',
+    'application/vnd.oasis.opendocument.presentation-template': 'ppt',
 }
 
 def pdftotext(input):
