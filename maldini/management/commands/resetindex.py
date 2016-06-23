@@ -15,11 +15,11 @@ MAPPINGS = {
             "filetype": {"type": "string", "index": "not_analyzed"},
             "lang": {"type": "string", "index": "not_analyzed"},
             "date": {"type": "date", "index": "not_analyzed"},
-            "date_created": {"type": "date", "index": "not_analyzed"},
+            "date-created": {"type": "date", "index": "not_analyzed"},
             "attachments": {"type": "boolean"},
-            "message_id": {"type": "string", "index": "not_analyzed"},
-            "in_reply_to": {"type": "string", "index": "not_analyzed"},
-            "thread_index": {"type": "string", "index": "not_analyzed"},
+            "message-id": {"type": "string", "index": "not_analyzed"},
+            "in-reply-to": {"type": "string", "index": "not_analyzed"},
+            "thread-index": {"type": "string", "index": "not_analyzed"},
             "references": {"type": "string", "index": "not_analyzed"},
         }
     }

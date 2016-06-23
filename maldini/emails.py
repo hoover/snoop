@@ -150,8 +150,7 @@ class EmailParser(object):
                        'thread-index', 'references']:
             value = message.get(header)
             if value:
-                key = header.replace('-', '_')
-                rv[key] = decode_header(value)
+                rv[header] = decode_header(value)
 
         message_date = message.get('date')
         date = email.utils.parsedate_to_datetime(message_date).isoformat()

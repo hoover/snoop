@@ -58,7 +58,7 @@ code { white-space: pre-wrap; }
 {% endif %}
 
 {% if data['type'] in ['pdf', 'doc'] %}
-    <p><b>Created:</b> <code>{{data.date_created}}</code></p>
+    <p><b>Created:</b> <code>{{data['date-created']}}</code></p>
     <p><b>Modified:</b> <code>{{data.date}}</code></p>
 {% endif %}
 

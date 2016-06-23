@@ -83,10 +83,10 @@ def index(id, verbose):
         'sha1',
         'md5',
         'lang',
-        'date_created',
-        'message_id',
-        'in_reply_to',
-        'thread_index',
+        'date-created',
+        'message-id',
+        'in-reply-to',
+        'thread-index',
         'references',
     }
 
