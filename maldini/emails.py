@@ -71,15 +71,10 @@ class EmailParser(object):
     def parts_tree(self, message):
         if message.is_multipart():
             children = [self.parts_tree(p) for p in message.get_payload()]
+            rv = {'headers': dict(message)}
             if children:
-                return {
-                    'headers': dict(message),
-                    'parts': children
-                }
-            else:
-                return {
-                    'headers': dict(message),
-                }
+                rv['parts'] = children
+            return rv
         else:
             return {
                 'headers': dict(message),
