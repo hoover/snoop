@@ -7,6 +7,7 @@ import os
 import tika
 import tika.parser
 import tika.language
+import hashlib
 
 tika.tika.TikaClientOnly = True
 
@@ -69,6 +70,11 @@ def tika_parse(sha1, buffer):
     cache.save()
     return data
 
-def tika_lang(sha1, buffer):
-    # return tika.language.from_buffer(data['text'])
-    pass
+@transaction.atomic
+def tika_lang(text):
+    sha1 = hashlib.sha1(text.encode('utf-8')).hexdigest()
+    cache, created = models.TikaLangCache.objects.get_or_create(sha1=sha1)
+    if created:
+        cache.lang = tika.language.from_buffer(text)
+        cache.save()
+    return cache.lang

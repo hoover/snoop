@@ -2,7 +2,7 @@ from django.conf import settings
 from pathlib import Path
 import subprocess
 import hashlib
-from .tikalib import tika_parse, extract_meta
+from .tikalib import tika_parse, extract_meta, tika_lang
 from io import StringIO
 from . import emails
 
@@ -128,5 +128,8 @@ def digest(doc):
             parsed = tika_parse(doc.sha1, f.read())
         data['text'] = (parsed.get('content') or '').strip()
         data.update(extract_meta(parsed.get('metadata', {})))
+
+    if 'text' in data and len(data['text']) > 100:
+        data['lang'] = tika_lang(data['text'])
 
     return data
