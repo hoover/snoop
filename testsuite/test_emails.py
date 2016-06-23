@@ -74,7 +74,7 @@ def test_tree_without_attachments():
     email = get_email_for_path(MAIL_PATH_MAPBOX)
     tree = email.get_tree()
 
-    assert set(tree.keys()) == {'attachments', 'headers', 'parts'}
+    assert set(tree.keys()) == {'headers', 'parts'}
     assert len(tree['parts']) == 2
 
     headers = {'Subject', 'To', 'From', 'Date', 'Content-Type'}

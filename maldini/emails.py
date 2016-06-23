@@ -71,19 +71,26 @@ class EmailParser(object):
     def parts_tree(self, message):
         if message.is_multipart():
             children = [self.parts_tree(p) for p in message.get_payload()]
-            return {
-                'headers': dict(message),
-                'parts': children
-            }
+            if children:
+                return {
+                    'headers': dict(message),
+                    'parts': children
+                }
+            else:
+                return {
+                    'headers': dict(message),
+                }
         else:
             return {
                 'headers': dict(message),
-                'length': len(message.get_payload())
+                'length': len(message.get_payload()),
             }
 
     def get_tree(self):
         tree = self.parts_tree(self._message())
-        tree['attachments'] = dict(self.get_attachments(self._message()))
+        attachments = dict(self.get_attachments(self._message()))
+        if attachments:
+            tree['attachments'] = attachments
         return tree
 
     def get_part_text(self, part):
@@ -141,7 +148,7 @@ class EmailParser(object):
             'subject': decode_header(message.get('subject') or ''),
             'from': decode_header(person_from),
             'to': [decode_header(h) for h in people_to],
-            'attachments': tree['attachments'],
+            'attachments': tree.get('attachments', {}),
         }
 
         try:
