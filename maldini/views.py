@@ -4,6 +4,7 @@ from .models import Document
 from .digest import digest, open_document
 from .walker import files_in
 from dateutil import parser
+from pprint import pformat
 
 def _format_date(date_value):
     return parser.parse(date_value).strftime("%Y-%m-%d")
@@ -44,6 +45,9 @@ def document(request, id):
                     return None
                 else:
                     return a.id
+
+            if data.get('parts'):
+                data['parts'] = pformat(data.get('parts'), indent=4, width=120)
 
             attachments = [{
                 'filename': a['filename'],
