@@ -1,6 +1,6 @@
 import email, email.header, email.utils
 import re
-from tempfile import TemporaryFile
+from tempfile import SpooledTemporaryFile
 import codecs
 import dateutil.parser
 from bs4 import BeautifulSoup
@@ -59,7 +59,7 @@ class EmailParser(object):
     def open_part(self, number):
         part = dict(self.parts(self._message()))[number]
         self._get_part_content(part, number)
-        tmp = TemporaryFile()
+        tmp = SpooledTemporaryFile()
         try:
             data = part.get_payload(decode=True)
         except:
