@@ -156,8 +156,9 @@ def digest(doc):
         data['text'] = (parsed.get('content') or '').strip()
         data.update(extract_meta(parsed.get('metadata', {})))
 
-    if 'text' in data and len(data['text']) > 100:
-        data['lang'] = tika_lang(data['text'])[:2]
+    if settings.MALDINI_ANALYZE_LANG:
+        if 'text' in data and len(data['text']) > 100:
+            data['lang'] = tika_lang(data['text'])[:2]
 
     return data
 

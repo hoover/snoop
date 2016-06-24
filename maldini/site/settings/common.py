@@ -99,3 +99,5 @@ LOGGING = {
         },
     },
 }
+
+MALDINI_ANALYZE_LANG = True
