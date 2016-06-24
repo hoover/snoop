@@ -15,7 +15,7 @@ FILE_TYPES = {
     'text/html': 'html',
     'message/x-emlx': 'email',
     'message/rfc822': 'email',
-    'application/vnd.ms-outlook': 'msg',
+    'application/vnd.ms-outlook': 'email',
 
     'application/msword': 'doc',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'doc',
@@ -54,7 +54,9 @@ def doc_path(doc):
     return Path(settings.MALDINI_ROOT) / doc.path
 
 def is_email(doc):
-    return doc.content_type in ['message/x-emlx', 'message/rfc822']
+    return doc.content_type in ['message/x-emlx',
+                                'message/rfc822',
+                                'application/vnd.ms-outlook']
 
 def open_email(doc):
     if doc.content_type == 'message/x-emlx':
@@ -65,6 +67,9 @@ def open_email(doc):
     if doc.content_type == 'message/rfc822':
         with open_document(doc) as f:
             return emails.EmailParser(f)
+
+    if doc.content_type == 'application/vnd.ms-outlook':
+        return emails.open_msg(doc_path(doc))
 
     raise RuntimeError
 

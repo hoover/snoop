@@ -2,8 +2,11 @@ import email, email.header, email.utils
 import re
 from tempfile import SpooledTemporaryFile
 import codecs
-import dateutil.parser
 from bs4 import BeautifulSoup
+import tempfile
+from pathlib import Path
+import subprocess
+import shutil
 
 
 def decode_header(header):
@@ -198,3 +201,23 @@ class EmlxParser(EmailParser):
             self._parsed_message = email.message_from_bytes(raw)
 
         return self._parsed_message
+
+
+def open_msg(path):
+    with tempfile.TemporaryDirectory(suffix='snoop') as tmpdir:
+        shutil.copy(str(path), tmpdir)
+
+        tmp_msg_path = Path(tmpdir) / path.name
+
+        subprocess.run(
+            args=['msgconvert', tmp_msg_path.name],
+            cwd=tmpdir,
+            check=True)
+
+        tmp_eml_path = Path(re.sub('\.msg$', '.eml', str(tmp_msg_path)))
+
+        if not tmp_eml_path.exists():
+            raise RuntimeError
+
+        with tmp_eml_path.open('rb') as f:
+            return EmailParser(f)
