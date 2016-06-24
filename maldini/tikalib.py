@@ -71,17 +71,11 @@ def tika_parse(sha1, buffer):
     cache.save()
     return data
 
+@transaction.atomic
 def tika_lang(text):
     sha1 = hashlib.sha1(text.encode('utf-8')).hexdigest()
-    cache = models.TikaLangCache.objects.filter(sha1=sha1).first()
-    if cache is None:
-        lang = tika.language.from_buffer(text)
-        try:
-            models.TikaLangCache.objects.create(sha1=sha1, lang=lang)
-        except IntegrityError:
-            pass # somebody else wrote the cache entry in the mean time
-
-    else:
-        lang = cache.lang
-
-    return lang
+    cache, created = models.TikaLangCache.objects.get_or_create(sha1=sha1)
+    if created:
+        cache.lang = tika.language.from_buffer(text)
+        cache.save()
+    return cache.lang
