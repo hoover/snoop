@@ -6,6 +6,10 @@
    * `MALDINI_ROOT`: path to the dump
    * `ELASTICSEARCH_URL`: url to elasticsearch server
    * `ELASTICSEARCH_INDEX`: name of elasticsearch index where to index the data
+   * `TIKA_SERVER_ENDPOINT`: url to tika server
+   * `MAX_TIKA_FILE_SIZE`: in bytes. Files larger than this won't be sent to tika
+   * `TIKA_FILE_TYPES`: a list of categories of files to send to tika. Ex: pdf, doc
+   * `MSGCONVERT_SCRIPT`: path to the `msgconvert` script. See below for setup
 
 2. Create file and folder entries in the database:
 
