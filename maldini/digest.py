@@ -5,6 +5,8 @@ import hashlib
 from .tikalib import tika_parse, extract_meta, tika_lang
 from io import StringIO
 from . import emails
+from . import queues
+from . import models
 
 FILE_TYPES = {
     'application/x-directory': 'folder',
@@ -158,3 +160,19 @@ def digest(doc):
         data['lang'] = tika_lang(data['text'])[:2]
 
     return data
+
+def create_children(doc, data, verbose=True):
+    for name, info in data.get('attachments', {}).items():
+        child, created = models.Document.objects.update_or_create(
+            container=doc,
+            path=name,
+            defaults={
+                'disk_size': 0,
+                'content_type': info['content_type'],
+                'filename': info['filename'],
+            },
+        )
+
+        if created:
+            queues.put('digest', {'id': child.id}, verbose=verbose)
+            if verbose: print('new child', child.id)

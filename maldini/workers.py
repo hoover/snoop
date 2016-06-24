@@ -42,20 +42,7 @@ def digest(id, verbose):
             document.broken = ''
             document.save()
 
-    for name, info in data.get('attachments', {}).items():
-        child, created = models.Document.objects.update_or_create(
-            container=document,
-            path=name,
-            defaults={
-                'disk_size': 0,
-                'content_type': info['content_type'],
-                'filename': info['filename'],
-            },
-        )
-
-        if created:
-            queues.put('digest', {'id': child.id}, verbose=verbose)
-            if verbose: print('new child', child.id)
+    digest_module.create_children(document, data, verbose)
 
     models.Digest.objects.update_or_create(
         id=document.id,
