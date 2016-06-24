@@ -7,6 +7,7 @@ import email, email.header, email.utils
 from tempfile import SpooledTemporaryFile
 from bs4 import BeautifulSoup
 from pathlib import Path
+from django.conf import settings
 
 
 def decode_header(header):
@@ -202,21 +203,23 @@ class EmlxParser(EmailParser):
 
         return self._parsed_message
 
+class MsgConvertMissing(Exception):
+    pass
 
 def open_msg(path):
+    if settings.MSGCONVERT_SCRIPT is None:
+        raise MsgConvertMissing
+
     with tempfile.TemporaryDirectory(suffix='snoop') as tmpdir:
         tmp_msg_path = Path(tmpdir) / path.name
         os.symlink(str(path), str(tmp_msg_path))
 
         subprocess.run(
-            args=['msgconvert', tmp_msg_path.name],
+            args=[settings.MSGCONVERT_SCRIPT, tmp_msg_path.name],
             cwd=tmpdir,
             check=True)
 
-        tmp_eml_path = Path(re.sub('\.msg$', '.eml', str(tmp_msg_path)))
-
-        if not tmp_eml_path.exists():
-            raise RuntimeError
+        tmp_eml_path = tmp_msg_path.with_suffix('.eml')
 
         with tmp_eml_path.open('rb') as f:
             return EmailParser(f)
