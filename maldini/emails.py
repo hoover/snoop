@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import tempfile
 from pathlib import Path
 import subprocess
-import shutil
+import os
 
 
 def decode_header(header):
@@ -205,9 +205,8 @@ class EmlxParser(EmailParser):
 
 def open_msg(path):
     with tempfile.TemporaryDirectory(suffix='snoop') as tmpdir:
-        shutil.copy(str(path), tmpdir)
-
         tmp_msg_path = Path(tmpdir) / path.name
+        os.symlink(str(path), str(tmp_msg_path))
 
         subprocess.run(
             args=['msgconvert', tmp_msg_path.name],
