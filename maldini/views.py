@@ -1,10 +1,26 @@
+from pathlib import Path
+from dateutil import parser
+from pprint import pformat
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
+from django.conf import settings
+from jinja2 import Environment
 from .models import Document
 from .digest import digest
 from .walker import files_in
-from dateutil import parser
-from pprint import pformat
+
+BOOTSTRP_CSS = ""
+
+path = Path(settings.BASE_DIR) / 'assets' / 'bootstrap.min.css'
+with path.open('r') as f:
+    BOOTSTRP_CSS += f.read() + "\n"
+
+def environment(**options):
+    env = Environment(**options)
+    env.globals.update({
+        'css': BOOTSTRP_CSS
+    })
+    return env
 
 def _format_date(date_value):
     return parser.parse(date_value).strftime("%Y-%m-%d")

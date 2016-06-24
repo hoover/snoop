@@ -1,73 +1,152 @@
 <!doctype html>
-<meta charset="utf-8">
-<style>
-h1 { font-family: monospace; font-size: 16px; white-space: pre-wrap; }
-code { white-space: pre-wrap; }
-.content { border: 1px solid #bbb; white-space: pre-wrap; }
-</style>
+<head>
+  <meta charset="utf-8">
+  <style>
+    {{ css }}
+
+    .content {
+      margin: 5px;
+      border: 1px solid #bbb;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+
 <body>
+<div class="container container-fluid">
 
-{% if up != None %}
-<p><a href="{{ up }}">up</a></p>
-{% endif %}
+  <div class="col-lg-12">
 
-<h1>{{ data.get('title') or '' }}</h1>
+    <h3>{{ data.get('title') or '' }}</h3>
 
-{% if data.type != 'folder' %}
-<p><a href="./{{ id }}/raw/{{ data.filename }}">original: {{  data.filename }}</a></p>
-    {% if 'sha1' in data %}
-        <p><b>MD5:</b> <code>{{ data.md5 }}</code></p>
-        <p><b>SHA1:</b> <code>{{ data.sha1 }}</code></p>
+    {% if up != None %}
+      <a href="{{ up }}" class="btn btn-info" role="button">Up</a>
     {% endif %}
-{% endif %}
 
-<p><b>Type:</b> <code>{{ data.type }}</code></p>
+    {% if data.type != 'folder' %}
+      <a href="./{{ id }}/raw/{{ data.filename }}"
+         class="btn btn-primary" role="button">Original file</a>
 
-{% if data.lang %}
-<p><b>Language:</b> <code>{{ data.lang }}</code></p>
-{% endif %}
+    {% endif %}
+  </div>
 
-{% if data.type == 'email' %}
-  <p><b>From:</b> <code>{{ data.from }}</code></p>
-  <p>
-    <b>To:</b>
-      <code>{{ data.to|join(', ') }}</code>
-  </p>
-  <p><b>Date:</b> <code>{{ data.date }}</code></p>
-  <p><b>Subject:</b> <code>{{ data.subject }}</code></p>
+  <div class="col-lg-12">
+    <h4>Meta</h4>
+
+    <table class="table table-striped">
+      <tbody>
+      <tr>
+        <td> Type:</td>
+        <td><code>{{ data.type }}</code></td>
+      </tr>
+
+      {% if data.type != 'folder' and 'sha1' in data %}
+        <tr>
+          <td> MD5:</td>
+          <td><code>{{ data.md5 }}</code></td>
+        </tr>
+        <tr>
+          <td> SHA1:</td>
+          <td><code>{{ data.sha1 }}</code></td>
+        </tr>
+      {% endif %}
+
+
+      {% if data.lang %}
+        <tr>
+          <td> Language:</td>
+          <td><code>{{ data.lang }}</code></td>
+        </tr>
+      {% endif %}
+
+      {% if data['type'] in ['pdf', 'doc'] %}
+        <tr>
+          <td> Created:</td>
+          <td>{{ data['date-created'] }}</td>
+        </tr>
+
+        <tr>
+          <td> Modified:</td>
+          <td>{{ data.date }}</td>
+        </tr>
+      {% endif %}
+
+      {% if data.type == 'email' %}
+        <tr>
+          <td> From:</td>
+          <td>{{ data.from }}</td>
+        </tr>
+
+        <tr>
+          <td> To:</td>
+          <td>{{ data.to|join(', ') }}</td>
+        </tr>
+
+        <tr>
+          <td> Date:</td>
+          <td>{{ data.date }}</td>
+        </tr>
+
+        <tr>
+          <td> Subject:</td>
+          <td><b>{{ data.subject }}</b></td>
+        </tr>
+
+      {% endif %}
+      </tbody>
+    </table>
+  </div>
 
   {% if attachments %}
-  <p><b>Attachments:</b></p>
-  <ul>
-  {% for attachment in attachments %}
-    <li>
-      {% if attachment.id %}
-        <a href="./{{ attachment.id }}">{{ attachment.filename }}</a>
-      {% else %}
-        {{ attachment.filename }}
-      {% endif %}
-      {{ attachment.content_type }}
-    </li>
-  {% endfor %}
-  </ul>
+    <div class="col-lg-12">
+      <h4>Attachments</h4>
+      <ul>
+        {% for attachment in attachments %}
+          <li>
+            {% if attachment.id %}
+              <a href="./{{ attachment.id }}">{{ attachment.filename }}</a>
+            {% else %}
+              {{ attachment.filename }}
+            {% endif %}
+            {{ attachment.content_type }}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
   {% endif %}
-{% endif %}
 
-{% if data.type == 'folder' %}
-  <ul>
-  {% for file in data.files %}
-    <li><a href="{{ file.id }}">{{ file.filename }}</a></li>
-  {% endfor %}
-  </ul>
-{% endif %}
 
-{% if data['type'] in ['pdf', 'doc'] %}
-    <p><b>Created:</b> <code>{{data['date-created']}}</code></p>
-    <p><b>Modified:</b> <code>{{data.date}}</code></p>
-{% endif %}
 
-<pre class="content">{{ data.get('text', '') }}</pre>
+  {% if data.type == 'folder' %}
+    <div class="col-lg-12">
+      <h4>Files:</h4>
+      <ul>
+        {% for file in data.files %}
+          <li>
+            <a href="{{ file.id }}">
+              {{ file.filename }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
 
-{% if data.type == 'email' %}
-  <pre class="content">{{ data.get('tree', '') }}</pre>
-{% endif %}
+
+  {% if 'text' in data %}
+    <div class="col-lg-12">
+      <h4>Text</h4>
+      <pre class="content">{{ data['text'] }}</pre>
+    </div>
+  {% endif %}
+
+  {% if data.type == 'email' %}
+    <div class="col-lg-12">
+      <h4>Headers & Parts</h4>
+      <pre class="content">{{ data.get('tree', '') }}</pre>
+    </div>
+  {% endif %}
+
+</div>
+
+</body>

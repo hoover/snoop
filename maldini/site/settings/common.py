@@ -34,7 +34,7 @@ TEMPLATES = [
         ],
         'APP_DIRS': True,
         'OPTIONS': {
-            'environment': 'maldini.jinja2.environment',
+            'environment': 'maldini.views.environment',
         },
     },
 ]
