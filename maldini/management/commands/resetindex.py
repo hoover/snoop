@@ -21,6 +21,7 @@ MAPPINGS = {
             "in-reply-to": {"type": "string", "index": "not_analyzed"},
             "thread-index": {"type": "string", "index": "not_analyzed"},
             "references": {"type": "string", "index": "not_analyzed"},
+            "message": {"type": "string", "index": "not_analyzed"},
         }
     }
 }

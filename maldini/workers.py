@@ -75,6 +75,7 @@ def index(id, verbose):
         'in-reply-to',
         'thread-index',
         'references',
+        'message',
     }
 
     data = {key: digest_data.get(key) for key in copy_keys}

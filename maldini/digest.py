@@ -151,6 +151,8 @@ def digest(doc):
             (tree, email_data) = parse_email(doc)
             data.update(email_data)
             data['parts'] = tree
+    else:
+        data['message'] = doc.container_id
 
     filetype = guess_filetype(doc)
     data['type'] = filetype
