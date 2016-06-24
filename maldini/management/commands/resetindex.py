@@ -31,13 +31,7 @@ SETTINGS = {
         "analyzer": {
             "default": {
                 "tokenizer": "standard",
-                "filter": ["standard", "lowercase", "ascii_folding_preserve"]
-            }
-        },
-        "filter": {
-            "ascii_folding_preserve": {
-                "type": "asciifolding",
-                "preserve_original": True
+                "filter": ["standard", "lowercase", "asciifolding"],
             }
         }
     }
