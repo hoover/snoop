@@ -40,3 +40,12 @@ To digest a single document and view the JSON output:
 ```shell
 $ ./manage.py digest 123
 ```
+
+## Setup .msg -> .eml converter
+
+Current setup requires the `msgconvert` script to be accesible in the PATH.
+Docs: http://www.matijs.net/software/msgconv/
+
+```shell
+$ cpan -i Email::Outlook::Message
+```
