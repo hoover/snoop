@@ -76,6 +76,9 @@ def tika_lang(text):
     sha1 = hashlib.sha1(text.encode('utf-8')).hexdigest()
     cache, created = models.TikaLangCache.objects.get_or_create(sha1=sha1)
     if created:
-        cache.lang = tika.language.from_buffer(text)
+        lang = tika.language.from_buffer(text)
+        if 'error' in lang.lower():
+            raise RuntimeError("Unexpected error in tika language: %s" % sha1)
+        cache.lang = lang
         cache.save()
     return cache.lang
