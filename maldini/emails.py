@@ -1,12 +1,12 @@
-import email, email.header, email.utils
-import re
-from tempfile import SpooledTemporaryFile
-import codecs
-from bs4 import BeautifulSoup
-import tempfile
-from pathlib import Path
-import subprocess
 import os
+import re
+import subprocess
+import codecs
+import tempfile
+import email, email.header, email.utils
+from tempfile import SpooledTemporaryFile
+from bs4 import BeautifulSoup
+from pathlib import Path
 
 
 def decode_header(header):
