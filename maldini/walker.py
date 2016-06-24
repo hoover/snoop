@@ -5,6 +5,7 @@ from . import models
 
 mimetypes.add_type('message/x-emlx', '.emlx')
 mimetypes.add_type('message/x-emlxpart', '.emlxpart')
+mimetypes.add_type('application/vnd.ms-outlook', '.msg')
 
 def mime_type(name):
     return mimetypes.guess_type(name, strict=False)[0]

@@ -13,6 +13,7 @@ FILE_TYPES = {
     'text/html': 'html',
     'message/x-emlx': 'email',
     'message/rfc822': 'email',
+    'application/vnd.ms-outlook': 'msg',
 
     'application/msword': 'doc',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'doc',
