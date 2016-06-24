@@ -15,7 +15,11 @@ code { white-space: pre-wrap; }
 
 {% if data.type != 'folder' %}
 <p><a href="./{{ id }}/raw/{{ data.filename }}">original: {{  data.filename }}</a></p>
-{%  endif %}
+    {% if 'sha1' in data %}
+        <p><b>MD5:</b> <code>{{ data.md5 }}</code></p>
+        <p><b>SHA1:</b> <code>{{ data.sha1 }}</code></p>
+    {% endif %}
+{% endif %}
 
 <p><b>Type:</b> <code>{{ data.type }}</code></p>
 
