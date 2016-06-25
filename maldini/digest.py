@@ -98,9 +98,7 @@ def digest(doc):
         data['path'] = doc.path
 
         if emails.is_email(doc):
-            (tree, email_data) = emails.parse_email(doc)
-            data.update(email_data)
-            data['parts'] = tree
+            data.update(emails.parse_email(doc))
     else:
         data['message'] = doc.container_id
 

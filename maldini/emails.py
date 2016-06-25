@@ -251,4 +251,5 @@ def parse_email(doc):
     tree = email.get_tree()
     text = email.get_text()
     data['text'] = text
-    return (tree, data)
+    data['parts'] = tree
+    return data
