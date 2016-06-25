@@ -1,12 +1,12 @@
 from pathlib import Path
-from maldini import models, emails, digest
+from maldini import models, emails
 
 PATH_MSG_DISEARA = ("msg-5-outlook/DISEARĂ-Te-așteptăm-la-"
                     "discuția-despre-finanțarea-culturii.msg")
 
 def get_msg_for_path(path):
     doc = models.Document(path=path, content_type='application/vnd.ms-outlook')
-    return digest.open_email(doc)
+    return emails.open_email(doc)
 
 def test_content():
     email = get_msg_for_path(PATH_MSG_DISEARA)

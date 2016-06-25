@@ -1,4 +1,4 @@
-from maldini import digest, models, emails
+from maldini import models, emails
 
 MAIL_PATH_MAPBOX = "eml-1-promotional/Introducing Mapbox Android Services - " \
               "Mapbox Team <newsletter@mapbox.com> - 2016-04-20 1603.eml"
@@ -16,7 +16,7 @@ MAIL_PATH_NO_SUBJECT = "eml-2-attachment/message-without-subject.eml"
 
 def get_email_for_path(path):
     doc = models.Document(path=path, content_type='message/rfc822')
-    return digest.open_email(doc)
+    return emails.open_email(doc)
 
 def test_subject():
     email = get_email_for_path(MAIL_PATH_MAPBOX)

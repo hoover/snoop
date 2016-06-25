@@ -220,3 +220,37 @@ def open_msg(path):
 
         with msg.with_suffix('.eml').open('rb') as f:
             yield f
+
+def is_email(doc):
+    return doc.content_type in ['message/x-emlx',
+                                'message/rfc822',
+                                'application/vnd.ms-outlook']
+
+def open_email(doc):
+    from .digest import open_document, doc_path
+
+    if doc.content_type == 'message/x-emlx':
+        with open_document(doc) as f:
+            assert doc.container_id is None, "can't parse emlx in container"
+            return EmlxParser(f, doc_path(doc))
+
+    if doc.content_type == 'message/rfc822':
+        with open_document(doc) as f:
+            return EmailParser(f)
+
+    if doc.content_type == 'application/vnd.ms-outlook':
+        with open_msg(doc_path(doc)) as f:
+            return EmailParser(f)
+
+    raise RuntimeError
+
+def get_email_part(doc, part):
+    return open_email(doc).open_part(part)
+
+def parse_email(doc):
+    email = open_email(doc)
+    data = email.get_data()
+    tree = email.get_tree()
+    text = email.get_text()
+    data['text'] = text
+    return (tree, data)

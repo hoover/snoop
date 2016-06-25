@@ -53,38 +53,6 @@ def pdftotext(input):
 def doc_path(doc):
     return Path(settings.MALDINI_ROOT) / doc.path
 
-def is_email(doc):
-    return doc.content_type in ['message/x-emlx',
-                                'message/rfc822',
-                                'application/vnd.ms-outlook']
-
-def open_email(doc):
-    if doc.content_type == 'message/x-emlx':
-        with open_document(doc) as f:
-            assert doc.container_id is None, "can't parse emlx in container"
-            return emails.EmlxParser(f, doc_path(doc))
-
-    if doc.content_type == 'message/rfc822':
-        with open_document(doc) as f:
-            return emails.EmailParser(f)
-
-    if doc.content_type == 'application/vnd.ms-outlook':
-        with emails.open_msg(doc_path(doc)) as f:
-            return emails.EmailParser(f)
-
-    raise RuntimeError
-
-def get_email_part(doc, part):
-    return open_email(doc).open_part(part)
-
-def parse_email(doc):
-    email = open_email(doc)
-    data = email.get_data()
-    tree = email.get_tree()
-    text = email.get_text()
-    data['text'] = text
-    return (tree, data)
-
 def open_document(doc):
     if doc.content_type == 'application/x-directory':
         return StringIO()
@@ -148,8 +116,8 @@ def digest(doc):
     if doc.container_id is None:
         data['path'] = doc.path
 
-        if is_email(doc):
-            (tree, email_data) = parse_email(doc)
+        if emails.is_email(doc):
+            (tree, email_data) = emails.parse_email(doc)
             data.update(email_data)
             data['parts'] = tree
     else:
