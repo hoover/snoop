@@ -160,9 +160,6 @@ class EmailParser(object):
             self._parsed_message = email.message_from_binary_file(self.file)
         return self._parsed_message
 
-    def get_data(self):
-        return extract_email_data(self.get_tree())
-
     def get_text(self):
         text_parts = []
         for _, part in self.parts(self._message()):
@@ -248,9 +245,9 @@ def get_email_part(doc, part):
 
 def parse_email(doc):
     email = open_email(doc)
-    data = email.get_data()
     tree = email.get_tree()
     text = email.get_text()
+    data = extract_email_data(tree)
     data['text'] = text
     data['parts'] = tree
     return data
