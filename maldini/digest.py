@@ -1,9 +1,7 @@
 from django.conf import settings
-from pathlib import Path
 import subprocess
 import hashlib
 from .tikalib import tika_parse, extract_meta, tika_lang
-from io import StringIO
 from . import emails
 from . import queues
 from . import models
@@ -50,23 +48,6 @@ FILE_TYPES = {
 def pdftotext(input):
     return subprocess.check_output(['pdftotext', '-', '-'], stdin=input)
 
-def doc_path(doc):
-    return Path(settings.MALDINI_ROOT) / doc.path
-
-def open_document(doc):
-    if doc.content_type == 'application/x-directory':
-        return StringIO()
-
-    if doc.container is None:
-        path = doc_path(doc)
-        return path.open('rb')
-
-    else:
-        if is_email(doc.container):
-            return get_email_part(doc.container, doc.path)
-
-    raise RuntimeError
-
 def _path_bits(doc):
     if doc.container:
         yield from _path_bits(doc.container)
@@ -97,7 +78,7 @@ def guess_filetype(doc):
 
 def digest(doc):
     if not doc.sha1:
-        with open_document(doc) as f:
+        with doc.open() as f:
             md5, sha1, fsize = _calculate_hashes(f)
         if not doc.disk_size:
             doc.disk_size = fsize
@@ -127,7 +108,7 @@ def digest(doc):
     data['type'] = filetype
 
     if filetype in settings.TIKA_FILE_TYPES and doc.disk_size <= settings.MAX_TIKA_FILE_SIZE:
-        with open_document(doc) as f:
+        with doc.open() as f:
             parsed = tika_parse(doc.sha1, f.read())
         data['text'] = (parsed.get('content') or '').strip()
         data.update(extract_meta(parsed.get('metadata', {})))

@@ -227,19 +227,17 @@ def is_email(doc):
                                 'application/vnd.ms-outlook']
 
 def open_email(doc):
-    from .digest import open_document, doc_path
-
     if doc.content_type == 'message/x-emlx':
-        with open_document(doc) as f:
+        with doc.open() as f:
             assert doc.container_id is None, "can't parse emlx in container"
-            return EmlxParser(f, doc_path(doc))
+            return EmlxParser(f, doc.absolute_path)
 
     if doc.content_type == 'message/rfc822':
-        with open_document(doc) as f:
+        with doc.open() as f:
             return EmailParser(f)
 
     if doc.content_type == 'application/vnd.ms-outlook':
-        with open_msg(doc_path(doc)) as f:
+        with open_msg(doc.absolute_path) as f:
             return EmailParser(f)
 
     raise RuntimeError

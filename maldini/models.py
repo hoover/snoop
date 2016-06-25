@@ -1,5 +1,9 @@
+from pathlib import Path
+from io import StringIO
 from django.db import models
 from django.contrib.postgres.fields import JSONField
+from django.conf import settings
+from . import emails
 
 class Document(models.Model):
     container = models.ForeignKey('Document', null=True)
@@ -16,6 +20,23 @@ class Document(models.Model):
     class Meta:
         # TODO: constraint does not apply to container=None rows
         unique_together = ('container', 'path')
+
+    @property
+    def absolute_path(self):
+        return Path(settings.MALDINI_ROOT) / self.path
+
+    def open(self):
+        if self.content_type == 'application/x-directory':
+            return StringIO()
+
+        if self.container is None:
+            return self.absolute_path.open('rb')
+
+        else:
+            if emails.is_email(self.container):
+                return emails.get_email_part(self.container, self.path)
+
+        raise RuntimeError
 
 class Digest(models.Model):
     id = models.IntegerField(primary_key=True)

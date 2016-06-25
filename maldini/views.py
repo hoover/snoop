@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from .models import Document
-from .digest import digest, open_document
+from .digest import digest
 from .walker import files_in
 from dateutil import parser
 from pprint import pformat
@@ -11,7 +11,7 @@ def _format_date(date_value):
 
 def document_raw(request, id):
     doc = get_object_or_404(Document, id=id)
-    with open_document(doc) as f:
+    with doc.open() as f:
         data = f.read()
         return HttpResponse(data, content_type=doc.content_type)
 
