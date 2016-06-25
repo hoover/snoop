@@ -203,12 +203,9 @@ class EmlxParser(EmailParser):
 
         return self._parsed_message
 
-class MsgConvertMissing(Exception):
-    pass
-
 def open_msg(path):
     if settings.MSGCONVERT_SCRIPT is None:
-        raise MsgConvertMissing
+        raise RuntimeError("Path to 'msgconvert' is not configured")
 
     with tempfile.TemporaryDirectory(suffix='snoop') as tmpdir:
         tmp_msg_path = Path(tmpdir) / path.name
