@@ -46,8 +46,8 @@ def document(request, id):
                 else:
                     return a.id
 
-            if data.get('parts'):
-                data['parts'] = pformat(data.get('parts'), indent=4, width=120)
+            if data.get('tree'):
+                data['tree'] = pformat(data.get('tree'), indent=4, width=120)
 
             attachments = [{
                 'filename': a['filename'],

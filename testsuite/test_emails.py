@@ -66,7 +66,7 @@ def test_attachment_with_long_filename():
 
 def test_tree_without_attachments():
     data = parse_email(MAIL_PATH_MAPBOX)
-    tree = data['parts']
+    tree = data['tree']
 
     assert set(tree.keys()) == {'headers', 'parts'}
     assert len(tree['parts']) == 2
@@ -76,7 +76,7 @@ def test_tree_without_attachments():
 
 def test_tree_with_attachments():
     data = parse_email(MAIL_PATH_LONG_FILENAMES)
-    tree = data['parts']
+    tree = data['tree']
 
     assert set(tree.keys()) == {'attachments', 'headers', 'parts'}
     assert len(tree['attachments']) == 3

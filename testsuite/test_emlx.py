@@ -13,7 +13,7 @@ def test_subject():
 
 def test_tree_with_attachments():
     data = parse_email(PATH_EMLX_LEGE)
-    tree = data['parts']
+    tree = data['tree']
 
     headers = {'Subject', 'To', 'From', 'Date', 'Content-Type'}
     assert headers.issubset(set(tree['headers'].keys()))

@@ -249,5 +249,5 @@ def parse_email(doc):
     text = email.get_text()
     data = extract_email_data(tree)
     data['text'] = text
-    data['parts'] = tree
+    data['tree'] = tree
     return data

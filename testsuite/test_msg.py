@@ -9,7 +9,7 @@ def parse_email(path):
 
 def test_content():
     data = parse_email(PATH_MSG_DISEARA)
-    tree = data['parts']
+    tree = data['tree']
     text = data['text']
 
     assert data['subject'] == "DISEARĂ: Te așteptăm la " \
