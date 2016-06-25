@@ -10,6 +10,9 @@ def cache(model, keyfunc):
 
     def decorator(func):
 
+        if not settings.MALDINI_CACHE:
+            return func
+
         @transaction.atomic
         def wrapper(*args, **kwargs):
             key = keyfunc(*args, **kwargs)
