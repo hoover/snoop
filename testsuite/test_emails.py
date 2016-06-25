@@ -15,10 +15,8 @@ MAIL_PATH_LONG_FILENAMES = "eml-5-long-names/Attachments have " \
 MAIL_PATH_NO_SUBJECT = "eml-2-attachment/message-without-subject.eml"
 
 def get_email_for_path(path):
-    doc = models.Document(path=path)
-    with digest.open_document(doc) as f:
-        email = emails.EmailParser(f)
-    return email
+    doc = models.Document(path=path, content_type='message/rfc822')
+    return digest.open_email(doc)
 
 def test_subject():
     email = get_email_for_path(MAIL_PATH_MAPBOX)

@@ -1,12 +1,15 @@
 from pathlib import Path
-from django.conf import settings
-from maldini import emails
+from maldini import models, emails, digest
 
 PATH_MSG_DISEARA = ("msg-5-outlook/DISEARĂ-Te-așteptăm-la-"
                     "discuția-despre-finanțarea-culturii.msg")
 
+def get_msg_for_path(path):
+    doc = models.Document(path=path, content_type='application/vnd.ms-outlook')
+    return digest.open_email(doc)
+
 def test_content():
-    email = emails.open_msg(Path(settings.MALDINI_ROOT) / PATH_MSG_DISEARA)
+    email = get_msg_for_path(PATH_MSG_DISEARA)
     data = email.get_data()
     text = email.get_text()
     tree = email.get_tree()
