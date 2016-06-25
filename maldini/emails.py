@@ -1,4 +1,3 @@
-import os
 import re
 import subprocess
 import codecs
@@ -209,7 +208,7 @@ def open_msg(path):
 
     with tempfile.TemporaryDirectory(suffix='snoop') as tmpdir:
         tmp_msg_path = Path(tmpdir) / path.name
-        os.symlink(str(path), str(tmp_msg_path))
+        tmp_msg_path.symlink_to(path)
 
         subprocess.run(
             args=[settings.MSGCONVERT_SCRIPT, tmp_msg_path.name],
