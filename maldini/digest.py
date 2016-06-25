@@ -69,7 +69,8 @@ def open_email(doc):
             return emails.EmailParser(f)
 
     if doc.content_type == 'application/vnd.ms-outlook':
-        return emails.open_msg(doc_path(doc))
+        with emails.open_msg(doc_path(doc)) as f:
+            return emails.EmailParser(f)
 
     raise RuntimeError
 

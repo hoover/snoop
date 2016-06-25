@@ -4,6 +4,7 @@ import codecs
 import tempfile
 import email, email.header, email.utils
 from tempfile import SpooledTemporaryFile
+from contextlib import contextmanager
 from bs4 import BeautifulSoup
 from pathlib import Path
 from django.conf import settings
@@ -202,6 +203,7 @@ class EmlxParser(EmailParser):
 
         return self._parsed_message
 
+@contextmanager
 def open_msg(path):
     if settings.MSGCONVERT_SCRIPT is None:
         raise RuntimeError("Path to 'msgconvert' is not configured")
@@ -217,4 +219,4 @@ def open_msg(path):
         )
 
         with msg.with_suffix('.eml').open('rb') as f:
-            return EmailParser(f)
+            yield f
