@@ -243,10 +243,14 @@ def open_email(doc):
 def get_email_part(doc, part):
     return open_email(doc).open_part(part)
 
-def parse_email(doc):
+def raw_parse_email(doc):
     email = open_email(doc)
     tree = email.get_tree()
     text = email.get_text()
+    return (tree, text)
+
+def parse_email(doc):
+    (tree, text) = raw_parse_email(doc)
     data = extract_email_data(tree)
     data['text'] = text
     data['tree'] = tree
