@@ -28,6 +28,34 @@ def people(message, headers):
         for p in (_decode_person(h) for h in message.get_all(header, [])):
             yield p
 
+def extract_email_data(tree):
+    message = email.message.Message()
+    for name, value in tree['headers'].items():
+        message[name] = value
+
+    person_from = (list(people(message, ['from'])) + [''])[0]
+    people_to = list(people(message,
+        ['to', 'cc', 'resent-to', 'recent-cc', 'reply-to']))
+
+    rv = {
+        'subject': decode_header(message.get('subject') or ''),
+        'from': decode_header(person_from),
+        'to': [decode_header(h) for h in people_to],
+        'attachments': tree.get('attachments', {}),
+    }
+
+    for header in ['message-id', 'in-reply-to',
+                   'thread-index', 'references']:
+        value = message.get(header)
+        if value:
+            rv[header] = decode_header(value)
+
+    message_date = message.get('date')
+    date = email.utils.parsedate_to_datetime(message_date).isoformat()
+    rv['date'] = date
+
+    return rv
+
 class CorruptedFile(Exception):
     pass
 
@@ -133,33 +161,7 @@ class EmailParser(object):
         return self._parsed_message
 
     def get_data(self):
-        tree = self.get_tree()
-        message = email.message.Message()
-        for name, value in tree['headers'].items():
-            message[name] = value
-
-        person_from = (list(people(message, ['from'])) + [''])[0]
-        people_to = list(people(message,
-            ['to', 'cc', 'resent-to', 'recent-cc', 'reply-to']))
-
-        rv = {
-            'subject': decode_header(message.get('subject') or ''),
-            'from': decode_header(person_from),
-            'to': [decode_header(h) for h in people_to],
-            'attachments': tree.get('attachments', {}),
-        }
-
-        for header in ['message-id', 'in-reply-to',
-                       'thread-index', 'references']:
-            value = message.get(header)
-            if value:
-                rv[header] = decode_header(value)
-
-        message_date = message.get('date')
-        date = email.utils.parsedate_to_datetime(message_date).isoformat()
-        rv['date'] = date
-
-        return rv
+        return extract_email_data(self.get_tree())
 
     def get_text(self):
         text_parts = []
