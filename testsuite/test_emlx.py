@@ -3,19 +3,17 @@ from maldini import models, emails
 PATH_EMLX_LEGE = "lists.mbox/F2D0D67E-7B19-4C30-B2E9-" \
                  "B58FE4789D51/Data/1/Messages/1498.partial.emlx"
 
-def get_emlx_for_path(path):
+def parse_email(path):
     doc = models.Document(path=path, content_type='message/x-emlx')
-    return emails.open_email(doc)
+    return emails.parse_email(doc)
 
 def test_subject():
-    email = get_emlx_for_path(PATH_EMLX_LEGE)
-    data = email.get_data()
-
+    data = parse_email(PATH_EMLX_LEGE)
     assert data['subject'] == "Re: promulgare lege"
 
 def test_tree_with_attachments():
-    email = get_emlx_for_path(PATH_EMLX_LEGE)
-    tree = email.get_tree()
+    data = parse_email(PATH_EMLX_LEGE)
+    tree = data['parts']
 
     headers = {'Subject', 'To', 'From', 'Date', 'Content-Type'}
     assert headers.issubset(set(tree['headers'].keys()))
@@ -25,7 +23,6 @@ def test_tree_with_attachments():
     assert len(tree['parts']) == 4
 
 def test_get_data():
-    email = get_emlx_for_path(PATH_EMLX_LEGE)
-    attach = email.get_data().get('attachments')
-
+    data = parse_email(PATH_EMLX_LEGE)
+    attach = data.get('attachments')
     assert len(attach) == 2

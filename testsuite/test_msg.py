@@ -3,15 +3,14 @@ from maldini import models, emails
 PATH_MSG_DISEARA = ("msg-5-outlook/DISEARĂ-Te-așteptăm-la-"
                     "discuția-despre-finanțarea-culturii.msg")
 
-def get_msg_for_path(path):
+def parse_email(path):
     doc = models.Document(path=path, content_type='application/vnd.ms-outlook')
-    return emails.open_email(doc)
+    return emails.parse_email(doc)
 
 def test_content():
-    email = get_msg_for_path(PATH_MSG_DISEARA)
-    data = email.get_data()
-    text = email.get_text()
-    tree = email.get_tree()
+    data = parse_email(PATH_MSG_DISEARA)
+    tree = data['parts']
+    text = data['text']
 
     assert data['subject'] == "DISEARĂ: Te așteptăm la " \
                               "discuția despre finanțarea culturii"
