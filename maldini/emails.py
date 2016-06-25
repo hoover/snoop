@@ -206,16 +206,15 @@ def open_msg(path):
     if settings.MSGCONVERT_SCRIPT is None:
         raise RuntimeError("Path to 'msgconvert' is not configured")
 
-    with tempfile.TemporaryDirectory(suffix='snoop') as tmpdir:
-        tmp_msg_path = Path(tmpdir) / path.name
-        tmp_msg_path.symlink_to(path)
+    with tempfile.TemporaryDirectory(suffix='-snoop') as tmp:
+        msg = Path(tmp) / path.name
+        msg.symlink_to(path)
 
-        subprocess.run(
-            args=[settings.MSGCONVERT_SCRIPT, tmp_msg_path.name],
-            cwd=tmpdir,
-            check=True)
+        subprocess.check_call(
+            [settings.MSGCONVERT_SCRIPT, msg.name],
+            cwd=tmp,
+            stderr=subprocess.DEVNULL, # msgconvert produces some garbage
+        )
 
-        tmp_eml_path = tmp_msg_path.with_suffix('.eml')
-
-        with tmp_eml_path.open('rb') as f:
+        with msg.with_suffix('.eml').open('rb') as f:
             return EmailParser(f)
