@@ -56,8 +56,8 @@ class Job(models.Model):
 
 class TikaCache(models.Model):
     sha1 = models.CharField(max_length=50, primary_key=True)
-    data = models.TextField()
+    value = models.TextField()
 
 class TikaLangCache(models.Model):
     sha1 = models.CharField(max_length=50, primary_key=True)
-    lang = models.CharField(max_length=20)
+    value = models.CharField(max_length=20)
