@@ -4,7 +4,6 @@ import json
 from django.db import models, transaction
 from django.contrib.postgres.fields import JSONField
 from django.conf import settings
-from . import emails
 
 def cache(model, keyfunc):
 
@@ -35,6 +34,8 @@ def cache(model, keyfunc):
 class EmailCache(models.Model):
     id = models.IntegerField(primary_key=True)
     value = models.TextField()
+
+from . import emails  # moved here because circular import
 
 class Document(models.Model):
     container = models.ForeignKey('Document', null=True)

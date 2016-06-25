@@ -8,6 +8,7 @@ from contextlib import contextmanager
 from bs4 import BeautifulSoup
 from pathlib import Path
 from django.conf import settings
+from . import models
 
 
 def decode_header(header):
@@ -243,6 +244,7 @@ def open_email(doc):
 def get_email_part(doc, part):
     return open_email(doc).open_part(part)
 
+@models.cache(models.EmailCache, lambda doc: doc.id)
 def raw_parse_email(doc):
     email = open_email(doc)
     tree = email.get_tree()
