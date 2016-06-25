@@ -19,6 +19,15 @@ def text_from_html(html):
         node.extract()
     return re.sub(r'\s+', ' ', soup.get_text().strip())
 
+def people(message, headers):
+    def _decode_person(header):
+        (name, addr) = email.utils.parseaddr(str(header))
+        return ' '.join([str(email.header.Header(name)) + addr])
+
+    for header in headers:
+        for p in (_decode_person(h) for h in message.get_all(header, [])):
+            yield p
+
 class CorruptedFile(Exception):
     pass
 
@@ -39,15 +48,6 @@ class EmailParser(object):
 
     def flag(self, flag):
         self.flags.add(flag)
-
-    def decode_person(self, header):
-        (name, addr) = email.utils.parseaddr(str(header))
-        return ' '.join([str(email.header.Header(name)) + addr])
-
-    def people(self, message, headers):
-        for header in headers:
-            for p in (self.decode_person(h) for h in message.get_all(header, [])):
-                yield p
 
     def parts(self, message, number_bits=[]):
         if message.is_multipart():
@@ -138,10 +138,9 @@ class EmailParser(object):
         for name, value in tree['headers'].items():
             message[name] = value
 
-        person_from = (list(self.people(message, ['from'])) + [''])[0]
-        people_to = list(self.people(message,
-                                     ['to', 'cc', 'resent-to',
-                                      'recent-cc', 'reply-to']))
+        person_from = (list(people(message, ['from'])) + [''])[0]
+        people_to = list(people(message,
+            ['to', 'cc', 'resent-to', 'recent-cc', 'reply-to']))
 
         rv = {
             'subject': decode_header(message.get('subject') or ''),
