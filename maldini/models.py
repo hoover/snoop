@@ -1,9 +1,33 @@
 from pathlib import Path
 from io import StringIO
-from django.db import models
+import json
+from django.db import models, transaction
 from django.contrib.postgres.fields import JSONField
 from django.conf import settings
 from . import emails
+
+def cache(model, keyfunc):
+
+    def decorator(func):
+
+        @transaction.atomic
+        def wrapper(*args, **kwargs):
+            key = keyfunc(*args, **kwargs)
+
+            row, created = model.objects.get_or_create(pk=key)
+            if not created:
+                return json.loads(row.value)
+
+            value = func(*args, **kwargs)
+
+            row.value = json.dumps(value)
+            row.save()
+
+            return value
+
+        return wrapper
+
+    return decorator
 
 class Document(models.Model):
     container = models.ForeignKey('Document', null=True)

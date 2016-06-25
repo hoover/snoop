@@ -1,7 +1,5 @@
 from django.conf import settings
-from django.db import transaction
-import simplejson as json
-from maldini import models
+from . import models
 from dateutil import parser
 import os
 import tika
@@ -61,24 +59,14 @@ def extract_meta(meta):
     return data
 
 
-@transaction.atomic
+@models.cache(models.TikaCache, lambda sha1, buffer: sha1)
 def tika_parse(sha1, buffer):
-    cache, created = models.TikaCache.objects.get_or_create(sha1=sha1)
-    if not created:
-        return json.loads(cache.data)
-    data = tika.parser.from_buffer(buffer, settings.TIKA_SERVER_ENDPOINT)
-    cache.data = json.dumps(data)
-    cache.save()
-    return data
+    return tika.parser.from_buffer(buffer, settings.TIKA_SERVER_ENDPOINT)
 
-@transaction.atomic
+@models.cache(models.TikaLangCache,
+    lambda text: hashlib.sha1(text.encode('utf-8')).hexdigest())
 def tika_lang(text):
-    sha1 = hashlib.sha1(text.encode('utf-8')).hexdigest()
-    cache, created = models.TikaLangCache.objects.get_or_create(sha1=sha1)
-    if created:
-        lang = tika.language.from_buffer(text)
-        if 'error' in lang.lower():
-            raise RuntimeError("Unexpected error in tika language: %s" % sha1)
-        cache.lang = lang
-        cache.save()
-    return cache.lang
+    lang = tika.language.from_buffer(text)
+    if 'error' in lang.lower():
+        raise RuntimeError("Unexpected error in tika language: %s" % sha1)
+    return lang
