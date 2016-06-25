@@ -29,6 +29,10 @@ def cache(model, keyfunc):
 
     return decorator
 
+class EmailCache(models.Model):
+    id = models.IntegerField(primary_key=True)
+    value = models.TextField()
+
 class Document(models.Model):
     container = models.ForeignKey('Document', null=True)
     path = models.CharField(max_length=4000)
