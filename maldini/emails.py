@@ -20,38 +20,37 @@ def text_from_html(html):
         node.extract()
     return re.sub(r'\s+', ' ', soup.get_text().strip())
 
-def people(message, headers):
-    def _decode_person(header):
-        (name, addr) = email.utils.parseaddr(str(header))
-        return ' '.join([str(email.header.Header(name)) + addr])
 
-    for header in headers:
-        for p in (_decode_person(h) for h in message.get_all(header, [])):
+def people(headers, header_names):
+    def _decode_person(header_value):
+        pair = email.utils.parseaddr(header_value)
+        return email.utils.formataddr(pair)
+
+    for name in header_names:
+        for p in (_decode_person(h) for h in headers.get(name, [])):
             yield p
 
 def extract_email_data(tree):
-    message = email.message.Message()
-    for name, value in tree['headers'].items():
-        message[name] = value
+    headers = tree['headers']
 
-    person_from = (list(people(message, ['from'])) + [''])[0]
-    people_to = list(people(message,
-        ['to', 'cc', 'resent-to', 'recent-cc', 'reply-to']))
+    person_from = (list(people(headers, ['from'])) + [''])[0]
+    people_to = list(people(headers,
+        ['to', 'cc', 'bcc', 'resent-to', 'recent-cc', 'reply-to']))
 
     rv = {
-        'subject': decode_header(message.get('subject') or ''),
-        'from': decode_header(person_from),
-        'to': [decode_header(h) for h in people_to],
+        'subject': headers.get('subject', [''])[0],
+        'from': person_from,
+        'to': people_to,
         'attachments': tree.get('attachments', {}),
     }
 
     for header in ['message-id', 'in-reply-to',
                    'thread-index', 'references']:
-        value = message.get(header)
+        value = headers.get(header, [None])[0]
         if value:
-            rv[header] = decode_header(value)
+            rv[header] = value
 
-    message_date = message.get('date')
+    message_date = headers.get('date', [None])[0]
     if message_date:
         date = email.utils.parsedate_to_datetime(message_date).isoformat()
         rv['date'] = date
@@ -103,15 +102,19 @@ class EmailParser(object):
         return tmp
 
     def parts_tree(self, message):
+        headers = {
+            key.lower(): [decode_header(h) for h in message.get_all(key)]
+            for key in message.keys()
+        }
         if message.is_multipart():
             children = [self.parts_tree(p) for p in message.get_payload()]
-            rv = {'headers': dict(message)}
+            rv = {'headers': headers}
             if children:
                 rv['parts'] = children
             return rv
         else:
             return {
-                'headers': dict(message),
+                'headers': headers,
                 'length': len(message.get_payload()),
             }
 

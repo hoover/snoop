@@ -22,6 +22,7 @@ MAPPINGS = {
             "thread-index": {"type": "string", "index": "not_analyzed"},
             "references": {"type": "string", "index": "not_analyzed"},
             "message": {"type": "string", "index": "not_analyzed"},
+            "rev": {"type" : "integer"},
         }
     }
 }

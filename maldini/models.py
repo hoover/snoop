@@ -49,6 +49,8 @@ class Document(models.Model):
 
     broken = models.CharField(max_length=100, blank=True)
 
+    rev = models.IntegerField(null=True)
+
     class Meta:
         # TODO: constraint does not apply to container=None rows
         unique_together = ('container', 'path')

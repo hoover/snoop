@@ -48,7 +48,7 @@ def test_people():
     assert "penultim_o@yahoo.com" in data['to']
 
     assert type(data['from']) is str
-    assert "Teamnewsletter@mapbox.com" in data['from']
+    assert "newsletter@mapbox.com" in data['from']
 
 def test_normal_attachments():
     data = parse_email(MAIL_PATH_CAMPUS)
@@ -71,7 +71,7 @@ def test_tree_without_attachments():
     assert set(tree.keys()) == {'headers', 'parts'}
     assert len(tree['parts']) == 2
 
-    headers = {'Subject', 'To', 'From', 'Date', 'Content-Type'}
+    headers = {'subject', 'to', 'from', 'date', 'content-type'}
     assert headers.issubset(set(tree['headers'].keys()))
 
 def test_tree_with_attachments():
@@ -82,7 +82,7 @@ def test_tree_with_attachments():
     assert len(tree['attachments']) == 3
     assert len(tree['parts']) == 4
 
-    headers = {'Subject', 'To', 'From', 'Date', 'Content-Type'}
+    headers = {'subject', 'to', 'from', 'date', 'content-type'}
     assert headers.issubset(set(tree['headers'].keys()))
 
     for part in tree['parts']:

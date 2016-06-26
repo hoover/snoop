@@ -22,7 +22,7 @@ def test_content():
     assert len(data['to']) == 1
     assert "cosmin@caleido.ro" == data['to'][0]
 
-    headers = {'Subject', 'To', 'From', 'Date', 'Content-Type'}
+    headers = {'subject', 'to', 'from', 'date', 'content-type'}
     assert headers.issubset(set(tree['headers'].keys()))
 
     assert set(tree.keys()) == {'headers', 'parts'}
