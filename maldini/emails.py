@@ -52,8 +52,9 @@ def extract_email_data(tree):
             rv[header] = decode_header(value)
 
     message_date = message.get('date')
-    date = email.utils.parsedate_to_datetime(message_date).isoformat()
-    rv['date'] = date
+    if message_date:
+        date = email.utils.parsedate_to_datetime(message_date).isoformat()
+        rv['date'] = date
 
     return rv
 
