@@ -49,6 +49,8 @@ def digest(id, verbose):
         defaults={'data': json.dumps(data)},
     )
 
+    if verbose: print('type:', data.get('type'))
+
     queues.put('index', {'id': document.id}, verbose=verbose)
 
 def index(id, verbose):
