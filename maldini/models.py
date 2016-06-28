@@ -34,6 +34,7 @@ def cache(model, keyfunc):
 class EmailCache(models.Model):
     id = models.IntegerField(primary_key=True)
     value = models.TextField()
+    time = models.DateTimeField(auto_now=True)
 
 from . import emails  # moved here because circular import
 
@@ -91,7 +92,9 @@ class Job(models.Model):
 class TikaCache(models.Model):
     sha1 = models.CharField(max_length=50, primary_key=True)
     value = models.TextField()
+    time = models.DateTimeField(auto_now=True)
 
 class TikaLangCache(models.Model):
     sha1 = models.CharField(max_length=50, primary_key=True)
     value = models.CharField(max_length=20)
+    time = models.DateTimeField(auto_now=True)
