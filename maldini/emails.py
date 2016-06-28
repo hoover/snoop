@@ -22,20 +22,19 @@ def text_from_html(html):
 
 
 def people(headers, header_names):
-    def _decode_person(header_value):
-        pair = email.utils.parseaddr(header_value)
-        return email.utils.formataddr(pair)
-
+    values = []
     for name in header_names:
-        for p in (_decode_person(h) for h in headers.get(name, [])):
-            yield p
+        for p in headers.get(name, []):
+            values.append(p)
+    return values
 
 def extract_email_data(tree):
     headers = tree['headers']
 
-    person_from = (list(people(headers, ['from'])) + [''])[0]
-    people_to = list(people(headers,
-        ['to', 'cc', 'bcc', 'resent-to', 'recent-cc', 'reply-to']))
+    person_from = (people(headers, ['from']) + [''])[0]
+    people_to = people(headers,
+                       ['to', 'cc', 'bcc', 'resent-to', 'recent-cc',
+                        'reply-to'])
 
     rv = {
         'subject': headers.get('subject', [''])[0],
