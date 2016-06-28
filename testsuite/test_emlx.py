@@ -18,8 +18,8 @@ def test_tree_with_attachments():
     headers = {'subject', 'to', 'from', 'date', 'content-type'}
     assert headers.issubset(set(tree['headers'].keys()))
 
-    assert set(tree.keys()) == {'attachments', 'headers', 'parts'}
-    assert len(tree['attachments']) == 2
+    assert set(tree.keys()) == {'headers', 'parts'}
+    assert len(data['attachments']) == 2
     assert len(tree['parts']) == 4
 
 def test_get_data():

@@ -78,8 +78,8 @@ def test_tree_with_attachments():
     data = parse_email(MAIL_PATH_LONG_FILENAMES)
     tree = data['tree']
 
-    assert set(tree.keys()) == {'attachments', 'headers', 'parts'}
-    assert len(tree['attachments']) == 3
+    assert set(tree.keys()) == {'headers', 'parts'}
+    assert len(data['attachments']) == 3
     assert len(tree['parts']) == 4
 
     headers = {'subject', 'to', 'from', 'date', 'content-type'}

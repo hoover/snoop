@@ -117,11 +117,7 @@ class EmailParser(object):
         return rv
 
     def get_tree(self):
-        tree = self.parts_tree(self._message())
-        attachments = dict(self.get_attachments(self._message()))
-        if attachments:
-            tree['attachments'] = attachments
-        return tree
+        return self.parts_tree(self._message())
 
     def get_part_text(self, part):
         content_type = part.get_content_type()
@@ -147,16 +143,20 @@ class EmailParser(object):
         self.warn("Unknown part content type: %r" % content_type)
         self.flag('unknown_attachment')
 
-    def get_attachments(self, message):
+    def get_attachments(self):
+        message = self._message()
+        rv = {}
         for number, part in self.parts(message):
             if not part.get_content_disposition(): continue
             filename = part.get_filename()
             if not filename: continue
 
-            yield number, {
+            rv[number] = {
                 'content_type': part.get_content_type().lower(),
                 'filename': filename,
             }
+
+        return rv
 
     def _message(self):
         if self._parsed_message is None:
@@ -249,13 +249,18 @@ def get_email_part(doc, part):
 @models.cache(models.EmailCache, lambda doc: doc.id)
 def raw_parse_email(doc):
     email = open_email(doc)
-    tree = email.get_tree()
-    text = email.get_text()
-    return (tree, text)
+    return {
+        'tree': email.get_tree(),
+        'attachments': email.get_attachments(),
+        'text': email.get_text(),
+    }
 
 def parse_email(doc):
-    (tree, text) = raw_parse_email(doc)
-    data = extract_email_data(tree)
-    data['text'] = text
-    data['tree'] = tree
+    parsed = raw_parse_email(doc)
+    data = extract_email_data(parsed['tree'])
+    data.update({
+        'text': parsed['text'],
+        'tree': parsed['tree'],
+        'attachments': parsed['attachments'],
+    })
     return data
