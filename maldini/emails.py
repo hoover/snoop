@@ -4,6 +4,7 @@ import codecs
 import tempfile
 import email, email.header, email.utils
 from contextlib import contextmanager
+from collections import defaultdict
 from bs4 import BeautifulSoup
 from pathlib import Path
 from django.conf import settings
@@ -100,11 +101,23 @@ class EmailParser(object):
         return tmp
 
     def parts_tree(self, message):
-        headers = {
-            key.lower(): [decode_header(h) for h in message.get_all(key)]
-            for key in message.keys()
-        }
-        rv = {'headers': headers}
+        headers = defaultdict(list)
+
+        def _header(key, header):
+            try:
+                value = decode_header(header)
+
+            except:
+                value = str(header)
+                key = '_broken_' + key
+
+            headers[key].append(value)
+
+        for key in message.keys():
+            for header in message.get_all(key):
+                _header(key.lower(), header)
+
+        rv = {'headers': dict(headers)}
 
         if message.is_multipart():
             rv['parts'] = [self.parts_tree(p) for p in message.get_payload()]
