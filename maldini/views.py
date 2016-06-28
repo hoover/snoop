@@ -79,7 +79,7 @@ def document(request, id):
             else:
                 up = 0
 
-    for field in ['date', 'date_created']:
+    for field in ['date', 'date-created']:
         if data.get(field):
             data[field] = _format_date(data[field])
 

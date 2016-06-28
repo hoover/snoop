@@ -52,7 +52,7 @@ def extract_meta(meta):
         'tika':             meta
     }
 
-    for key in ['date', 'date_created']:
+    for key in ['date', 'date-created']:
         if data.get(key):
             data[key] = parser.parse(data[key]).isoformat()
 
