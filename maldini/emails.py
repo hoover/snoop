@@ -3,7 +3,6 @@ import subprocess
 import codecs
 import tempfile
 import email, email.header, email.utils
-from tempfile import SpooledTemporaryFile
 from contextlib import contextmanager
 from bs4 import BeautifulSoup
 from pathlib import Path
@@ -91,7 +90,7 @@ class EmailParser(object):
     def open_part(self, number):
         part = dict(self.parts(self._message()))[number]
         self._get_part_content(part, number)
-        tmp = SpooledTemporaryFile()
+        tmp = tempfile.SpooledTemporaryFile()
         try:
             data = part.get_payload(decode=True)
         except:
