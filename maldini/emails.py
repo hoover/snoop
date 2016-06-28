@@ -106,17 +106,15 @@ class EmailParser(object):
             key.lower(): [decode_header(h) for h in message.get_all(key)]
             for key in message.keys()
         }
+        rv = {'headers': headers}
+
         if message.is_multipart():
-            children = [self.parts_tree(p) for p in message.get_payload()]
-            rv = {'headers': headers}
-            if children:
-                rv['parts'] = children
-            return rv
+            rv['parts'] = [self.parts_tree(p) for p in message.get_payload()]
+
         else:
-            return {
-                'headers': headers,
-                'length': len(message.get_payload()),
-            }
+            rv['length'] = len(message.get_payload())
+
+        return rv
 
     def get_tree(self):
         tree = self.parts_tree(self._message())
