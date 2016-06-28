@@ -23,7 +23,7 @@ def environment(**options):
     return env
 
 def _format_date(date_value):
-    return parser.parse(date_value).strftime("%Y-%m-%d")
+    return parser.parse(date_value).strftime("%d %B %Y")
 
 def document_raw(request, id):
     doc = get_object_or_404(Document, id=id)
