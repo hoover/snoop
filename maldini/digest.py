@@ -106,8 +106,7 @@ def digest(doc):
     data['type'] = filetype
 
     if filetype in settings.TIKA_FILE_TYPES and doc.disk_size <= settings.MAX_TIKA_FILE_SIZE:
-        with doc.open() as f:
-            parsed = tika_parse(doc.sha1, f.read())
+        parsed = tika_parse(doc.sha1, doc.open)
         data['text'] = (parsed.get('content') or '').strip()
         data.update(extract_meta(parsed.get('metadata', {})))
 
