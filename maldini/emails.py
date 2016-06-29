@@ -219,6 +219,24 @@ class EmlxParser(EmailParser):
 
         return self._parsed_message
 
+def msgcache(func):
+    if not (settings.MALDINI_CACHE and settings.MALDINI_MSG_CACHE):
+        return func
+
+    def wrapper(doc):
+        d0 =  Path(settings.MALDINI_MSG_CACHE) /doc.sha1[:2]
+        cached = d0 / (doc.sha1[2:] + '.eml')
+
+        if not cached.is_file():
+            d0.mkdir(exist_ok=True)
+            with func(doc) as tmp:
+                Path(tmp.name).rename(cached)
+
+        return cached.open('rb')
+
+    return wrapper
+
+@msgcache
 @contextmanager
 def open_msg(doc):
     if settings.MSGCONVERT_SCRIPT is None:
