@@ -5,6 +5,7 @@ from .tikalib import tika_parse, extract_meta, tika_lang
 from . import emails
 from . import queues
 from . import models
+from .utils import chunks
 
 FILE_TYPES = {
     'application/x-directory': 'folder',
@@ -59,10 +60,7 @@ def _calculate_hashes(opened_file):
     md5 = hashlib.md5()
     sha1 = hashlib.sha1()
 
-    while True:
-        data = opened_file.read(BUF_SIZE)
-        if not data:
-            break
+    for data in chunks(opened_file):
         md5.update(data)
         sha1.update(data)
 
