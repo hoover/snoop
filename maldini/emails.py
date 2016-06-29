@@ -248,10 +248,9 @@ def open_msg(doc):
         msg = Path(tmp) / path.name
         msg.symlink_to(path)
 
-        subprocess.check_call(
+        subprocess.check_output(
             [settings.MSGCONVERT_SCRIPT, msg.name],
             cwd=tmp,
-            stderr=subprocess.DEVNULL, # msgconvert produces some garbage
         )
 
         with msg.with_suffix('.eml').open('rb') as f:
