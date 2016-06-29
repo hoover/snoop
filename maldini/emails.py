@@ -228,8 +228,8 @@ def msgcache(func):
         cached = d0 / (doc.sha1[2:] + '.eml')
 
         if not cached.is_file():
-            d0.mkdir(exist_ok=True)
             with func(doc) as tmp:
+                d0.mkdir(exist_ok=True)
                 Path(tmp.name).rename(cached)
 
         return cached.open('rb')
