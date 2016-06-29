@@ -88,6 +88,7 @@ class Job(models.Model):
 
     class Meta:
         unique_together = ('queue', 'data')
+        index_together = ('queue', 'started')
 
 class TikaCache(models.Model):
     sha1 = models.CharField(max_length=50, primary_key=True)
