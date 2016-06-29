@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 from pathlib import Path
 from django.conf import settings
 from . import models
+from .utils import chunks
 
 
 def decode_header(header):
@@ -230,7 +231,13 @@ def msgcache(func):
         if not cached.is_file():
             with func(doc) as tmp:
                 d0.mkdir(exist_ok=True)
-                Path(tmp.name).rename(cached)
+
+                _tmp = tempfile.NamedTemporaryFile(dir=str(d0), delete=False)
+                with _tmp as c:
+                    for chunk in chunks(tmp):
+                        c.write(chunk)
+
+                Path(c.name).rename(cached)
 
         return cached.open('rb')
 
