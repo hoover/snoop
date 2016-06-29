@@ -220,9 +220,11 @@ class EmlxParser(EmailParser):
         return self._parsed_message
 
 @contextmanager
-def open_msg(path):
+def open_msg(doc):
     if settings.MSGCONVERT_SCRIPT is None:
         raise RuntimeError("Path to 'msgconvert' is not configured")
+
+    path = doc.absolute_path
 
     with tempfile.TemporaryDirectory(suffix='-snoop') as tmp:
         msg = Path(tmp) / path.name
@@ -253,7 +255,7 @@ def open_email(doc):
             return EmailParser(f)
 
     if doc.content_type == 'application/vnd.ms-outlook':
-        with open_msg(doc.absolute_path) as f:
+        with open_msg(doc) as f:
             return EmailParser(f)
 
     raise RuntimeError
