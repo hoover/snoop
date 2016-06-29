@@ -50,7 +50,12 @@ FILE_TYPES = {
 def _path_bits(doc):
     if doc.container:
         yield from _path_bits(doc.container)
-    yield doc.path
+        if emails.is_email(doc.container):
+            yield doc.filename
+        else:
+            yield doc.path
+    else:
+        yield doc.path
 
 def _calculate_hashes(opened_file):
     BUF_SIZE = 65536
@@ -83,7 +88,7 @@ def digest(doc):
         doc.save()
 
     data = {
-        'title': '|'.join(_path_bits(doc)),
+        'path': '//'.join(_path_bits(doc)),
         'lang': None,
         'sha1': doc.sha1,
         'md5': doc.md5,
@@ -91,8 +96,6 @@ def digest(doc):
     }
 
     if doc.container_id is None:
-        data['path'] = doc.path
-
         if emails.is_email(doc):
             data.update(emails.parse_email(doc))
     else:

@@ -7,7 +7,6 @@ es = Elasticsearch(settings.ELASTICSEARCH_URL)
 
 def get_index_data(digest_data):
     copy_keys = {
-        'title',
         'path',
         'text',
         'subject',
