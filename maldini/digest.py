@@ -109,7 +109,9 @@ def digest(doc):
             data['lang'] = tika_lang(data['text'])[:2]
 
     ocr_text = [ocr.text for ocr in models.Ocr.objects.filter(md5=doc.md5)]
-    data['text'] = '\n\n'.join([data.get('text', '')] + ocr_text)
+    if ''.join(ocr_text).strip():
+        data['text'] = '\n\n'.join([data.get('text', '')] + ocr_text)
+        data['ocr'] = True
 
     return data
 
