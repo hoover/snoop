@@ -1,7 +1,7 @@
 from pathlib import Path
 from dateutil import parser
 from pprint import pformat
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 from django.shortcuts import get_object_or_404, render
 from django.conf import settings
 from jinja2 import Environment
@@ -30,6 +30,14 @@ def document_raw(request, id):
     with doc.open() as f:
         data = f.read()
         return HttpResponse(data, content_type=doc.content_type)
+
+def document_ocr(request, id, tag):
+    doc = get_object_or_404(models.Document, id=id)
+    ocr = get_object_or_404(models.Ocr, tag=tag, md5=doc.md5)
+    return FileResponse(
+        ocr.absolute_path.open('rb'),
+        content_type='application/pdf',
+    )
 
 def document(request, id):
     up = None

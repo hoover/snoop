@@ -82,6 +82,10 @@ class Ocr(models.Model):
     class Meta:
         unique_together = ('tag', 'md5')
 
+    @property
+    def absolute_path(self):
+        return Path(settings.MALDINI_OCR_ROOT) / self.tag / self.path
+
 class Digest(models.Model):
     id = models.IntegerField(primary_key=True)
     data = models.TextField()
