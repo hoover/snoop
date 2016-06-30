@@ -17,7 +17,9 @@ def walk(tag, verbose=False):
                 aggregate = prefix + item.name.split('.')[0]
                 m = re.search(r'([a-zA-Z0-9]{32})$', aggregate)
                 if m is None:
-                    raise RuntimeError("invalid path %r" % item)
+                    print("invalid path", item)
+                    continue
+
                 md5 = m.group(1).lower()
                 assert len(md5) == 32
                 yield (md5, item)
