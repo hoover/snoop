@@ -46,8 +46,12 @@
       {% if data.type != 'folder' %}
         <a href="./{{ id }}/raw/{{ data.filename }}"
            class="btn btn-primary" role="button">Original file</a>
-
       {% endif %}
+
+      {% for tag in ocr_tags %}
+        <a href="./{{ id }}/ocr/{{ tag }}/{{ data.filename }}"
+           class="btn btn-secondary" role="button">OCR {{ tag }}</a>
+      {% endfor %}
     </div>
   </div>
 

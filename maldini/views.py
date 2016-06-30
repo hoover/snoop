@@ -95,9 +95,12 @@ def document(request, id):
         if data.get(field):
             data[field] = _format_date(data[field])
 
+    ocr_tags = [ocr.tag for ocr in models.Ocr.objects.filter(md5=doc.md5)]
+
     return render(request, 'document.html', {
         'id': id,
         'up': up,
         'data': data,
         'attachments': attachments,
+        'ocr_tags': ocr_tags,
     })
