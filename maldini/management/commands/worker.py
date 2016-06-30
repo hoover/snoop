@@ -12,7 +12,7 @@ class Command(BaseCommand):
 
     def handle(self, verbosity, queue, stop_first_error, **options):
         if queue == 'digest':
-            worker = workers.digest
+            from maldini.digest import worker
         elif queue == 'index':
             worker = workers.index
         else:

@@ -2,56 +2,8 @@ from django.conf import settings
 import simplejson as json
 from elasticsearch import Elasticsearch
 from maldini import models
-from maldini import queues
-from maldini import digest as digest_module
-from maldini import emails
 
 es = Elasticsearch(settings.ELASTICSEARCH_URL)
-
-def digest(id, verbose):
-    try:
-        document = models.Document.objects.get(id=id)
-    except models.Document.DoesNotExist:
-        if verbose: print('MISSING')
-        return
-
-    try:
-        data = digest_module.digest(document)
-
-    except emails.MissingEmlxPart:
-        document.broken = 'missing_emlx_part'
-        document.save()
-        if verbose: print('missing_emlx_part')
-        return
-
-    except emails.PayloadError:
-        document.broken = 'payload_error'
-        document.save()
-        if verbose: print('payload_error')
-        return
-
-    except emails.CorruptedFile:
-        document.broken = 'corrupted_file'
-        document.save()
-        if verbose: print('corrupted_file')
-        return
-
-    else:
-        if document.broken:
-            if verbose: print('removing broken flag', document.broken)
-            document.broken = ''
-            document.save()
-
-    digest_module.create_children(document, data, verbose)
-
-    models.Digest.objects.update_or_create(
-        id=document.id,
-        defaults={'data': json.dumps(data)},
-    )
-
-    if verbose: print('type:', data.get('type'))
-
-    queues.put('index', {'id': document.id}, verbose=verbose)
 
 def index(id, verbose):
     try:

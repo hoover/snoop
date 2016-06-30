@@ -1,5 +1,6 @@
 from django.conf import settings
 import hashlib
+import json
 from .tikalib import tika_parse, extract_meta, tika_lang
 from . import emails
 from . import queues
@@ -130,3 +131,48 @@ def create_children(doc, data, verbose=True):
         if created:
             queues.put('digest', {'id': child.id}, verbose=verbose)
             if verbose: print('new child', child.id)
+
+def worker(id, verbose):
+    try:
+        document = models.Document.objects.get(id=id)
+    except models.Document.DoesNotExist:
+        if verbose: print('MISSING')
+        return
+
+    try:
+        data = digest(document)
+
+    except emails.MissingEmlxPart:
+        document.broken = 'missing_emlx_part'
+        document.save()
+        if verbose: print('missing_emlx_part')
+        return
+
+    except emails.PayloadError:
+        document.broken = 'payload_error'
+        document.save()
+        if verbose: print('payload_error')
+        return
+
+    except emails.CorruptedFile:
+        document.broken = 'corrupted_file'
+        document.save()
+        if verbose: print('corrupted_file')
+        return
+
+    else:
+        if document.broken:
+            if verbose: print('removing broken flag', document.broken)
+            document.broken = ''
+            document.save()
+
+    create_children(document, data, verbose)
+
+    models.Digest.objects.update_or_create(
+        id=document.id,
+        defaults={'data': json.dumps(data)},
+    )
+
+    if verbose: print('type:', data.get('type'))
+
+    queues.put('index', {'id': document.id}, verbose=verbose)
