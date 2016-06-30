@@ -6,22 +6,14 @@ import email, email.header, email.utils
 from contextlib import contextmanager
 from collections import defaultdict
 from io import BytesIO
-from bs4 import BeautifulSoup
 from pathlib import Path
 from django.conf import settings
 from . import models
-from .utils import chunks
+from .utils import chunks, text_from_html
 
 
 def decode_header(header):
     return str(email.header.make_header(email.header.decode_header(header)))
-
-def text_from_html(html):
-    soup = BeautifulSoup(html, 'lxml')
-    for node in soup(["script", "style"]):
-        node.extract()
-    return re.sub(r'\s+', ' ', soup.get_text().strip())
-
 
 def people(headers, header_names):
     values = []

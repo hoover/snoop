@@ -1,4 +1,6 @@
+import re
 import subprocess
+from bs4 import BeautifulSoup
 
 def chunks(file, blocksize=65536):
     while True:
@@ -52,3 +54,10 @@ def timeit(name):
     decorator.cm = cm
 
     return decorator
+
+
+def text_from_html(html):
+    soup = BeautifulSoup(html, 'lxml')
+    for node in soup(["script", "style"]):
+        node.extract()
+    return re.sub(r'\s+', ' ', soup.get_text().strip())
