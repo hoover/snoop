@@ -23,13 +23,15 @@ def walk(tag, verbose=False):
                 yield (md5, item)
 
     ocr_root = Path(settings.MALDINI_OCR_ROOT) / tag
-    for (md5, path) in _traverse(ocr_root):
+    for i, (md5, path) in enumerate(_traverse(ocr_root), 1):
         job = {
             'tag': tag,
             'md5': md5,
             'path': str(path.relative_to(ocr_root)),
         }
         queues.put('ocr', job, verbose=verbose)
+
+    if verbose: print('added', i, 'jobs to queue')
 
 
 def worker(tag, md5, path, verbose):
