@@ -1,9 +1,14 @@
+import subprocess
+
 def chunks(file, blocksize=65536):
     while True:
         data = file.read(blocksize)
         if not data:
             return
         yield data
+
+def pdftotext(input):
+    return subprocess.check_output(['pdftotext', '-', '-'], stdin=input)
 
 def timeit(name):
     """ Measure aggregate time for a function or code block

@@ -1,5 +1,4 @@
 from django.conf import settings
-import subprocess
 import hashlib
 from .tikalib import tika_parse, extract_meta, tika_lang
 from . import emails
@@ -45,9 +44,6 @@ FILE_TYPES = {
     'application/vnd.oasis.opendocument.presentation': 'ppt',
     'application/vnd.oasis.opendocument.presentation-template': 'ppt',
 }
-
-def pdftotext(input):
-    return subprocess.check_output(['pdftotext', '-', '-'], stdin=input)
 
 def _path_bits(doc):
     if doc.container:
