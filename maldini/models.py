@@ -73,6 +73,15 @@ class Document(models.Model):
 
         raise RuntimeError
 
+class Ocr(models.Model):
+    tag = models.CharField(max_length=100)
+    md5 = models.CharField(max_length=40, db_index=True)
+    path = models.CharField(max_length=4000)
+    text = models.TextField(blank=True)
+
+    class Meta:
+        unique_together = ('tag', 'md5')
+
 class Digest(models.Model):
     id = models.IntegerField(primary_key=True)
     data = models.TextField()
