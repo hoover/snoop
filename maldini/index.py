@@ -1,11 +1,11 @@
 from django.conf import settings
-import simplejson as json
+import json
 from elasticsearch import Elasticsearch
-from maldini import models
+from . import models
 
 es = Elasticsearch(settings.ELASTICSEARCH_URL)
 
-def index(id, verbose):
+def worker(id, verbose):
     try:
         digest = models.Digest.objects.get(id=id)
     except models.Digest.DoesNotExist:

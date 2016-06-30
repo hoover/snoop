@@ -1,6 +1,5 @@
 from django.core.management.base import BaseCommand
 from maldini import queues
-from maldini import workers
 
 class Command(BaseCommand):
 
@@ -14,7 +13,7 @@ class Command(BaseCommand):
         if queue == 'digest':
             from maldini.digest import worker
         elif queue == 'index':
-            worker = workers.index
+            from maldini.index import worker
         else:
             raise ValueError("Unknown queue %r" % queue)
 
