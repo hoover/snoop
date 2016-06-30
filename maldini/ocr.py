@@ -32,10 +32,12 @@ def walk(tag, verbose=False):
             with path.open('rb') as f:
                 row.text = pdftotext(f)
             row.save()
-            counters['added'] += 1
-            if verbose: print(md5)
+            action = 'add'
 
         else:
-            counters['skipped'] += 1
+            action = 'skip'
+
+        counters[action] += 1
+        if verbose: print(md5, action)
 
     if verbose: print(dict(counters))
