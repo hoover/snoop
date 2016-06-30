@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.conf import settings
 from jinja2 import Environment
-from .models import Document
+from . import models
 from .digest import digest
 from .walker import files_in
 
@@ -26,7 +26,7 @@ def _format_date(date_value):
     return parser.parse(date_value).strftime("%d %B %Y")
 
 def document_raw(request, id):
-    doc = get_object_or_404(Document, id=id)
+    doc = get_object_or_404(models.Document, id=id)
     with doc.open() as f:
         data = f.read()
         return HttpResponse(data, content_type=doc.content_type)
@@ -42,7 +42,7 @@ def document(request, id):
         }
 
     else:
-        doc = get_object_or_404(Document, id=id)
+        doc = get_object_or_404(models.Document, id=id)
 
         try:
             data = digest(doc)
@@ -57,7 +57,7 @@ def document(request, id):
             def attachment_id(n):
                 try:
                     a = doc.document_set.get(path=n)
-                except Document.DoesNotExist:
+                except models.Document.DoesNotExist:
                     return None
                 else:
                     return a.id
@@ -75,7 +75,11 @@ def document(request, id):
                 up = doc.container.id
             elif '/' in doc.path:
                 up_path = doc.path.rsplit('/', 1)[0]
-                up = Document.objects.get(container=None, path=up_path).id
+                up = (
+                    models.Document.objects
+                    .get(container=None, path=up_path)
+                    .id
+                )
             else:
                 up = 0
 
