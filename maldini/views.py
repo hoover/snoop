@@ -27,6 +27,8 @@ def _format_date(date_value):
 
 def document_raw(request, id):
     doc = get_object_or_404(models.Document, id=id)
+    if doc.content_type == 'text/html':
+        return HttpResponse("Not serving HTML files, they can be dangerous")
     with doc.open() as f:
         data = f.read()
         return HttpResponse(data, content_type=doc.content_type)
