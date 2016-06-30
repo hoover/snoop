@@ -48,6 +48,7 @@ def document(request, id):
             'type': 'folder',
             'files': files_in(''),
         }
+        ocr_tags = []
 
     else:
         doc = get_object_or_404(models.Document, id=id)
@@ -91,11 +92,11 @@ def document(request, id):
             else:
                 up = 0
 
+        ocr_tags = [ocr.tag for ocr in models.Ocr.objects.filter(md5=doc.md5)]
+
     for field in ['date', 'date-created']:
         if data.get(field):
             data[field] = _format_date(data[field])
-
-    ocr_tags = [ocr.tag for ocr in models.Ocr.objects.filter(md5=doc.md5)]
 
     return render(request, 'document.html', {
         'id': id,
