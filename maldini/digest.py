@@ -108,6 +108,9 @@ def digest(doc):
         if 'text' in data and len(data['text']) > 100:
             data['lang'] = tika_lang(data['text'])[:2]
 
+    ocr_text = [ocr.text for ocr in models.Ocr.objects.filter(md5=doc.md5)]
+    data['text'] = '\n\n'.join([data.get('text', '')] + ocr_text)
+
     return data
 
 def create_children(doc, data, verbose=True):
