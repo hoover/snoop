@@ -1,5 +1,6 @@
 from pathlib import Path
 from collections import defaultdict
+import re
 from django.conf import settings
 from . import models
 from .utils import pdftotext
@@ -12,7 +13,11 @@ def walk(tag, verbose=False):
                 yield from _traverse(item, prefix + item.name)
 
             else:
-                md5 = prefix + item.name.split('.')[0]
+                aggregate = prefix + item.name.split('.')[0]
+                m = re.search(r'([a-zA-Z0-9]{32})$', aggregate)
+                if m is None:
+                    raise RuntimeError("invalid path %r" % item)
+                md5 = m.group(1).lower()
                 assert len(md5) == 32
                 yield (md5, item)
 
