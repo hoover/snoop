@@ -22,13 +22,13 @@ def walk(tag, verbose=False):
                 yield (md5, item)
 
     assert settings.MALDINI_OCR_ROOT is not None
-    ocr_root = Path(settings.MALDINI_OCR_ROOT)
+    ocr_root = Path(settings.MALDINI_OCR_ROOT) / tag
     counters = defaultdict(int)
 
-    for (md5, path) in _traverse(ocr_root / tag):
+    for (md5, path) in _traverse(ocr_root):
         row, created = models.Ocr.objects.get_or_create(tag=tag, md5=md5)
         if created:
-            row.path = str(path)
+            row.path = str(path.relative_to(ocr_root))
             with path.open('rb') as f:
                 row.text = pdftotext(f)
             row.save()
