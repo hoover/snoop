@@ -5,6 +5,7 @@ import tempfile
 import email, email.header, email.utils
 from contextlib import contextmanager
 from collections import defaultdict
+from io import BytesIO
 from bs4 import BeautifulSoup
 from pathlib import Path
 from django.conf import settings
@@ -249,16 +250,29 @@ def open_msg(doc):
     if settings.MSGCONVERT_SCRIPT is None:
         raise RuntimeError("Path to 'msgconvert' is not configured")
 
+    if doc.flags.get('msgconvert_fail'):
+        yield BytesIO()
+        return
+
     path = doc.absolute_path
 
     with tempfile.TemporaryDirectory(suffix='-snoop') as tmp:
         msg = Path(tmp) / path.name
         msg.symlink_to(path)
 
-        subprocess.check_output(
-            [settings.MSGCONVERT_SCRIPT, msg.name],
-            cwd=tmp,
-        )
+        try:
+            subprocess.check_output(
+                [settings.MSGCONVERT_SCRIPT, msg.name],
+                cwd=tmp,
+            )
+        except:
+            if settings.MALDINI_FLAG_MSGCONVERT_FAIL:
+                doc.flags['msgconvert_fail'] = True
+                doc.save()
+                yield BytesIO()
+                return
+
+            raise
 
         with msg.with_suffix('.eml').open('rb') as f:
             yield f
