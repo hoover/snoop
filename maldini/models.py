@@ -44,13 +44,11 @@ class Document(models.Model):
     content_type = models.CharField(max_length=100, blank=True)
     filename = models.CharField(max_length=1000)
     disk_size = models.BigIntegerField()
-
     md5 = models.CharField(max_length=40, blank=True, db_index=True)
     sha1 = models.CharField(max_length=50, blank=True, db_index=True)
-
     broken = models.CharField(max_length=100, blank=True)
-
     rev = models.IntegerField(null=True)
+    flags = JSONField(default=dict, blank=True)
 
     class Meta:
         # TODO: constraint does not apply to container=None rows
