@@ -5,7 +5,7 @@ from .tikalib import tika_parse, extract_meta, tika_lang
 from . import emails
 from . import queues
 from . import models
-from .utils import chunks
+from .utils import chunks, text_from_html
 
 FILE_TYPES = {
     'application/x-directory': 'folder',
@@ -99,6 +99,14 @@ def digest(doc):
 
     filetype = guess_filetype(doc)
     data['type'] = filetype
+
+    if filetype in ['text', 'html']:
+        with doc.open() as f:
+            content = f.read()
+            if filetype == 'html':
+                data['text'] = text_from_html(content)
+            else:
+                data['text'] = content.decode('utf-8')
 
     if filetype in settings.TIKA_FILE_TYPES and doc.disk_size <= settings.MAX_TIKA_FILE_SIZE:
         parsed = tika_parse(doc.sha1, doc.open)
