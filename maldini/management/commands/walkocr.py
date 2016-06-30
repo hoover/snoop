@@ -8,7 +8,6 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('tag')
-        parser.add_argument('subfolder')
 
-    def handle(self, verbosity, tag, subfolder, **options):
-        walk(tag, subfolder, verbose=verbosity > 0)
+    def handle(self, verbosity, tag, **options):
+        walk(tag, verbose=verbosity > 0)

@@ -4,7 +4,7 @@ from django.conf import settings
 from . import models
 from .utils import pdftotext
 
-def walk(tag, subfolder, verbose=False):
+def walk(tag, verbose=False):
 
     def _traverse(folder, prefix=''):
         for item in folder.iterdir():
@@ -20,7 +20,7 @@ def walk(tag, subfolder, verbose=False):
     ocr_root = Path(settings.MALDINI_OCR_ROOT)
     counters = defaultdict(int)
 
-    for (md5, path) in _traverse(ocr_root / subfolder):
+    for (md5, path) in _traverse(ocr_root / tag):
         row, created = models.Ocr.objects.get_or_create(tag=tag, md5=md5)
         if created:
             row.path = str(path)
