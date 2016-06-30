@@ -1,5 +1,5 @@
 from pathlib import Path
-from io import StringIO
+from io import BytesIO
 import json
 from django.db import models, transaction
 from django.contrib.postgres.fields import JSONField
@@ -60,7 +60,7 @@ class Document(models.Model):
 
     def open(self):
         if self.content_type == 'application/x-directory':
-            return StringIO()
+            return BytesIO()
 
         if self.container is None:
             return self.absolute_path.open('rb')
