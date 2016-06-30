@@ -4,6 +4,7 @@ import re
 from django.conf import settings
 from . import models
 from .utils import pdftotext
+from . import queues
 
 def walk(tag, verbose=False):
 
@@ -21,23 +22,26 @@ def walk(tag, verbose=False):
                 assert len(md5) == 32
                 yield (md5, item)
 
-    assert settings.MALDINI_OCR_ROOT is not None
     ocr_root = Path(settings.MALDINI_OCR_ROOT) / tag
-    counters = defaultdict(int)
-
     for (md5, path) in _traverse(ocr_root):
-        row, created = models.Ocr.objects.get_or_create(tag=tag, md5=md5)
-        if created:
-            row.path = str(path.relative_to(ocr_root))
-            with path.open('rb') as f:
-                row.text = pdftotext(f)
-            row.save()
-            action = 'add'
+        job = {
+            'tag': tag,
+            'md5': md5,
+            'path': str(path.relative_to(ocr_root)),
+        }
+        queues.put('ocr', job, verbose=verbose)
 
-        else:
-            action = 'skip'
 
-        counters[action] += 1
-        if verbose: print(md5, action)
+def worker(tag, md5, path, verbose):
+    ocr_root = Path(settings.MALDINI_OCR_ROOT) / tag
 
-    if verbose: print(dict(counters))
+    row, created = models.Ocr.objects.get_or_create(tag=tag, md5=md5)
+    if created:
+        row.path = path
+        with (ocr_root / path).open('rb') as f:
+            row.text = pdftotext(f)
+        row.save()
+        if verbose: print(md5, 'add')
+
+    else:
+        if verbose: print(md5, 'skip')

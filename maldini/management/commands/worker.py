@@ -14,6 +14,8 @@ class Command(BaseCommand):
             from maldini.digest import worker
         elif queue == 'index':
             from maldini.index import worker
+        elif queue == 'ocr':
+            from maldini.ocr import worker
         else:
             raise ValueError("Unknown queue %r" % queue)
 
