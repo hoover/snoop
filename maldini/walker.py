@@ -7,6 +7,8 @@ mimetypes.add_type('message/x-emlx', '.emlx')
 mimetypes.add_type('message/x-emlxpart', '.emlxpart')
 mimetypes.add_type('application/vnd.ms-outlook', '.msg')
 
+FOLDER = 'application/x-directory'
+
 def mime_type(name):
     return mimetypes.guess_type(name, strict=False)[0]
 
@@ -31,32 +33,42 @@ class Walker(object):
     def _path(self, file):
         return file.relative_to(self.root)
 
-    def handle(self, file=None):
-        if file is None:
-            file = self.root
+    def handle(self, item=None):
+        if item is None:
+            item = self.root
 
-        if file.is_dir():
-            path = self._path(file)
-            if models.FolderMark.objects.filter(path=path).count():
-                print('SKIP', path)
-                return
-            for child in file.iterdir():
-                self.handle(child)
-            models.FolderMark.objects.create(path=path)
-            print('MARK', path)
+        if item.is_dir():
+            self.handle_folder(item)
 
         else:
-            self.handle_file(file)
+            self.handle_file(item)
+
+    def handle_folder(self, folder):
+        path = self._path(folder)
+        print('FOLDER', path)
+        if models.FolderMark.objects.filter(path=path).count():
+            print('SKIP', path)
+            return
+        if str(path) != '.':
+            models.Document.objects.get_or_create(
+                path=path,
+                disk_size=0,
+                content_type=FOLDER,
+                filename=path.name,
+            )
+        for child in folder.iterdir():
+            self.handle(child)
+        models.FolderMark.objects.create(path=path)
+        print('MARK', path)
 
     def handle_file(self, file):
         path = self._path(file)
         print('FILE', path)
-        doc, _ = models.Document.objects.get_or_create(path=path, defaults={
+        models.Document.objects.get_or_create(path=path, defaults={
             'disk_size': file.stat().st_size,
             'content_type': mime_type(file.name) or '',
             'filename': path.name,
         })
-        doc.save()
 
 def files_in(parent_path):
     child_documents = models.Document.objects.filter(
