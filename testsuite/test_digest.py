@@ -1,15 +1,15 @@
 import mimetypes
+import pytest
 from maldini import digest, models
-
-# TODO
-# - guess_filetype: various extensions and content-types (to be discovered on the field)
-# - errors: corrupt docs, missing docs
 
 PATH_TEXT = "disk-files/pdf-doc-txt/easychair.txt"
 PATH_HTML = "disk-files/bad-html/alert.html"
 
-models.Ocr.objects.filter = lambda *a, **k: []
-models.Ocr.objects.all = lambda *a, **k: []
+@pytest.fixture(autouse=True)
+def no_ocr_models(monkeypatch):
+    func_empty_list = lambda *a, **k: []
+    monkeypatch.setattr(models.Ocr.objects, "filter", func_empty_list)
+    monkeypatch.setattr(models.Ocr.objects, "all", func_empty_list)
 
 def digest_path(path):
     content_type = mimetypes.guess_type(path, False)[0]
