@@ -2,6 +2,7 @@ from pathlib import Path
 from collections import defaultdict
 import re
 from django.conf import settings
+from django.db import transaction
 from . import models
 from .utils import pdftotext
 from . import queues
@@ -36,6 +37,7 @@ def walk(tag, verbose=False):
     if verbose: print('added', i, 'jobs to queue')
 
 
+@transaction.atomic
 def worker(tag, md5, path, verbose):
     ocr_root = Path(settings.MALDINI_OCR_ROOT) / tag
 
