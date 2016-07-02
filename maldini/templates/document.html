@@ -48,7 +48,7 @@
            class="btn btn-primary" role="button">Original file</a>
       {% endif %}
 
-      {% for tag in ocr_tags %}
+      {% for tag in data.get('ocr', {}) %}
         <a href="./{{ id }}/ocr/{{ tag }}/{{ data.filename }}"
            class="btn btn-secondary" role="button">OCR {{ tag }}</a>
       {% endfor %}
@@ -217,6 +217,11 @@
       </div>
     </div>
   {% endif %}
+
+  {% for ocr_tag, ocr_text in data.get('ocr', {}).items() %}
+    <h5>OCR {{ ocr_tag }}</h5>
+    <pre class="content">{{ ocr_text }}</pre>
+  {% endfor %}
 
   {% if data.type == 'email' %}
     <div class="row">

@@ -30,13 +30,13 @@ def worker(id, verbose):
         'thread-index',
         'references',
         'message',
-        'ocr',
     }
 
     data = {key: digest_data.get(key) for key in copy_keys}
     data['filetype'] = digest_data.get('type')
     data['attachments'] = bool(digest_data.get('attachments'))
     data['people'] = ' '.join([digest_data.get('from', '')] + digest_data.get('to', []))
+    data['ocr'] = bool(digest_data.get('ocr'))
 
     es.index(
         index=settings.ELASTICSEARCH_INDEX,

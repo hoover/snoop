@@ -94,8 +94,6 @@ def document(request, id):
             else:
                 up = 0
 
-        ocr_tags = [ocr.tag for ocr in models.Ocr.objects.filter(md5=doc.md5)]
-
     for field in ['date', 'date-created']:
         if data.get(field):
             data[field] = _format_date(data[field])
@@ -105,5 +103,4 @@ def document(request, id):
         'up': up,
         'data': data,
         'attachments': attachments,
-        'ocr_tags': ocr_tags,
     })

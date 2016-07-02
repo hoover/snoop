@@ -113,10 +113,9 @@ def digest(doc):
         if 'text' in data and len(data['text']) > 100:
             data['lang'] = tika_lang(data['text'])[:2]
 
-    ocr_text = [ocr.text for ocr in models.Ocr.objects.filter(md5=doc.md5)]
-    if ''.join(ocr_text).strip():
-        data['text'] = '\n\n'.join([data.get('text', '')] + ocr_text)
-        data['ocr'] = True
+    ocr_items = list(models.Ocr.objects.filter(md5=doc.md5))
+    if ocr_items:
+        data['ocr'] = {ocr.tag: ocr.text for ocr in ocr_items}
 
     return data
 
