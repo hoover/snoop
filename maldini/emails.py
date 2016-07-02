@@ -159,6 +159,7 @@ class EmailParser(object):
             if not part.get_content_disposition(): continue
             filename = part.get_filename()
             if not filename: continue
+            filename = decode_header(filename)
 
             rv[number] = {
                 'content_type': part.get_content_type().lower(),
