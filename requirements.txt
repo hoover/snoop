@@ -6,6 +6,7 @@
 #
 
 beautifulsoup4==4.4.1
+chardet==2.3.0
 click==6.6                # via pip-tools
 Django==1.9.7
 elasticsearch==2.3.0
