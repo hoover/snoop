@@ -37,6 +37,7 @@ def worker(id, verbose):
     data['attachments'] = bool(digest_data.get('attachments'))
     data['people'] = ' '.join([digest_data.get('from', '')] + digest_data.get('to', []))
     data['ocr'] = bool(digest_data.get('ocr'))
+    data['ocrtext'] = digest_data.get('ocr')
 
     es.index(
         index=settings.ELASTICSEARCH_INDEX,
