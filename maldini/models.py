@@ -4,7 +4,6 @@ import json
 from django.db import models, transaction
 from django.contrib.postgres.fields import JSONField
 from django.conf import settings
-from . import archives
 
 def cache(model, keyfunc):
 
@@ -39,6 +38,14 @@ class EmailCache(models.Model):
     time = models.DateTimeField(auto_now=True)
 
 from . import emails  # moved here because circular import
+
+class ArchiveListCache(models.Model):
+    sha1 = models.CharField(max_length=50, primary_key=True)
+    value = models.TextField()
+    time = models.DateTimeField(auto_now=True)
+
+from . import archives
+
 
 class Document(models.Model):
     container = models.ForeignKey('Document', null=True)
