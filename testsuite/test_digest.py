@@ -42,4 +42,4 @@ def test_html_text():
 
     assert 'html' == data['type']
     assert "HAHAHAHAH" in data['text']
-
+    assert "more text" in data['text']
