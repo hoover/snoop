@@ -22,6 +22,7 @@ def get_index_data(digest_data):
         'thread-index',
         'references',
         'message',
+        'filename',
     }
 
     data = {key: digest_data.get(key) for key in copy_keys}
