@@ -118,7 +118,7 @@
 
           <tr>
             <td> To:</td>
-            <td>{{ data.get('to')|join(', ') }}</td>
+            <td>{{ data.get('to', [])|join(', ') }}</td>
           </tr>
 
           <tr>
