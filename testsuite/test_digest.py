@@ -1,6 +1,6 @@
-import mimetypes
 import pytest
 from maldini import digest, models
+from maldini.content_types import guess_content_type
 
 PATH_TEXT = "disk-files/pdf-doc-txt/easychair.txt"
 PATH_HTML = "disk-files/bad-html/alert.html"
@@ -12,7 +12,7 @@ def no_ocr_models(monkeypatch):
     monkeypatch.setattr(models.Ocr.objects, "all", func_empty_list)
 
 def digest_path(path):
-    content_type = mimetypes.guess_type(path, False)[0]
+    content_type = guess_content_type(path)
     filename = path.split('/')[-1]
     doc = models.Document(path=path,
                           content_type=content_type,
