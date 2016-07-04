@@ -92,7 +92,8 @@ def digest(doc):
         'lang': None,
         'sha1': doc.sha1,
         'md5': doc.md5,
-        'filename': doc.filename
+        'filename': doc.filename,
+        'rev': doc.rev,
     }
 
     if doc.container_id is None:

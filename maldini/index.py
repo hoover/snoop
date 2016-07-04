@@ -23,6 +23,7 @@ def get_index_data(digest_data):
         'references',
         'message',
         'filename',
+        'rev',
     }
 
     data = {key: digest_data.get(key) for key in copy_keys}
