@@ -3,7 +3,7 @@ from maldini import queues
 
 class Command(BaseCommand):
 
-    help = "Run the `digest` worker"
+    help = "Run a worker"
 
     def add_arguments(self, parser):
         parser.add_argument('queue')
