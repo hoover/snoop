@@ -14,6 +14,16 @@ class MissingArchiveFile(Exception):
 class EncryptedArchiveFile(Exception):
     pass
 
+def other_temps(sha1, current_dir):
+    current = Path(current_dir).name
+    for dir in CACHE_ROOT.iterdir():
+        if dir.name == current:
+            continue
+        hash = dir.name[:len(sha1)]
+        if sha1 == hash:
+            return True
+    return False
+
 def extract_to_base(doc):
     if not settings.SEVENZIP_BINARY:
         raise RuntimeError
@@ -22,34 +32,39 @@ def extract_to_base(doc):
     if base.is_dir():
         return
 
-    tmpdir = tempfile.mkdtemp(prefix=doc.sha1, dir=str(CACHE_ROOT))
-    tmparchive = None
-    if not doc.container:
-        path = str(doc.absolute_path)
-    else:
-        tmparchive = tempfile.NamedTemporaryFile(suffix=doc.filename)
-        with doc.open() as f:
-            shutil.copyfileobj(f, tmparchive, length=4*1024*1024)
-        path = tmparchive.name
+    tmpdir = tempfile.mkdtemp(prefix=doc.sha1, dir=str(CACHE_ROOT), suffix='tmp')
 
-    out = ""
-    try:
-        out = subprocess.check_output([
-            settings.SEVENZIP_BINARY,
-            '-y'
-            '-pp',
-            'e',
-            path,
-            '-o' + tmpdir,
-        ], stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError:
-        if "Wrong password" in out:
-            raise EncryptedArchiveFile
+    if other_temps(doc.sha1, tmpdir):
+        shutil.rmtree(tmpdir)
+        raise RuntimeError("Another worker has taken this one")
+
+    with tempfile.NamedTemporaryFile(suffix=doc.filename) as tmparchive:
+        if not doc.container:
+            path = str(doc.absolute_path)
         else:
-            raise RuntimeError("7z failed")
+            with doc.open() as f:
+                shutil.copyfileobj(f, tmparchive, length=4*1024*1024)
+            path = tmparchive
 
-    if tmparchive:
-        tmparchive.close()
+        out = ""
+        try:
+            out = subprocess.check_output([
+                settings.SEVENZIP_BINARY,
+                '-y',
+                '-pp',
+                'e',
+                path,
+                '-o' + tmpdir,
+            ], stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError:
+            tmppath = Path(tmpdir)
+            newpath = tmppath.with_name('broken_' + tmppath.name)
+            shutil.move(tmpdir, str(newpath))
+
+            if "Wrong password" in out:
+                raise EncryptedArchiveFile
+            else:
+                raise RuntimeError("7z failed")
 
     shutil.move(tmpdir, str(base))
 
