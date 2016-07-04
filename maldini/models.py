@@ -27,6 +27,7 @@ def cache(model, keyfunc):
 
             return value
 
+        wrapper.no_cache = func
         return wrapper
 
     return decorator
