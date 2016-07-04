@@ -23,7 +23,7 @@ def check(batch):
         assert emails.is_email(doc)
         cache_row = models.EmailCache.objects.get(pk=doc.id)
         cached = json.loads(cache_row.value)
-        correct = emails.raw_parse_email(doc)
+        correct = emails.raw_parse_email.no_cache(doc)
         if cached != correct:
             errors.append(doc.id)
     id_pool.difference_update(sample_ids)
