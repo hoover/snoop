@@ -23,7 +23,7 @@ def extract_to_base(doc):
 
     tmpdir = tempfile.mkdtemp(prefix=doc.sha1, dir=str(CACHE_ROOT))
     tmparchive = None
-    if doc.container:
+    if not doc.container:
         path = str(doc.absolute_path)
     else:
         tmparchive = tempfile.NamedTemporaryFile(suffix=doc.filename)
@@ -48,7 +48,7 @@ def extract_to_base(doc):
             raise RuntimeError("7z failed")
 
     if tmparchive:
-        tmparchive.cleanup()
+        tmparchive.close()
 
     shutil.move(tmpdir, str(base))
 

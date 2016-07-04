@@ -6,6 +6,8 @@ from . import emails
 from . import text
 from . import queues
 from . import models
+from . import archives
+from .walker import mime_type
 from .utils import chunks
 
 FILE_TYPES = {
@@ -83,6 +85,13 @@ def guess_filetype(doc):
 
     return FILE_TYPES.get(content_type)
 
+def docs_under_archive(doc):
+    children = models.Document.objects.filter(container=doc)
+    return [{
+        'id': child.id,
+        'filename': child.filename
+    } for child in children]
+
 def digest(doc):
     if not doc.sha1:
         with doc.open() as f:
@@ -127,13 +136,37 @@ def digest(doc):
     if ocr_items:
         data['ocr'] = {ocr.tag: ocr.text for ocr in ocr_items}
 
+    ## TODO: if is_archive, extract it here.
+    # get_archive_contents: extract or find on disk,
+    # walk it, return relative filenames
+    # Cache this return value as json right here, with:
+    # Filename, filesize
+    if archives.is_archive(doc):
+        data['files'] = docs_under_archive(doc)
+
     return data
 
 def create_children(doc, data, verbose=True):
-    for name, info in data.get('attachments', {}).items():
+    children_info = []
+    if emails.is_email(doc):
+        for name, info in data.get('attachments', {}).items():
+            children_info.append({
+                'path': name,
+                'content_type': info['content_type'],
+                'filename': info['filename'],
+            })
+    elif archives.is_archive(doc):
+        for name in archives.list_files(doc):
+            children_info.append({
+                'path': name,
+                'content_type': mime_type(name),
+                'filename': name,
+            })
+
+    for info in children_info:
         child, created = models.Document.objects.update_or_create(
             container=doc,
-            path=name,
+            path=info['path'],
             defaults={
                 'disk_size': 0,
                 'content_type': info['content_type'],
@@ -171,6 +204,18 @@ def worker(id, verbose):
         document.broken = 'corrupted_file'
         document.save()
         if verbose: print('corrupted_file')
+        return
+
+    except archives.EncryptedArchiveFile:
+        document.broken = 'encrypted archive'
+        document.save()
+        if verbose: print('encrypted archive')
+        return
+
+    except archives.MissingArchiveFile:
+        document.broken = 'missing archive file'
+        document.save()
+        if verbose: print('missing archive file')
         return
 
     else:

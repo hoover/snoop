@@ -4,6 +4,7 @@ import json
 from django.db import models, transaction
 from django.contrib.postgres.fields import JSONField
 from django.conf import settings
+from . import archives
 
 def cache(model, keyfunc):
 
@@ -69,6 +70,9 @@ class Document(models.Model):
         else:
             if emails.is_email(self.container):
                 return emails.get_email_part(self.container, self.path)
+
+            if archives.is_archive(self.container):
+                return archives.open_file(self.container, self.path)
 
         raise RuntimeError
 
