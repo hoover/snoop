@@ -58,13 +58,13 @@ def bulk_worker(data_list, verbose):
         for digest in models.Digest.objects.filter(id__in=id_set).iterator():
             digest_data = json.loads(digest.data)
             data = get_index_data(digest_data)
-            yield {
+            data.update({
                 '_op_type': 'index',
                 '_index': settings.ELASTICSEARCH_INDEX,
                 '_type': 'doc',
                 '_id': digest.id,
-                'doc': data,
-            }
+            })
+            yield data
 
     (ok, err) = helpers.bulk(es, stats_only=True, actions=iter_actions())
     if err:
