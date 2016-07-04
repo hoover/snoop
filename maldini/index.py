@@ -5,14 +5,7 @@ from . import models
 
 es = Elasticsearch(settings.ELASTICSEARCH_URL)
 
-def worker(id, verbose):
-    try:
-        digest = models.Digest.objects.get(id=id)
-    except models.Digest.DoesNotExist:
-        if verbose: print('MISSING')
-        return
-
-    digest_data = json.loads(digest.data)
+def get_index_data(digest_data):
     copy_keys = {
         'title',
         'path',
@@ -38,6 +31,18 @@ def worker(id, verbose):
     data['people'] = ' '.join([digest_data.get('from', '')] + digest_data.get('to', []))
     data['ocr'] = bool(digest_data.get('ocr'))
     data['ocrtext'] = digest_data.get('ocr')
+
+    return data
+
+def worker(id, verbose):
+    try:
+        digest = models.Digest.objects.get(id=id)
+    except models.Digest.DoesNotExist:
+        if verbose: print('MISSING')
+        return
+
+    digest_data = json.loads(digest.data)
+    data = get_index_data(digest_data)
 
     es.index(
         index=settings.ELASTICSEARCH_INDEX,
