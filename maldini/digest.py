@@ -66,7 +66,6 @@ def _path_bits(doc):
         yield doc.path
 
 def _calculate_hashes(opened_file):
-    BUF_SIZE = 65536
 
     md5 = hashlib.md5()
     sha1 = hashlib.sha1()
