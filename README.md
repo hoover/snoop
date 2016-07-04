@@ -1,3 +1,14 @@
+## Setup `7z`
+
+Current setup requires `7z` to be present to process archives.
+On debian/linux, I've used the `p7zip` implementation. Rar support is also
+needed.
+
+```shell
+$ sudo apt-get install p7zip-full
+$ sudo apt-get install p7zip-rar
+```
+
 ## Extract text from file dump
 
 1. Configuration - create a file `maldini/site/settings/local.py`:
