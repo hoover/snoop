@@ -1,6 +1,6 @@
 from django.conf import settings
 import json
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, helpers
 from . import models
 
 es = Elasticsearch(settings.ELASTICSEARCH_URL)
@@ -50,3 +50,22 @@ def worker(id, verbose):
         id=digest.id,
         body=data,
     )
+
+def bulk_worker(data_list, verbose):
+    id_set = set(d['id'] for d in data_list)
+
+    def iter_actions():
+        for digest in models.Digest.objects.filter(id__in=id_set).iterator():
+            digest_data = json.loads(digest.data)
+            data = get_index_data(digest_data)
+            yield {
+                '_op_type': 'index',
+                '_index': settings.ELASTICSEARCH_INDEX,
+                '_type': 'doc',
+                '_id': digest.id,
+                'doc': data,
+            }
+
+    (ok, err) = helpers.bulk(es, stats_only=True, actions=iter_actions())
+    if err:
+        raise RuntimeError("Indexing failures: %d" % err)
