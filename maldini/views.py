@@ -9,7 +9,6 @@ from jinja2 import Environment
 from . import models
 from .digest import digest
 from .walker import files_in
-
 BOOTSTRP_CSS = ""
 
 path = Path(settings.BASE_DIR) / 'assets' / 'bootstrap.min.css'
@@ -23,6 +22,13 @@ def environment(**options):
         'uriencode': filepath_to_uri,
     })
     return env
+
+def _format_size(num):
+    for unit in ['', 'KB', 'MB', 'GB', 'TB']:
+        if abs(num) < 1024.0:
+            return "%3.1f %s" % (num, unit)
+        num /= 1024.0
+    return "%3.1f %s" % (num, 'PB')
 
 def _format_date(date_value):
     return parser.parse(date_value).strftime("%d %B %Y")
@@ -42,6 +48,15 @@ def document_ocr(request, id, tag):
         ocr.absolute_path.open('rb'),
         content_type='application/pdf',
     )
+
+def doc_children(doc):
+    children = models.Document.objects.filter(container=doc)
+    return [{
+                'id': child.id,
+                'filename': child.filename,
+                'size': child.disk_size,
+                'content_type': child.content_type,
+            } for child in children]
 
 def document(request, id):
     up = None
@@ -66,6 +81,12 @@ def document(request, id):
         else:
             if data.get('type') == 'folder':
                 data['files'] = files_in(doc.path + '/')
+            elif data.get('type') == 'archive':
+                data['files'] = doc_children(doc)
+
+            if 'files' in data:
+                for file in data['files']:
+                    file['size'] = _format_size(file['size'])
 
             def attachment_id(n):
                 try:

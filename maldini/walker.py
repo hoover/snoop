@@ -70,7 +70,9 @@ def files_in(parent_path):
     )
     return [{
         'id': child.id,
-        'filename': child.path[len(parent_path):]
+        'filename': child.path[len(parent_path):],
+        'size': child.disk_size,
+        'content_type': child.content_type,
     } for child in child_documents]
 
 def _fix_mimetypes():
