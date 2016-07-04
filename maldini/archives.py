@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 from django.conf import settings
 import shutil
+from maldini import models
 
 CACHE_ROOT = Path(settings.ARCHIVE_CACHE_ROOT)
 
@@ -53,7 +54,7 @@ def extract_to_base(doc):
     shutil.move(tmpdir, str(base))
 
 
-
+@models.cache(models.ArchiveListCache, lambda doc: doc.sha1)
 def list_files(doc):
     base = CACHE_ROOT / doc.sha1
     if not base.is_dir():

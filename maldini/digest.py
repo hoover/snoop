@@ -1,6 +1,7 @@
 from django.conf import settings
 import hashlib
 import json
+from pathlib import Path
 from .tikalib import tika_parse, extract_meta, tika_lang
 from . import emails
 from . import text
@@ -32,13 +33,6 @@ def _calculate_hashes(opened_file):
     fsize = opened_file.tell()
 
     return (md5.hexdigest(), sha1.hexdigest(), fsize)
-
-def docs_under_archive(doc):
-    children = models.Document.objects.filter(container=doc)
-    return [{
-        'id': child.id,
-        'filename': child.filename
-    } for child in children]
 
 def digest(doc):
     if not doc.sha1:
@@ -84,13 +78,8 @@ def digest(doc):
     if ocr_items:
         data['ocr'] = {ocr.tag: ocr.text for ocr in ocr_items}
 
-    ## TODO: if is_archive, extract it here.
-    # get_archive_contents: extract or find on disk,
-    # walk it, return relative filenames
-    # Cache this return value as json right here, with:
-    # Filename, filesize
     if archives.is_archive(doc):
-        data['files'] = docs_under_archive(doc)
+        data['file_list'] = archives.list_files(doc)
 
     return data
 
@@ -104,11 +93,11 @@ def create_children(doc, data, verbose=True):
                 'filename': info['filename'],
             })
     elif archives.is_archive(doc):
-        for name in archives.list_files(doc):
+        for path in data['file_list']:
             children_info.append({
-                'path': name,
-                'content_type': guess_content_type(name),
-                'filename': name,
+                'path': path,
+                'content_type': guess_content_type(path),
+                'filename': Path(path).name,
             })
 
     for info in children_info:
