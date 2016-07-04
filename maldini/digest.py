@@ -45,6 +45,12 @@ FILE_TYPES = {
     'application/vnd.ms-powerpoint.slideshow.macroEnabled.12': 'ppt',
     'application/vnd.oasis.opendocument.presentation': 'ppt',
     'application/vnd.oasis.opendocument.presentation-template': 'ppt',
+
+    'application/zip': 'archive',
+    'application/rar': 'archive',
+    'application/x-7z-compressed': 'archive',
+    'application/x-tar': 'archive',
+    'application/x-bzip2': 'archive',
 }
 
 def _path_bits(doc):
