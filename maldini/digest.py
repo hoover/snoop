@@ -53,10 +53,10 @@ def digest(doc):
         'rev': doc.rev,
     }
 
-    if doc.container_id is None:
-        if emails.is_email(doc):
-            data.update(emails.parse_email(doc))
-    else:
+    if emails.is_email(doc):
+        data.update(emails.parse_email(doc))
+
+    if doc.container_id:
         data['message'] = doc.container_id
 
     filetype = guess_filetype(doc)
