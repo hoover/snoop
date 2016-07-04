@@ -73,7 +73,9 @@ def list_files(doc):
 def open_file(doc, name):
     path = CACHE_ROOT / doc.sha1 / name
     if not path.exists():
-        raise MissingArchiveFile(str(path))
+        extract_to_base(doc)
+        if not path.exists():
+            raise MissingArchiveFile(str(path))
     return path.open('rb')
 
 def is_archive(doc):
