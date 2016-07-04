@@ -36,13 +36,18 @@ def check(batch):
     sample_ids = set(random.sample(id_pool, min([batch, len(id_pool)])))
     for doc in models.Document.objects.filter(id__in=sample_ids).iterator():
         assert emails.is_email(doc)
-        cache_row = models.EmailCache.objects.get(pk=doc.id)
+        try:
+            cache_row = models.EmailCache.objects.get(pk=doc.id)
+        except models.EmailCache.DoesNotExist:
+            continue
         cached = json.loads(cache_row.value)
         correct = emails.raw_parse_email.no_cache(doc)
         if cached != correct:
-            print('\n\n\n%d\n' % doc.id)
             diff(cached, correct, str(doc.id)+'-')
     id_pool.difference_update(sample_ids)
 
+n = 0
 while id_pool:
   check(10)
+  n += 10
+  print(n)
