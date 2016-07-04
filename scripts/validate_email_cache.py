@@ -17,7 +17,7 @@ id_list = list(
 id_pool = set(id_list)
 
 def check(batch):
-    sample_ids = set(random.sample(id_list, batch))
+    sample_ids = set(random.sample(id_pool, min([batch, len(id_pool)])))
     errors = []
     for doc in models.Document.objects.filter(id__in=sample_ids).iterator():
         assert emails.is_email(doc)
