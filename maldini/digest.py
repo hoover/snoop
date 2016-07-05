@@ -79,7 +79,7 @@ def digest(doc):
         data['ocr'] = {ocr.tag: ocr.text for ocr in ocr_items}
 
     if archives.is_archive(doc):
-        data['file_list'] = archives.list_files(doc)
+        data.update(archives.list_files(doc))
 
     return data
 
@@ -98,6 +98,13 @@ def create_children(doc, data, verbose=True):
             children_info.append({
                 'path': path,
                 'content_type': guess_content_type(path),
+                'filename': Path(path).name,
+                'size': 0,
+            })
+        for path in data['folder_list']:
+            children_info.append({
+                'path': path,
+                'content_type': 'application/x-directory',
                 'filename': Path(path).name,
                 'size': 0,
             })

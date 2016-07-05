@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from dateutil import parser
 from pprint import pformat
@@ -49,8 +50,10 @@ def document_ocr(request, id, tag):
         content_type='application/pdf',
     )
 
-def doc_children(doc):
-    children = models.Document.objects.filter(container=doc)
+def files_in_archive(doc, path):
+    children = models.Document.objects.filter(
+        container=doc,
+        path__iregex=r'^' + re.escape(path) + r'[^/]+$')
     return [{
                 'id': child.id,
                 'filename': child.filename,
@@ -80,9 +83,12 @@ def document(request, id):
 
         else:
             if data.get('type') == 'folder':
-                data['files'] = files_in(doc.path + '/')
+                if doc.container:
+                    data['files'] = files_in_archive(doc.container, doc.path + '/')
+                else:
+                    data['files'] = files_in(doc.path + '/')
             elif data.get('type') == 'archive':
-                data['files'] = doc_children(doc)
+                data['files'] = files_in_archive(doc, '')
 
             if 'files' in data:
                 for file in data['files']:
@@ -105,15 +111,15 @@ def document(request, id):
                 'content_type': a['content_type'],
             } for n, a in data.get('attachments', {}).items()]
 
-            if doc.container:
-                up = doc.container.id
-            elif '/' in doc.path:
+            if '/' in doc.path:
                 up_path = doc.path.rsplit('/', 1)[0]
                 up = (
                     models.Document.objects
-                    .get(container=None, path=up_path)
+                    .get(container=doc.container, path=up_path)
                     .id
                 )
+            elif doc.container:
+                up = doc.container.id
             else:
                 up = 0
 

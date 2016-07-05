@@ -94,15 +94,24 @@ def list_files(doc):
     if not base.is_dir():
         extract_to_base(doc)
 
-    filelist = []
+    file_list = []
+    folder_list = []
 
-    for root, dirs, files in os.walk(str(base.resolve())):
+    for root, dirs, files in os.walk(str(base)):
         for file in files:
             abs = Path(root) / file
             rel = abs.relative_to(base)
-            filelist.append(str(rel))
+            file_list.append(str(rel))
+        for folder in dirs:
+            print(folder)
+            abs = Path(root) / folder
+            rel = abs.relative_to(base)
+            folder_list.append(str(rel))
 
-    return filelist
+    return {
+        'file_list': file_list,
+        'folder_list': folder_list,
+    }
 
 def open_file(doc, name):
     path = CACHE_ROOT / doc.sha1 / name
