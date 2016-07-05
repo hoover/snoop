@@ -24,6 +24,11 @@ def other_temps(sha1, current_dir):
             return True
     return False
 
+def mark_broken(tmpdir):
+    tmppath = Path(tmpdir)
+    newpath = tmppath.with_name('broken_' + tmppath.name)
+    shutil.move(tmpdir, str(newpath))
+
 def extract_to_base(doc):
     if not settings.SEVENZIP_BINARY:
         raise RuntimeError
@@ -32,7 +37,10 @@ def extract_to_base(doc):
     if base.is_dir():
         return
 
-    tmpdir = tempfile.mkdtemp(prefix=doc.sha1, dir=str(CACHE_ROOT), suffix='tmp')
+    tmpdir = tempfile.mkdtemp(
+        prefix=doc.sha1,
+        dir=str(CACHE_ROOT),
+        suffix='_tmp')
 
     if other_temps(doc.sha1, tmpdir):
         shutil.rmtree(tmpdir)
@@ -44,29 +52,32 @@ def extract_to_base(doc):
         else:
             with doc.open() as f:
                 shutil.copyfileobj(f, tmparchive, length=4*1024*1024)
-            path = tmparchive
+            path = tmparchive.name
 
-        out = ""
         try:
-            out = subprocess.check_output([
+            print('starting')
+            subprocess.check_output([
                 settings.SEVENZIP_BINARY,
                 '-y',
                 '-pp',
-                'e',
+                'x',
                 path,
                 '-o' + tmpdir,
             ], stderr=subprocess.STDOUT)
-        except subprocess.CalledProcessError:
-            tmppath = Path(tmpdir)
-            newpath = tmppath.with_name('broken_' + tmppath.name)
-            shutil.move(tmpdir, str(newpath))
 
-            if "Wrong password" in out:
+        except subprocess.CalledProcessError as e:
+            mark_broken(tmpdir)
+
+            if "Wrong password" in e.output.decode():
                 raise EncryptedArchiveFile
             else:
-                raise RuntimeError("7z failed")
-
-    shutil.move(tmpdir, str(base))
+                shutil.copy(path, '/tmp/file.zip')
+                raise RuntimeError("7z failed: " + e.output.decode())
+        except Exception:
+            mark_broken(tmpdir)
+            raise
+        else:
+            shutil.move(tmpdir, str(base))
 
 
 @models.cache(models.ArchiveListCache, lambda doc: doc.sha1)
