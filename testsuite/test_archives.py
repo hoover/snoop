@@ -15,6 +15,9 @@ ZIP_SIMPLE = {
         "AppBody-Sample-English.docx",
         "sample.doc"
     ],
+    'sha1': 'f7bafa8f401d5327cd69423ba83cdac3b6e6b945',
+    'filename': 'zip-with-docx-and-doc.zip',
+    'type': 'archive',
 }
 
 RAR_SIMPLE = {
@@ -25,14 +28,15 @@ RAR_SIMPLE = {
         "Sample_BulletsAndNumberings.docx",
         "cap33.pdf"
     ],
+    'md5': '0aa545beed4b0b7bc2b16bc87eebeff9',
+    'filename': 'rar-with-pdf-doc-docx.rar',
+    'type': 'archive',
 }
 
 EML_SIMPLE = {
     'parent': None,
     'path': "eml-2-attachment/Urăsc canicula, e nașpa.eml",
-    'files': [
-        '?'
-    ],
+    'type': 'email',
 }
 
 ZIP_ATTACHMENT = {
@@ -42,6 +46,8 @@ ZIP_ATTACHMENT = {
     'files': [
         'cap33.pdf'
     ],
+    'sha1': 'cb191b36eee4b6b3a9db58199ff2bad61af2f635',
+    'type': 'archive',
 }
 
 @pytest.fixture(autouse=True)
@@ -63,33 +69,67 @@ def doc_obj(obj):
                           content_type=content_type,
                           filename=filename)
     doc.save = lambda *a, **k: None
-    if obj['parent']:
+    if obj.get('sha1'):
+        doc.sha1 = obj['sha1']
+    if obj.get('parent'):
         doc.container = doc_obj(obj['parent'])
     return doc
 
 def digest_obj(obj):
     return digest.digest(doc_obj(obj))
 
-def test_simple_zip_archive():
-    data = digest_obj(ZIP_SIMPLE)
+def assert_archive_consistence(obj):
+    data = digest_obj(obj)
+    keys = ['filename', 'sha1', 'md5', 'type', 'text']
+    for key in keys:
+        if key in obj:
+            assert obj[key] == data[key]
 
-    assert 'archive' == data.get('type')
-    assert set(ZIP_SIMPLE['files']) == set(data.get('file_list'))
-    assert 'zip-with-docx-and-doc.zip' == data.get('filename')
-    assert 'f7bafa8f401d5327cd69423ba83cdac3b6e6b945' == data.get('sha1')
+    if 'files' in obj:
+        assert set(obj['files']) == set(data['file_list'])
+
+
+def test_simple_zip_archive():
+    assert_archive_consistence(ZIP_SIMPLE)
 
 def test_simple_rar_archive():
-    data = digest_obj(RAR_SIMPLE)
-
-    assert 'archive' == data.get('type')
-    assert set(RAR_SIMPLE['files']) == set(data.get('file_list'))
-    assert '0aa545beed4b0b7bc2b16bc87eebeff9' == data.get('md5')
-    assert 'rar-with-pdf-doc-docx.rar' == data.get('filename')
+    assert_archive_consistence(RAR_SIMPLE)
 
 def test_zip_attachment():
-    data = digest_obj(ZIP_ATTACHMENT)
+    assert_archive_consistence(ZIP_ATTACHMENT)
 
-    assert 'archive' == data.get('type')
-    assert set(ZIP_ATTACHMENT['files']) == set(data.get('file_list'))
-    assert 'cb191b36eee4b6b3a9db58199ff2bad61af2f635'  == data.get('sha1')
-    assert 'zip-with-pdf.zip' == data.get('filename')
+SEVENZ = {
+    "parent": None,
+    "path": "eml-7-recursive/d.7z",
+    'files': ['this/is/deep/recursivitate.eml'],
+    'sha1': 'f5fc5a8221cff1f5a621bac4d46ebaf44acdd08a',
+    'type': 'archive',
+}
+
+SEVENZ_EMAIL = {
+    'parent': SEVENZ,
+    'path': "this/is/deep/recursivitate.eml",
+    'sha1': '0e366a509c4eb2232375fa7488259fbd261618db',
+    'type': 'email',
+}
+
+SEVENZ_EMAIL_ZIP = {
+    'parent': SEVENZ_EMAIL,
+    'path': '3',
+    'filename': 'a.zip',
+    'type': 'archive',
+    'sha1': '3ac46acf315c3d24d7d3577a66fd94e93992dcfe',
+}
+
+SEVENZ_EMAIL_ZIP_FILE = {
+    'parent': SEVENZ_EMAIL_ZIP,
+    'path': 'a/b/c.txt',
+    'type': 'text',
+    'text': 'GET OUT OF MY LIFE, JILL\n\n',
+}
+
+def test_complex_container_structure():
+    assert_archive_consistence(SEVENZ)
+    assert_archive_consistence(SEVENZ_EMAIL)
+    assert_archive_consistence(SEVENZ_EMAIL_ZIP)
+    assert_archive_consistence(SEVENZ_EMAIL_ZIP_FILE)

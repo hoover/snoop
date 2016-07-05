@@ -103,7 +103,6 @@ def list_files(doc):
             rel = abs.relative_to(base)
             file_list.append(str(rel))
         for folder in dirs:
-            print(folder)
             abs = Path(root) / folder
             rel = abs.relative_to(base)
             folder_list.append(str(rel))
