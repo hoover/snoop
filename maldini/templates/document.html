@@ -173,7 +173,7 @@
               </td>
               <td>
                 {% if attachment.id %}
-                  <a href="./{{ attachment.id }}/raw/{{ attachment.filename }}"
+                  <a href="./{{ attachment.id }}/raw/{{ attachment.get('filename', 'NO_NAME')}}"
                      class="btn btn-primary" role="button">Original file</a>
                 {% else %}
                   <code>-- broken link --</code>
