@@ -91,6 +91,7 @@ def create_children(doc, data, verbose=True):
                 'path': name,
                 'content_type': info['content_type'],
                 'filename': info['filename'],
+                'size': info['size'],
             })
     elif archives.is_archive(doc):
         for path in data['file_list']:
@@ -98,6 +99,7 @@ def create_children(doc, data, verbose=True):
                 'path': path,
                 'content_type': guess_content_type(path),
                 'filename': Path(path).name,
+                'size': 0,
             })
 
     for info in children_info:
@@ -105,7 +107,7 @@ def create_children(doc, data, verbose=True):
             container=doc,
             path=info['path'],
             defaults={
-                'disk_size': 0,
+                'disk_size': info['size'],
                 'content_type': info['content_type'],
                 'filename': info['filename'],
             },
