@@ -5,6 +5,7 @@ import tempfile
 from django.conf import settings
 import shutil
 from maldini import models
+from maldini.content_types import guess_filetype
 
 CACHE_ROOT = Path(settings.ARCHIVE_CACHE_ROOT)
 
@@ -112,12 +113,8 @@ def open_file(doc, name):
     return path.open('rb')
 
 def is_archive(doc):
-    return doc.content_type in [
-        'application/zip',
-        'application/x-zip',
-        'application/x-gzip',
-        'application/x-zip-compressed',
-        'application/rar',
-        'application/x-rar-compressed',
-        'application/x-7z-compressed',
+    return guess_filetype(doc) == 'archive' and \
+           doc.content_type not in [
+            'application/x-tar',
+            'application/x-bzip2',
     ]
