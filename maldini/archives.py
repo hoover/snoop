@@ -24,10 +24,28 @@ def other_temps(sha1, current_dir):
             return True
     return False
 
-def mark_broken(tmpdir):
+def mark_broken(tmpdir, archive_path):
     tmppath = Path(tmpdir)
     newpath = tmppath.with_name('broken_' + tmppath.name)
     shutil.move(tmpdir, str(newpath))
+    shutil.copy(archive_path, str(newpath))
+
+def call_7z(archive_path, output_dir):
+    try:
+        subprocess.check_output([
+            settings.SEVENZIP_BINARY,
+            '-y',
+            '-pp',
+            'x',
+            archive_path,
+            '-o' + output_dir,
+        ], stderr=subprocess.STDOUT)
+
+    except subprocess.CalledProcessError as e:
+        if "Wrong password" in e.output.decode():
+            raise EncryptedArchiveFile
+        else:
+            raise RuntimeError("7z failed: " + e.output.decode())
 
 def extract_to_base(doc):
     if not settings.SEVENZIP_BINARY:
@@ -46,38 +64,27 @@ def extract_to_base(doc):
         shutil.rmtree(tmpdir)
         raise RuntimeError("Another worker has taken this one")
 
-    with tempfile.NamedTemporaryFile(suffix=doc.filename) as tmparchive:
-        if not doc.container:
-            path = str(doc.absolute_path)
-        else:
-            with doc.open() as f:
-                shutil.copyfileobj(f, tmparchive, length=4*1024*1024)
-            path = tmparchive.name
+    if not doc.container:
+        temp = False
+        path = str(doc.absolute_path)
+    else:
+        temp = True
+        path = tempfile.mktemp(suffix=doc.filename)
+        with doc.open() as f, open(path, 'wb') as g:
+            shutil.copyfileobj(f, g, length=4*1024*1024)
 
-        try:
-            print('starting')
-            subprocess.check_output([
-                settings.SEVENZIP_BINARY,
-                '-y',
-                '-pp',
-                'x',
-                path,
-                '-o' + tmpdir,
-            ], stderr=subprocess.STDOUT)
+    try:
+        call_7z(path, tmpdir)
 
-        except subprocess.CalledProcessError as e:
-            mark_broken(tmpdir)
-
-            if "Wrong password" in e.output.decode():
-                raise EncryptedArchiveFile
-            else:
-                shutil.copy(path, '/tmp/file.zip')
-                raise RuntimeError("7z failed: " + e.output.decode())
-        except Exception:
-            mark_broken(tmpdir)
-            raise
-        else:
-            shutil.move(tmpdir, str(base))
+    except Exception:
+        mark_broken(tmpdir, path)
+        if temp:
+            os.remove(path)
+        raise
+    else:
+        shutil.move(tmpdir, str(base))
+        if temp:
+            os.remove(path)
 
 
 @models.cache(models.ArchiveListCache, lambda doc: doc.sha1)
