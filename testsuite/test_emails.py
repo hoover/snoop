@@ -14,6 +14,9 @@ MAIL_PATH_LONG_FILENAMES = "eml-5-long-names/Attachments have " \
                            "long file names..eml"
 MAIL_PATH_NO_SUBJECT = "eml-2-attachment/message-without-subject.eml"
 
+MAIL_PATH_DOUBLE_DECODE_ATTACHMENT_FILENAME = "eml-8-double-encoded/double-" \
+                                              "encoding.eml"
+
 def parse_email(path):
     doc = models.Document(path=path, content_type='message/rfc822')
     return emails.parse_email(doc)
@@ -87,3 +90,14 @@ def test_tree_with_attachments():
 
     for part in tree['parts']:
         assert 'headers' in part.keys()
+
+def test_double_decoding_of_attachment_filenames():
+    data = parse_email(MAIL_PATH_DOUBLE_DECODE_ATTACHMENT_FILENAME)
+    without_encoding = "atașament_pârș.jpg"
+    simple_encoding = "=?utf-8?b?YXRhyJlhbWVudF9ww6JyyJkuanBn?="
+    double_encoding = "=?utf-8?b?PT91dGYtOD9iP1lYUmh5S" \
+                      "mxoYldWdWRGOXd3Nkp5eUprdWFuQm4/PQ==?="
+
+    filenames = [at[1]['filename'] for at in data.get('attachments').items()]
+    assert double_encoding not in filenames
+    assert {simple_encoding, without_encoding} == set(filenames)
