@@ -44,12 +44,12 @@
       {% endif %}
 
       {% if data.type != 'folder' %}
-        <a href="./{{ id }}/raw/{{ data.filename }}"
+        <a href="./{{ id }}/raw/{{ uriencode(data.filename) }}"
            class="btn btn-primary" role="button">Original file</a>
       {% endif %}
 
       {% for tag in data.get('ocr', {}) %}
-        <a href="./{{ id }}/ocr/{{ tag }}/{{ data.filename }}"
+        <a href="./{{ id }}/ocr/{{ tag }}/{{ uriencode(data.filename) }}"
            class="btn btn-secondary" role="button">OCR {{ tag }}</a>
       {% endfor %}
     </div>

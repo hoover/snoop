@@ -4,6 +4,7 @@ from pprint import pformat
 from django.http import HttpResponse, FileResponse
 from django.shortcuts import get_object_or_404, render
 from django.conf import settings
+from django.utils.encoding import filepath_to_uri
 from jinja2 import Environment
 from . import models
 from .digest import digest
@@ -18,7 +19,8 @@ with path.open('r') as f:
 def environment(**options):
     env = Environment(**options)
     env.globals.update({
-        'css': BOOTSTRP_CSS
+        'css': BOOTSTRP_CSS,
+        'uriencode': filepath_to_uri,
     })
     return env
 
