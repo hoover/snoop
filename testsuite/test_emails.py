@@ -13,6 +13,8 @@ MAIL_PATH_AMERICAN = "eml-3-uppercaseheaders/Fwd: The American College " \
 MAIL_PATH_LONG_FILENAMES = "eml-5-long-names/Attachments have " \
                            "long file names..eml"
 MAIL_PATH_NO_SUBJECT = "eml-2-attachment/message-without-subject.eml"
+MAIL_PATH_OCTET_STREAM_CONTENT_TYPE = "eml-2-attachment/attachments-have-" \
+                                      "octet-stream-content-type.eml"
 
 MAIL_PATH_DOUBLE_DECODE_ATTACHMENT_FILENAME = "eml-8-double-encoded/double-" \
                                               "encoding.eml"
@@ -101,3 +103,10 @@ def test_double_decoding_of_attachment_filenames():
     filenames = [at[1]['filename'] for at in data.get('attachments').items()]
     assert double_encoding not in filenames
     assert {simple_encoding, without_encoding} == set(filenames)
+
+def test_attachment_with_octet_stream_content_type():
+    data = parse_email(MAIL_PATH_OCTET_STREAM_CONTENT_TYPE)
+
+    assert data['attachments']['2']['content_type'] == 'application/msword'
+    assert data['attachments']['3']['content_type'] == 'application/zip'
+    assert data['attachments']['4']['content_type'] == 'image/png'

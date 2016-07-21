@@ -10,6 +10,7 @@ from pathlib import Path
 from django.conf import settings
 from . import models
 from .utils import chunks, text_from_html
+from .content_types import guess_content_type
 
 
 def decode_header(header):
@@ -160,9 +161,12 @@ class EmailParser(object):
             filename = part.get_filename()
             if not filename: continue
             filename = decode_header(filename)
+            content_type = part.get_content_type().lower()
+            if content_type == "application/octet-stream":
+                content_type = guess_content_type(filename)
 
             rv[number] = {
-                'content_type': part.get_content_type().lower(),
+                'content_type': content_type,
                 'filename': filename,
                 'size': len(part.get_payload()),
             }
