@@ -156,3 +156,8 @@ class TikaLangCache(models.Model):
     sha1 = models.CharField(max_length=50, primary_key=True)
     value = models.CharField(max_length=20)
     time = models.DateTimeField(auto_now=True)
+
+class HtmlTextCache(models.Model):
+    sha1 = models.CharField(max_length=50, primary_key=True)
+    value = models.TextField()
+    time = models.DateTimeField(auto_now=True)
