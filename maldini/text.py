@@ -1,5 +1,6 @@
 import chardet
 from .utils import text_from_html
+from . import models
 
 def decode_bytes(content):
     try:
@@ -17,6 +18,7 @@ def decode_bytes(content):
         print("falling back to latin-1")
         return content.decode('latin-1')
 
+@models.cache(models.HtmlTextCache, lambda doc: doc.id)
 def get_text(doc):
     with doc.open() as f:
         content = f.read()
