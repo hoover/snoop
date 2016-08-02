@@ -2,7 +2,7 @@ pip-tools
 psycopg2
 pathlib
 beautifulsoup4
-Django
+Django<1.10
 elasticsearch
 simplejson
 waitress
