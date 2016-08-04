@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from dateutil import parser
 from pprint import pformat
@@ -9,7 +10,6 @@ from jinja2 import Environment
 from . import models
 from .digest import digest
 from .walker import files_in
-
 BOOTSTRP_CSS = ""
 
 path = Path(settings.BASE_DIR) / 'assets' / 'bootstrap.min.css'
@@ -23,6 +23,13 @@ def environment(**options):
         'uriencode': filepath_to_uri,
     })
     return env
+
+def _format_size(num):
+    for unit in ['', 'KB', 'MB', 'GB', 'TB']:
+        if abs(num) < 1024.0:
+            return "%3.1f %s" % (num, unit)
+        num /= 1024.0
+    return "%3.1f %s" % (num, 'PB')
 
 def _format_date(date_value):
     return parser.parse(date_value).strftime("%d %B %Y")
@@ -42,6 +49,17 @@ def document_ocr(request, id, tag):
         ocr.absolute_path.open('rb'),
         content_type='application/pdf',
     )
+
+def files_in_archive(doc, path):
+    children = models.Document.objects.filter(
+        container=doc,
+        path__iregex=r'^' + re.escape(path) + r'[^/]+$')
+    return [{
+                'id': child.id,
+                'filename': child.filename,
+                'size': child.disk_size,
+                'content_type': child.content_type,
+            } for child in children]
 
 def document(request, id):
     up = None
@@ -65,7 +83,16 @@ def document(request, id):
 
         else:
             if data.get('type') == 'folder':
-                data['files'] = files_in(doc.path + '/')
+                if doc.container:
+                    data['files'] = files_in_archive(doc.container, doc.path + '/')
+                else:
+                    data['files'] = files_in(doc.path + '/')
+            elif data.get('type') == 'archive':
+                data['files'] = files_in_archive(doc, '')
+
+            if 'files' in data:
+                for file in data['files']:
+                    file['size'] = _format_size(file['size'])
 
             def attachment_id(n):
                 try:
@@ -84,15 +111,15 @@ def document(request, id):
                 'content_type': a['content_type'],
             } for n, a in data.get('attachments', {}).items()]
 
-            if doc.container:
-                up = doc.container.id
-            elif '/' in doc.path:
+            if '/' in doc.path:
                 up_path = doc.path.rsplit('/', 1)[0]
                 up = (
                     models.Document.objects
-                    .get(container=None, path=up_path)
+                    .get(container=doc.container, path=up_path)
                     .id
                 )
+            elif doc.container:
+                up = doc.container.id
             else:
                 up = 0
 

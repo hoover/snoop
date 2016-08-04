@@ -118,7 +118,7 @@
 
           <tr>
             <td> To:</td>
-            <td>{{ data.get('to')|join(', ') }}</td>
+            <td>{{ data.get('to', [])|join(', ') }}</td>
           </tr>
 
           <tr>
@@ -173,7 +173,7 @@
               </td>
               <td>
                 {% if attachment.id %}
-                  <a href="./{{ attachment.id }}/raw/{{ attachment.filename }}"
+                  <a href="./{{ attachment.id }}/raw/{{ attachment.get('filename', 'NO_NAME')}}"
                      class="btn btn-primary" role="button">Original file</a>
                 {% else %}
                   <code>-- broken link --</code>
@@ -191,19 +191,47 @@
 
 
 
-  {% if data.type == 'folder' %}
+  {% if data.type in ['folder', 'archive'] %}
     <div class="row">
       <div class="col-lg-12">
         <h5>Files:</h5>
-        <ul>
+        <table class="table table-striped table-sm">
+          <thead>
+          <tr>
+            <th>Filename</th>
+            <th>Content-Type</th>
+            <th>Size</th>
+            <th>Open</th>
+          </tr>
+          </thead>
+          <tbody>
           {% for file in data.files %}
-            <li>
-              <a href="{{ file.id }}">
-                {{ file.filename }}
-              </a>
-            </li>
+            <tr>
+              <td>
+                {% if file.id %}
+                  <a href="./{{ file.id }}">{{ file.filename }}</a>
+                {% else %}
+                  {{ file.filename }}
+                {% endif %}
+              </td>
+              <td>
+                {{ file.content_type }}
+              </td>
+              <td>
+                {{ file.size }}
+              </td>
+              <td>
+                {% if file.id %}
+                  <a href="./{{ file.id }}" class="btn btn-info"
+                     role="button">Open</a>
+                {% else %}
+                  <code>-- broken link --</code>
+                {% endif %}
+              </td>
+            </tr>
           {% endfor %}
-        </ul>
+          </tbody>
+        </table>
       </div>
     </div>
   {% endif %}

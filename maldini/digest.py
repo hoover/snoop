@@ -1,51 +1,15 @@
 from django.conf import settings
 import hashlib
 import json
+from pathlib import Path
 from .tikalib import tika_parse, extract_meta, tika_lang
 from . import emails
 from . import text
 from . import queues
 from . import models
+from . import archives
+from .content_types import guess_content_type, guess_filetype
 from .utils import chunks
-
-FILE_TYPES = {
-    'application/x-directory': 'folder',
-    'application/pdf': 'pdf',
-    'text/plain': 'text',
-    'text/html': 'html',
-    'message/x-emlx': 'email',
-    'message/rfc822': 'email',
-    'application/vnd.ms-outlook': 'email',
-
-    'application/msword': 'doc',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'doc',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.template': 'doc',
-    'application/vnd.ms-word.document.macroEnabled.12': 'doc',
-    'application/vnd.ms-word.template.macroEnabled.12': 'doc',
-    'application/vnd.oasis.opendocument.text': 'doc',
-    'application/vnd.oasis.opendocument.text-template': 'doc',
-    'application/rtf': 'doc',
-
-    'application/vnd.ms-excel': 'xls',
-    'application/vnd.openxlsformats-officedocument.spreadsheetml.sheet': 'xls',
-    'application/vnd.openxlsformats-officedocument.spreadsheetml.template': 'xls',
-    'application/vnd.ms-excel.sheet.macroEnabled.12': 'xls',
-    'application/vnd.ms-excel.template.macroEnabled.12': 'xls',
-    'application/vnd.ms-excel.addin.macroEnabled.12': 'xls',
-    'application/vnd.ms-excel.sheet.binary.macroEnabled.12': 'xls',
-    'application/vnd.oasis.opendocument.spreadsheet-template': 'xls',
-    'application/vnd.oasis.opendocument.spreadsheet': 'xls',
-
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'ppt',
-    'application/vnd.openxmlformats-officedocument.presentationml.template': 'ppt',
-    'application/vnd.openxmlformats-officedocument.presentationml.slideshow': 'ppt',
-    'application/vnd.ms-powerpoint.addin.macroEnabled.12': 'ppt',
-    'application/vnd.ms-powerpoint.presentation.macroEnabled.12': 'ppt',
-    'application/vnd.ms-powerpoint.template.macroEnabled.12': 'ppt',
-    'application/vnd.ms-powerpoint.slideshow.macroEnabled.12': 'ppt',
-    'application/vnd.oasis.opendocument.presentation': 'ppt',
-    'application/vnd.oasis.opendocument.presentation-template': 'ppt',
-}
 
 def _path_bits(doc):
     if doc.container:
@@ -58,7 +22,6 @@ def _path_bits(doc):
         yield doc.path
 
 def _calculate_hashes(opened_file):
-    BUF_SIZE = 65536
 
     md5 = hashlib.md5()
     sha1 = hashlib.sha1()
@@ -70,12 +33,6 @@ def _calculate_hashes(opened_file):
     fsize = opened_file.tell()
 
     return (md5.hexdigest(), sha1.hexdigest(), fsize)
-
-def guess_filetype(doc):
-
-    content_type = doc.content_type.split(';')[0]  # for: text/plain; charset=ISO-1234
-
-    return FILE_TYPES.get(content_type)
 
 def digest(doc):
     if not doc.sha1:
@@ -96,10 +53,10 @@ def digest(doc):
         'rev': doc.rev,
     }
 
-    if doc.container_id is None:
-        if emails.is_email(doc):
-            data.update(emails.parse_email(doc))
-    else:
+    if emails.is_email(doc):
+        data.update(emails.parse_email(doc))
+
+    if doc.container_id:
         data['message'] = doc.container_id
 
     filetype = guess_filetype(doc)
@@ -121,15 +78,43 @@ def digest(doc):
     if ocr_items:
         data['ocr'] = {ocr.tag: ocr.text for ocr in ocr_items}
 
+    if archives.is_archive(doc):
+        data.update(archives.list_files(doc))
+
     return data
 
 def create_children(doc, data, verbose=True):
-    for name, info in data.get('attachments', {}).items():
+    children_info = []
+    if emails.is_email(doc):
+        for name, info in data.get('attachments', {}).items():
+            children_info.append({
+                'path': name,
+                'content_type': info['content_type'],
+                'filename': info['filename'],
+                'size': info['size'],
+            })
+    elif archives.is_archive(doc):
+        for path in data['file_list']:
+            children_info.append({
+                'path': path,
+                'content_type': guess_content_type(path),
+                'filename': Path(path).name,
+                'size': 0,
+            })
+        for path in data['folder_list']:
+            children_info.append({
+                'path': path,
+                'content_type': 'application/x-directory',
+                'filename': Path(path).name,
+                'size': 0,
+            })
+
+    for info in children_info:
         child, created = models.Document.objects.update_or_create(
             container=doc,
-            path=name,
+            path=info['path'],
             defaults={
-                'disk_size': 0,
+                'disk_size': info['size'],
                 'content_type': info['content_type'],
                 'filename': info['filename'],
             },
@@ -165,6 +150,18 @@ def worker(id, verbose):
         document.broken = 'corrupted_file'
         document.save()
         if verbose: print('corrupted_file')
+        return
+
+    except archives.EncryptedArchiveFile:
+        document.broken = 'encrypted archive'
+        document.save()
+        if verbose: print('encrypted archive')
+        return
+
+    except archives.MissingArchiveFile:
+        document.broken = 'missing archive file'
+        document.save()
+        if verbose: print('missing archive file')
         return
 
     else:

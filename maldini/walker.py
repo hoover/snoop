@@ -1,16 +1,9 @@
 from pathlib import Path
-import mimetypes
 import re
 from . import models
-
-mimetypes.add_type('message/x-emlx', '.emlx')
-mimetypes.add_type('message/x-emlxpart', '.emlxpart')
-mimetypes.add_type('application/vnd.ms-outlook', '.msg')
+from .content_types import guess_content_type
 
 FOLDER = 'application/x-directory'
-
-def mime_type(name):
-    return mimetypes.guess_type(name, strict=False)[0]
 
 class Walker(object):
 
@@ -66,7 +59,7 @@ class Walker(object):
         print('FILE', path)
         models.Document.objects.get_or_create(path=path, defaults={
             'disk_size': file.stat().st_size,
-            'content_type': mime_type(file.name) or '',
+            'content_type': guess_content_type(file.name),
             'filename': path.name,
         })
 
@@ -77,7 +70,9 @@ def files_in(parent_path):
     )
     return [{
         'id': child.id,
-        'filename': child.path[len(parent_path):]
+        'filename': child.path[len(parent_path):],
+        'size': child.disk_size,
+        'content_type': child.content_type,
     } for child in child_documents]
 
 def _fix_mimetypes():
@@ -91,7 +86,7 @@ def _fix_mimetypes():
 
         else:
             if doc.container_id is None:
-                content_type = mime_type(Path(doc.path).name)
+                content_type = guess_content_type(Path(doc.path).name)
                 if content_type:
                     print('adding', doc.id, content_type)
                     doc.content_type = content_type

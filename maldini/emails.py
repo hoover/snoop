@@ -164,6 +164,7 @@ class EmailParser(object):
             rv[number] = {
                 'content_type': part.get_content_type().lower(),
                 'filename': filename,
+                'size': len(part.get_payload()),
             }
 
         return rv
