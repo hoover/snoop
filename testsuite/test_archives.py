@@ -1,12 +1,10 @@
 import pytest
 import shutil
 from pathlib import Path
+import tempfile
 from django.conf import settings
-from maldini import digest, models
+from maldini import digest, models, archives
 from maldini.content_types import guess_content_type
-
-CACHE_ROOT = Path(settings.ARCHIVE_CACHE_ROOT)
-
 
 ZIP_SIMPLE = {
     'parent': None,
@@ -56,11 +54,11 @@ def no_ocr_models(monkeypatch):
     monkeypatch.setattr(models.Ocr.objects, "filter", func_empty_list)
     monkeypatch.setattr(models.Ocr.objects, "all", func_empty_list)
 
-@pytest.fixture(autouse=True)
-def clean_archive_dir():
-    if CACHE_ROOT.is_dir():
-        shutil.rmtree(str(CACHE_ROOT))
-    CACHE_ROOT.mkdir()
+@pytest.yield_fixture(autouse=True)
+def archive_dir(monkeypatch):
+    with tempfile.TemporaryDirectory() as tmp:
+        monkeypatch.setattr(archives, 'CACHE_ROOT', Path(tmp))
+        yield
 
 def doc_obj(obj):
     filename = obj.get('filename') or obj['path'].split('/')[-1]

@@ -7,7 +7,10 @@ import shutil
 from maldini import models
 from maldini.content_types import guess_filetype
 
-CACHE_ROOT = Path(settings.ARCHIVE_CACHE_ROOT)
+if settings.ARCHIVE_CACHE_ROOT:
+    CACHE_ROOT = Path(settings.ARCHIVE_CACHE_ROOT)
+else:
+    CACHE_ROOT = None
 
 class MissingArchiveFile(Exception):
     pass
