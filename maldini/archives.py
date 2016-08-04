@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 from django.conf import settings
 import shutil
+from contextlib import contextmanager
 from maldini import models
 from maldini.content_types import guess_filetype
 
@@ -50,6 +51,20 @@ def call_7z(archive_path, output_dir):
         else:
             raise RuntimeError("7z failed: " + e.output.decode())
 
+@contextmanager
+def _file_on_disk(doc):
+    if doc.container:
+        MB = 1024*1024
+        suffix = Path(doc.filename).suffix
+        with tempfile.NamedTemporaryFile(suffix=suffix) as tmp:
+            with doc.open() as f:
+                shutil.copyfileobj(f, tmp, length=4*MB)
+                tmp.flush()
+            yield Path(tmp.name)
+
+    else:
+        yield doc.absolute_path
+
 def extract_to_base(doc):
     if not settings.SEVENZIP_BINARY:
         raise RuntimeError
@@ -67,27 +82,16 @@ def extract_to_base(doc):
         shutil.rmtree(tmpdir)
         raise RuntimeError("Another worker has taken this one")
 
-    if not doc.container:
-        temp = False
-        path = str(doc.absolute_path)
-    else:
-        temp = True
-        path = tempfile.mktemp(suffix=doc.filename)
-        with doc.open() as f, open(path, 'wb') as g:
-            shutil.copyfileobj(f, g, length=4*1024*1024)
+    with _file_on_disk(doc) as archive:
+        try:
+            call_7z(str(archive), tmpdir)
 
-    try:
-        call_7z(path, tmpdir)
+        except Exception:
+            mark_broken(tmpdir, str(archive))
+            raise
 
-    except Exception:
-        mark_broken(tmpdir, path)
-        if temp:
-            os.remove(path)
-        raise
-    else:
-        shutil.move(tmpdir, str(base))
-        if temp:
-            os.remove(path)
+        else:
+            shutil.move(tmpdir, str(base))
 
 
 @models.cache(models.ArchiveListCache, lambda doc: doc.sha1)
