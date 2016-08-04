@@ -15,8 +15,7 @@ class MissingArchiveFile(Exception):
 class EncryptedArchiveFile(Exception):
     pass
 
-def other_temps(sha1, current_dir):
-    current = Path(current_dir).name
+def _other_temps(sha1, current):
     for dir in CACHE_ROOT.iterdir():
         if dir.name == current:
             continue
@@ -61,7 +60,7 @@ def extract_to_base(doc):
         dir=str(CACHE_ROOT),
         suffix='_tmp')
 
-    if other_temps(doc.sha1, tmpdir):
+    if _other_temps(doc.sha1, Path(tmpdir).name):
         shutil.rmtree(tmpdir)
         raise RuntimeError("Another worker has taken this one")
 
