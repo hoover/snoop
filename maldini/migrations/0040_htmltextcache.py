@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('maldini', '0038_document_flags'),
+        ('maldini', '0039_archivelistcache'),
     ]
 
     operations = [
