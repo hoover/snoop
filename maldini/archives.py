@@ -28,21 +28,15 @@ def _other_temps(sha1, current):
             return True
     return False
 
-def mark_broken(tmpdir, archive_path):
-    tmppath = Path(tmpdir)
-    newpath = tmppath.with_name('broken_' + tmppath.name)
-    shutil.move(tmpdir, str(newpath))
-    shutil.copy(archive_path, str(newpath))
-
-def call_7z(archive_path, output_dir):
+def call_7z(archive, output_dir):
     try:
         subprocess.check_output([
             settings.SEVENZIP_BINARY,
             '-y',
             '-pp',
             'x',
-            archive_path,
-            '-o' + output_dir,
+            str(archive),
+            '-o' + str(output_dir),
         ], stderr=subprocess.STDOUT)
 
     except subprocess.CalledProcessError as e:
@@ -73,25 +67,26 @@ def extract_to_base(doc):
     if base.is_dir():
         return
 
-    tmpdir = tempfile.mkdtemp(
+    tmp = Path(tempfile.mkdtemp(
         prefix=doc.sha1,
         dir=str(CACHE_ROOT),
-        suffix='_tmp')
+        suffix='_tmp',
+    ))
 
-    if _other_temps(doc.sha1, Path(tmpdir).name):
-        shutil.rmtree(tmpdir)
+    if _other_temps(doc.sha1, tmp.name):
+        shutil.rmtree(str(tmp))
         raise RuntimeError("Another worker has taken this one")
 
     with _file_on_disk(doc) as archive:
         try:
-            call_7z(str(archive), tmpdir)
+            call_7z(archive, tmp)
 
         except Exception:
-            mark_broken(tmpdir, str(archive))
+            tmp.rename(tmp.with_name('broken_' + tmp.name))
             raise
 
         else:
-            shutil.move(tmpdir, str(base))
+            tmp.rename(base)
 
 
 @models.cache(models.ArchiveListCache, lambda doc: doc.sha1)
