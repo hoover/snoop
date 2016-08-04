@@ -1,6 +1,9 @@
 from pathlib import Path
 from io import BytesIO
 import json
+from contextlib import contextmanager
+import tempfile
+import shutil
 from django.db import models, transaction
 from django.contrib.postgres.fields import JSONField
 from django.conf import settings
@@ -65,9 +68,10 @@ class Document(models.Model):
 
     @property
     def absolute_path(self):
+        assert self.container is None
         return Path(settings.MALDINI_ROOT) / self.path
 
-    def open(self):
+    def _open_file(self):
         if self.content_type == 'application/x-directory':
             return BytesIO()
 
@@ -82,6 +86,36 @@ class Document(models.Model):
                 return archives.open_file(self.container, self.path)
 
         raise RuntimeError
+
+    @contextmanager
+    def open(self, filesystem=False):
+        """ Open the document as a file. If the document is inside an email or
+        archive, it will be copied to a temporary file:
+
+            with doc.open() as f:
+                f.read()
+
+        If ``filesystem`` is True, ``f`` will have a ``path`` attribute, which
+        is the absolute path of the file on disk.
+        """
+
+        with self._open_file() as f:
+            if filesystem:
+                if self.container:
+                    MB = 1024*1024
+                    suffix = Path(self.filename).suffix
+                    with tempfile.NamedTemporaryFile(suffix=suffix) as tmp:
+                        shutil.copyfileobj(f, tmp, length=4*MB)
+                        tmp.flush()
+                        tmp.path = Path(tmp.name)
+                        yield tmp
+
+                else:
+                    f.path = self.absolute_path
+                    yield f
+
+            else:
+                yield f
 
 class Ocr(models.Model):
     tag = models.CharField(max_length=100)

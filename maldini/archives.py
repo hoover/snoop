@@ -4,7 +4,6 @@ import subprocess
 import tempfile
 from django.conf import settings
 import shutil
-from contextlib import contextmanager
 from maldini import models
 from maldini.content_types import guess_filetype
 
@@ -28,14 +27,14 @@ def _other_temps(sha1, current):
             return True
     return False
 
-def call_7z(archive, output_dir):
+def call_7z(archive_path, output_dir):
     try:
         subprocess.check_output([
             settings.SEVENZIP_BINARY,
             '-y',
             '-pp',
             'x',
-            str(archive),
+            str(archive_path),
             '-o' + str(output_dir),
         ], stderr=subprocess.STDOUT)
 
@@ -44,20 +43,6 @@ def call_7z(archive, output_dir):
             raise EncryptedArchiveFile
         else:
             raise RuntimeError("7z failed: " + e.output.decode())
-
-@contextmanager
-def _file_on_disk(doc):
-    if doc.container:
-        MB = 1024*1024
-        suffix = Path(doc.filename).suffix
-        with tempfile.NamedTemporaryFile(suffix=suffix) as tmp:
-            with doc.open() as f:
-                shutil.copyfileobj(f, tmp, length=4*MB)
-                tmp.flush()
-            yield Path(tmp.name)
-
-    else:
-        yield doc.absolute_path
 
 def extract_to_base(doc):
     if not settings.SEVENZIP_BINARY:
@@ -77,9 +62,9 @@ def extract_to_base(doc):
         shutil.rmtree(str(tmp))
         raise RuntimeError("Another worker has taken this one")
 
-    with _file_on_disk(doc) as archive:
+    with doc.open(filesystem=True) as archive:
         try:
-            call_7z(archive, tmp)
+            call_7z(archive.path, tmp)
 
         except Exception:
             tmp.rename(tmp.with_name('broken_' + tmp.name))
