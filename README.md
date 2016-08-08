@@ -116,3 +116,11 @@ $ cpan -i Email::Outlook::Message
 
 Set `MSGCONVERT_SCRIPT` to the script's path.
 If it's installed system-wide, just use `msgconvert`.
+
+
+### `gpg` for Hushmail-like emails
+
+Set:
+   * `SNOOP_GPG_HOME`: path to the existing gpg home directory with keys to be used for decryption
+   * `SNOOP_GPG_BINARY`: path to the `gpg` binary to be used in conjuction with `SNOOP_GPG_HOME`
+

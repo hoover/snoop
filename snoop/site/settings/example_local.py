@@ -21,3 +21,6 @@ MSGCONVERT_SCRIPT = 'msgconvert'
 ARCHIVE_CACHE_ROOT = '/path/to/archive/cache'
 SEVENZIP_BINARY = '7z'
 ELASTICSEARCH_INDEX = 'hoover'
+
+SNOOP_GPG_HOME = '/path/to/gpg/home'
+SNOOP_GPG_BINARY = 'gpg'
