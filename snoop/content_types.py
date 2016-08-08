@@ -5,6 +5,8 @@ mimetypes.add_type('message/x-emlxpart', '.emlxpart')
 mimetypes.add_type('application/vnd.ms-outlook', '.msg')
 mimetypes.add_type('application/x-hoover-pst', '.pst')
 mimetypes.add_type('application/x-hoover-pst', '.ost')
+mimetypes.add_type('application/x-pgp-encrypted-ascii', '.asc')
+mimetypes.add_type('application/x-pgp-encrypted-binary', '.pgp')
 
 
 def guess_content_type(filename):
