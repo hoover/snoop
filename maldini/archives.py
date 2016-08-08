@@ -7,6 +7,16 @@ import shutil
 from maldini import models
 from maldini.content_types import guess_filetype
 
+KNOWN_TYPES = {
+    'application/zip',
+    'application/rar',
+    'application/x-7z-compressed',
+    'application/x-zip',
+    'application/x-gzip',
+    'application/x-zip-compressed',
+    'application/x-rar-compressed',
+}
+
 if settings.ARCHIVE_CACHE_ROOT:
     CACHE_ROOT = Path(settings.ARCHIVE_CACHE_ROOT)
 else:
@@ -107,8 +117,4 @@ def open_file(doc, name):
     return path.open('rb')
 
 def is_archive(doc):
-    return guess_filetype(doc) == 'archive' and \
-           doc.content_type not in [
-            'application/x-tar',
-            'application/x-bzip2',
-    ]
+    return doc.content_type in KNOWN_TYPES
