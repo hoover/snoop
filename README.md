@@ -132,3 +132,11 @@ Set `READPST_BINARY` to the binary's path.
 If it's installed system-wide, just use `readpst`.
 
 Set `SNOOP_PST_CACHE_ROOT` to an existing folder with write access.
+
+
+### `gpg` for Hushmail-like emails
+
+Set:
+   * `SNOOP_GPG_HOME`: path to the existing gpg home directory with keys to be used for decryption
+   * `SNOOP_GPG_BINARY`: path to the `gpg` binary to be used in conjuction with `SNOOP_GPG_HOME`
+
