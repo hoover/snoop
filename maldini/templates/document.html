@@ -48,6 +48,11 @@
            class="btn btn-primary" role="button">Original file</a>
       {% endif %}
 
+      {% if as_eml %}
+        <a href="./{{ id }}/eml/{{ as_eml }}"
+           class="btn btn-primary" role="button">as .eml file</a>
+      {% endif %}
+
       {% for tag in data.get('ocr', {}) %}
         <a href="./{{ id }}/ocr/{{ tag }}/{{ uriencode(data.filename) }}"
            class="btn btn-secondary" role="button">OCR {{ tag }}</a>

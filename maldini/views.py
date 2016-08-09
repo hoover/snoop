@@ -2,7 +2,7 @@ import re
 from pathlib import Path
 from dateutil import parser
 from pprint import pformat
-from django.http import HttpResponse, FileResponse
+from django.http import HttpResponse, FileResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, render
 from django.conf import settings
 from django.utils.encoding import filepath_to_uri
@@ -10,6 +10,7 @@ from jinja2 import Environment
 from . import models
 from .digest import digest
 from .walker import files_in
+from .emails import open_msg
 BOOTSTRP_CSS = ""
 
 path = Path(settings.BASE_DIR) / 'assets' / 'bootstrap.min.css'
@@ -61,6 +62,17 @@ def files_in_archive(doc, path):
                 'content_type': child.content_type,
             } for child in children]
 
+def _as_eml(doc):
+    if doc.content_type == 'application/vnd.ms-outlook':
+        return str(Path(doc.filename).with_suffix('.eml'))
+
+def document_as_eml(request, id):
+    doc = get_object_or_404(models.Document, id=id)
+    if not _as_eml(doc):
+        return HttpResponseNotFound()
+    with open_msg(doc) as f:
+        return HttpResponse(f.read(), content_type='message/rfc822')
+
 def document(request, id):
     up = None
     attachments = []
@@ -71,6 +83,7 @@ def document(request, id):
             'files': files_in(''),
         }
         ocr_tags = []
+        as_eml = False
 
     else:
         doc = get_object_or_404(models.Document, id=id)
@@ -123,6 +136,8 @@ def document(request, id):
             else:
                 up = 0
 
+        as_eml = _as_eml(doc)
+
     for field in ['date', 'date-created']:
         if data.get(field):
             data[field] = _format_date(data[field])
@@ -132,4 +147,5 @@ def document(request, id):
         'up': up,
         'data': data,
         'attachments': attachments,
+        'as_eml': as_eml,
     })

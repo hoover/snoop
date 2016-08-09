@@ -7,4 +7,5 @@ urlpatterns = [
     url(r'^doc/(?P<id>\d+)$', views.document),
     url(r'^(?s)doc/(?P<id>\d+)/raw/.*$', views.document_raw),
     url(r'^doc/(?P<id>\d+)/ocr/(?P<tag>[^/]+)/.*$', views.document_ocr),
+    url(r'^(?s)doc/(?P<id>\d+)/eml/.*$', views.document_as_eml),
 ]
