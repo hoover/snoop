@@ -11,4 +11,4 @@ class Command(BaseCommand):
         parser.add_argument('-r', action='store_true', dest='restart')
 
     def handle(self, prefix, restart, **options):
-        Walker.walk(0, settings.MALDINI_ROOT, prefix, restart)
+        Walker.walk(0, settings.SNOOP_ROOT, prefix, restart)

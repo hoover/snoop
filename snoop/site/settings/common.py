@@ -11,6 +11,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'maldini',
+    'snoop',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -24,7 +25,7 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'maldini.site.urls'
+ROOT_URLCONF = 'snoop.site.urls'
 
 TEMPLATES = [
     {
@@ -34,12 +35,12 @@ TEMPLATES = [
         ],
         'APP_DIRS': True,
         'OPTIONS': {
-            'environment': 'maldini.views.environment',
+            'environment': 'snoop.views.environment',
         },
     },
 ]
 
-WSGI_APPLICATION = 'maldini.site.wsgi.application'
+WSGI_APPLICATION = 'snoop.site.wsgi.application'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -80,7 +81,7 @@ LOGGING = {
             'propagate': False,
             'handlers': ['stderr'],
         },
-        'maldini': {
+        'snoop': {
             'level': 'INFO',
             'propagate': False,
             'handlers': ['stderr'],
@@ -100,11 +101,11 @@ LOGGING = {
     },
 }
 
-MALDINI_CACHE = True
-MALDINI_ANALYZE_LANG = True
+SNOOP_CACHE = True
+SNOOP_ANALYZE_LANG = True
 MSGCONVERT_SCRIPT = None
-MALDINI_MSG_CACHE = None
-MALDINI_OCR_ROOT = None
-MALDINI_FLAG_MSGCONVERT_FAIL = False
+SNOOP_MSG_CACHE = None
+SNOOP_OCR_ROOT = None
+SNOOP_FLAG_MSGCONVERT_FAIL = False
 SEVENZIP_BINARY = None
 ARCHIVE_CACHE_ROOT = None

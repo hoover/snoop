@@ -10,7 +10,7 @@ SECRET_KEY = 'some random secret key'
 DEBUG = True
 TIME_ZONE = 'Europe/Berlin'
 
-MALDINI_ROOT = '/path/to/test/data'
+SNOOP_ROOT = '/path/to/test/data'
 
 ELASTICSEARCH_URL = 'http://localhost:9200'
 

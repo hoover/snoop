@@ -1,6 +1,6 @@
 import pytest
-from maldini import digest, models
-from maldini.content_types import guess_content_type
+from snoop import digest, models
+from snoop.content_types import guess_content_type
 
 PATH_TEXT = "disk-files/pdf-doc-txt/easychair.txt"
 PATH_HTML = "disk-files/bad-html/alert.html"

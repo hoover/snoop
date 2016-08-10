@@ -25,7 +25,7 @@ def walk(tag, verbose=False):
                 assert len(md5) == 32
                 yield (md5, item)
 
-    ocr_root = Path(settings.MALDINI_OCR_ROOT) / tag
+    ocr_root = Path(settings.SNOOP_OCR_ROOT) / tag
     for i, (md5, path) in enumerate(_traverse(ocr_root), 1):
         job = {
             'tag': tag,
@@ -39,7 +39,7 @@ def walk(tag, verbose=False):
 
 @transaction.atomic
 def worker(tag, md5, path, verbose):
-    ocr_root = Path(settings.MALDINI_OCR_ROOT) / tag
+    ocr_root = Path(settings.SNOOP_OCR_ROOT) / tag
 
     row, created = models.Ocr.objects.get_or_create(tag=tag, md5=md5)
     if created:

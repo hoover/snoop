@@ -3,8 +3,8 @@ import shutil
 from pathlib import Path
 import tempfile
 from django.conf import settings
-from maldini import digest, models, archives
-from maldini.content_types import guess_content_type
+from snoop import digest, models, archives
+from snoop.content_types import guess_content_type
 
 ZIP_SIMPLE = {
     'parent': None,

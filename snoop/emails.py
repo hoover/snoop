@@ -220,11 +220,11 @@ class EmlxParser(EmailParser):
         return self._parsed_message
 
 def msgcache(func):
-    if not (settings.MALDINI_CACHE and settings.MALDINI_MSG_CACHE):
+    if not (settings.SNOOP_CACHE and settings.SNOOP_MSG_CACHE):
         return func
 
     def wrapper(doc):
-        d0 =  Path(settings.MALDINI_MSG_CACHE) /doc.sha1[:2]
+        d0 =  Path(settings.SNOOP_MSG_CACHE) /doc.sha1[:2]
         cached = d0 / (doc.sha1[2:] + '.eml')
 
         if not cached.is_file():
@@ -264,7 +264,7 @@ def open_msg(doc):
                 cwd=tmp,
             )
         except:
-            if settings.MALDINI_FLAG_MSGCONVERT_FAIL:
+            if settings.SNOOP_FLAG_MSGCONVERT_FAIL:
                 doc.flags['msgconvert_fail'] = True
                 doc.save()
                 yield BytesIO()

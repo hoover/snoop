@@ -12,7 +12,7 @@ def cache(model, keyfunc):
 
     def decorator(func):
 
-        if not settings.MALDINI_CACHE:
+        if not settings.SNOOP_CACHE:
             return func
 
         @transaction.atomic
@@ -69,7 +69,7 @@ class Document(models.Model):
     @property
     def absolute_path(self):
         assert self.container is None
-        return Path(settings.MALDINI_ROOT) / self.path
+        return Path(settings.SNOOP_ROOT) / self.path
 
     def _open_file(self):
         if self.content_type == 'application/x-directory':
@@ -128,7 +128,7 @@ class Ocr(models.Model):
 
     @property
     def absolute_path(self):
-        return Path(settings.MALDINI_OCR_ROOT) / self.tag / self.path
+        return Path(settings.SNOOP_OCR_ROOT) / self.tag / self.path
 
 class Digest(models.Model):
     id = models.IntegerField(primary_key=True)

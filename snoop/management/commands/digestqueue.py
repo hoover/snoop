@@ -11,7 +11,7 @@ class Command(BaseCommand):
         parser.add_argument('where')
 
     def handle(self, where, verbosity, **options):
-        query = 'SELECT id FROM maldini_document WHERE %s' % where
+        query = 'SELECT id FROM snoop_document WHERE %s' % where
         for document in models.Document.objects.raw(query):
             queues.put('digest', {'id': document.id}, verbose=verbosity>0)
             if verbosity > 0:

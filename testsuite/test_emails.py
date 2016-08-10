@@ -1,4 +1,4 @@
-from maldini import models, emails
+from snoop import models, emails
 
 MAIL_PATH_MAPBOX = "eml-1-promotional/Introducing Mapbox Android Services - " \
               "Mapbox Team <newsletter@mapbox.com> - 2016-04-20 1603.eml"
