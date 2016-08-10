@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from maldini import queues
+from ... import queues
 
 class Command(BaseCommand):
 
@@ -11,7 +11,7 @@ class Command(BaseCommand):
 
     def handle(self, verbosity, queue, batch, **options):
         if queue == 'index':
-            from maldini.index import bulk_worker
+            from ...index import bulk_worker
         else:
             raise ValueError("Unknown queue %r" % queue)
 

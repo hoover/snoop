@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from maldini import queues
+from ... import queues
 
 class Command(BaseCommand):
 
@@ -11,13 +11,13 @@ class Command(BaseCommand):
 
     def handle(self, verbosity, queue, stop_first_error, **options):
         if queue == 'digest':
-            from maldini.digest import worker
+            from ...digest import worker
         elif queue == 'index':
-            from maldini.index import worker
+            from ...index import worker
         elif queue == 'ocr':
-            from maldini.ocr import worker
+            from ...ocr import worker
         elif queue == 'hotfix':
-            from maldini.hotfix import worker
+            from ...hotfix import worker
         else:
             raise ValueError("Unknown queue %r" % queue)
 

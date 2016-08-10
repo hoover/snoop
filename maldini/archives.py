@@ -4,8 +4,8 @@ import subprocess
 import tempfile
 from django.conf import settings
 import shutil
-from maldini import models
-from maldini.content_types import guess_filetype
+from . import models
+from .content_types import guess_filetype
 
 KNOWN_TYPES = {
     'application/zip',

@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from maldini.walker import Walker
+from ...walker import Walker
 
 class Command(BaseCommand):
 
