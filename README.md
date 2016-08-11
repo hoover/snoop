@@ -21,8 +21,8 @@ $ sudo apt-get install p7zip-rar
    * `MAX_TIKA_FILE_SIZE`: in bytes. Files larger than this won't be sent to tika
    * `TIKA_FILE_TYPES`: a list of categories of files to send to tika. Ex: pdf, doc
    * `MSGCONVERT_SCRIPT`: path to the `msgconvert` script. See below for setup
-   * `MALDINI_GPG_HOME`: path to the existing gpg home directory with keys to be used for decryption
-   * `MALDINI_GPG_BINARY`: path to the `gpg` binary to be used in conjuction with `MALDINI_GPG_HOME`
+   * `SNOOP_GPG_HOME`: path to the existing gpg home directory with keys to be used for decryption
+   * `SNOOP_GPG_BINARY`: path to the `gpg` binary to be used in conjuction with `MALDINI_GPG_HOME`
 
 2. Create file and folder entries in the database:
 
