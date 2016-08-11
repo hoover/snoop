@@ -1,6 +1,7 @@
 import tempfile
 import gnupg
 import pytest
+
 from django.conf import settings
 from snoop import emails, models, pgp
 
