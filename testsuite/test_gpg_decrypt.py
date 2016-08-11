@@ -8,7 +8,7 @@ from email.headerregistry import Address
 import gnupg
 import pytest
 
-from maldini import pgp
+from snoop import pgp
 from django.conf import settings
 
 # http://www.saltycrane.com/blog/2011/10/python-gnupg-gpg-example/
@@ -22,8 +22,8 @@ def patch_gpg_to_temp_dir(monkeypatch):
     with tempfile.TemporaryDirectory() as tmp:
         gpg = gnupg.GPG(gnupghome=tmp, gpgbinary='gpg')
         monkeypatch.setattr(pgp, 'GPG', gpg)
-        monkeypatch.setattr(settings, 'MALDINI_GPG_HOME', '/tmp')
-        monkeypatch.setattr(settings, 'MALDINI_GPG_BINARY', 'gpg')
+        monkeypatch.setattr(settings, 'SNOOP_GPG_HOME', '/tmp')
+        monkeypatch.setattr(settings, 'SNOOP_GPG_BINARY', 'gpg')
         yield
 
 def test_decryption(patch_gpg_to_temp_dir):

@@ -5,14 +5,14 @@ from django.conf import settings
 GPG = None
 
 def is_enabled():
-    return settings.MALDINI_GPG_HOME and settings.MALDINI_GPG_BINARY
+    return settings.SNOOP_GPG_HOME and settings.SNOOP_GPG_BINARY
 
 def _get_gpg():
     global GPG
     if is_enabled():
         if not GPG:
-            GPG = gnupg.GPG(gnupghome=settings.MALDINI_GPG_HOME,
-                            gpgbinary=settings.MALDINI_GPG_BINARY)
+            GPG = gnupg.GPG(gnupghome=settings.SNOOP_GPG_HOME,
+                            gpgbinary=settings.SNOOP_GPG_BINARY)
         return GPG
     else:
         raise RuntimeError("MALDINI_GPG_BINARY or MALDINI_GPG_HOME not set")
