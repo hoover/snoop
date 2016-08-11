@@ -24,5 +24,5 @@ ARCHIVE_CACHE_ROOT = '/path/to/archive/cache'
 
 SEVENZIP_BINARY = '7z'
 
-MALDINI_GPG_HOME = '/path/to/gpg/home'
-MALDINI_GPG_BINARY = 'gpg'
+SNOOP_GPG_HOME = '/path/to/gpg/home'
+SNOOP_GPG_BINARY = 'gpg'
