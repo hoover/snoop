@@ -1,4 +1,4 @@
-from maldini import models, emails
+from snoop import models, emails
 
 PATH_MSG_DISEARA = ("msg-5-outlook/DISEARĂ-Te-așteptăm-la-"
                     "discuția-despre-finanțarea-culturii.msg")

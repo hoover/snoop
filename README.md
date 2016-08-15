@@ -14,7 +14,7 @@ $ sudo apt-get install p7zip-rar
 1. Configuration - create a file `maldini/site/settings/local.py`:
 
    * `DATABASES`: django database configuration
-   * `MALDINI_ROOT`: path to the dump
+   * `SNOOP_ROOT`: path to the dump
    * `ELASTICSEARCH_URL`: url to elasticsearch server
    * `ELASTICSEARCH_INDEX`: name of elasticsearch index where to index the data
    * `TIKA_SERVER_ENDPOINT`: url to tika server

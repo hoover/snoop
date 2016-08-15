@@ -1,4 +1,4 @@
-/maldini/site/settings/local.py
-/maldini/site/settings/testing_local.py
+/snoop/site/settings/local.py
+/snoop/site/settings/testing_local.py
 *.pyc
 /.cache
