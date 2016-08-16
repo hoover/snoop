@@ -91,8 +91,11 @@ def document(request, id):
         try:
             data = digest(doc)
 
-        except:
-            data = {'type': '-- ERROR --'}
+        except Exception as e:
+            error_message = doc.broken
+            if not error_message:
+                error_message = e.__class__.__name__ + ' (not marked as broken)'
+            data = {'type': 'ERROR: ' + error_message}
 
         else:
             if data.get('type') == 'folder':
