@@ -8,6 +8,7 @@ from . import text
 from . import queues
 from . import models
 from . import archives
+from . import pgp
 from .content_types import guess_content_type, guess_filetype
 from .utils import chunks
 
@@ -153,15 +154,27 @@ def worker(id, verbose):
         return
 
     except archives.EncryptedArchiveFile:
-        document.broken = 'encrypted archive'
+        document.broken = 'encrypted_archive'
         document.save()
-        if verbose: print('encrypted archive')
+        if verbose: print('encrypted_archive')
         return
 
     except archives.MissingArchiveFile:
-        document.broken = 'missing archive file'
+        document.broken = 'missing_archive_file'
         document.save()
-        if verbose: print('missing archive file')
+        if verbose: print('missing_archive_file')
+        return
+
+    except archives.ExtractingFailed:
+        document.broken = 'extracting_archive_with_7z_failed'
+        document.save()
+        if verbose: print('extracting_archive_with_7z_failed')
+        return
+    
+    except pgp.DecryptionError:
+        document.broken = 'decryption_failed'
+        document.save()
+        if verbose: print('decryption_failed')
         return
 
     else:
