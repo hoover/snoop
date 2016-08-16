@@ -28,6 +28,9 @@ class MissingArchiveFile(Exception):
 class EncryptedArchiveFile(Exception):
     pass
 
+class ExtractingFailed(Exception):
+    pass
+
 def _other_temps(sha1, current):
     for dir in CACHE_ROOT.iterdir():
         if dir.name == current:
@@ -49,10 +52,11 @@ def call_7z(archive_path, output_dir):
         ], stderr=subprocess.STDOUT)
 
     except subprocess.CalledProcessError as e:
-        if "Wrong password" in e.output.decode():
+        sevenzip_output = e.output.decode()
+        if "Wrong password" in sevenzip_output:
             raise EncryptedArchiveFile
         else:
-            raise RuntimeError("7z failed: " + e.output.decode())
+            raise ExtractingFailed(sevenzip_output)
 
 def extract_to_base(doc):
     if not settings.SEVENZIP_BINARY:
