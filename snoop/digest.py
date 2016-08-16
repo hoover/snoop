@@ -154,27 +154,27 @@ def worker(id, verbose):
         return
 
     except archives.EncryptedArchiveFile:
-        document.broken = 'encrypted archive'
+        document.broken = 'encrypted_archive'
         document.save()
-        if verbose: print('encrypted archive')
+        if verbose: print('encrypted_archive')
         return
 
     except archives.MissingArchiveFile:
-        document.broken = 'missing archive file'
+        document.broken = 'missing_archive_file'
         document.save()
-        if verbose: print('missing archive file')
+        if verbose: print('missing_archive_file')
         return
 
     except archives.ExtractingFailed:
-        document.broken = 'extracting archive with 7z failed'
+        document.broken = 'extracting_archive_with_7z_failed'
         document.save()
-        if verbose: print('extracting archive with 7z failed')
+        if verbose: print('extracting_archive_with_7z_failed')
         return
     
     except pgp.DecryptionError:
-        document.broken = 'decryption failed'
+        document.broken = 'decryption_failed'
         document.save()
-        if verbose: print('decryption failed')
+        if verbose: print('decryption_failed')
         return
 
     else:
