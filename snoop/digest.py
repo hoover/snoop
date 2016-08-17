@@ -164,6 +164,12 @@ def worker(id, verbose):
         if verbose: print('missing archive file')
         return
 
+    except archives.ExtractingFailed:
+        document.broken = 'extracting archive with 7z failed'
+        document.save()
+        if verbose: print('extracting archive with 7z failed')
+        return
+
     else:
         if document.broken:
             if verbose: print('removing broken flag', document.broken)
