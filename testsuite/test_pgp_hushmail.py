@@ -40,7 +40,7 @@ def test_attachments():
     assert len(attach) == 6
 
     email = open_email(PATH_HUSH_MAIL)
-    assert 'encrypted' in email.flags
+    assert email.encrypted
 
     with email.open_part('3') as f:
         text = f.read().decode()
