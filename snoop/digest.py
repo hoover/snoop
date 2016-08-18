@@ -8,6 +8,7 @@ from . import text
 from . import queues
 from . import models
 from . import archives
+from . import pgp
 from .content_types import guess_content_type, guess_filetype
 from .utils import chunks
 
@@ -168,6 +169,12 @@ def worker(id, verbose):
         document.broken = 'extracting archive with 7z failed'
         document.save()
         if verbose: print('extracting archive with 7z failed')
+        return
+
+    except pgp.DecryptionError:
+        document.broken = 'decryption failed'
+        document.save()
+        if verbose: print('decryption failed')
         return
 
     else:

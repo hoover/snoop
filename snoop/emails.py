@@ -11,6 +11,7 @@ from django.conf import settings
 from . import models
 from .utils import chunks, text_from_html
 from .content_types import guess_content_type
+from . import pgp
 
 
 def decode_header(header):
@@ -49,7 +50,7 @@ def extract_email_data(tree):
         try:
             date = email.utils.parsedate_to_datetime(message_date).isoformat()
         except:
-            pass # TODO log a warning
+            pass
         else:
             rv['date'] = date
 
@@ -65,16 +66,9 @@ class EmailParser(object):
 
     def __init__(self, file):
         self.file = file
-        self.warnings = []
-        self.flags = set()
+        self.encrypted = False
         self._parsed_message = None
         self._message() # TODO refactor so we don't parse the message here
-
-    def warn(self, text):
-        self.warnings.append(text)
-
-    def flag(self, flag):
-        self.flags.add(flag)
 
     def parts(self, message, number_bits=[]):
         if message.is_multipart():
@@ -95,6 +89,12 @@ class EmailParser(object):
             data = part.get_payload(decode=True)
         except:
             raise PayloadError
+
+        if self.encrypted and \
+                pgp.is_enabled() and \
+                pgp.contains_pgp_block(data):
+            data = pgp.decrypt_pgp_block(data)
+
         tmp.write(data)
         tmp.seek(0)
         return tmp
@@ -131,9 +131,11 @@ class EmailParser(object):
 
     def get_part_text(self, part):
         content_type = part.get_content_type()
-        def get_payload():
+        def get_payload(encrypted=False):
             try:
                 payload_bytes = part.get_payload(decode=True)
+                if encrypted:
+                    payload_bytes = pgp.decrypt_pgp_block(payload_bytes)
             except:
                 return '(error)'
 
@@ -145,13 +147,14 @@ class EmailParser(object):
             return payload_bytes.decode(charset, errors='replace')
 
         if content_type == 'text/plain':
-            return get_payload()
+            if self.encrypted:
+                if 'content-disposition' not in part:
+                    return get_payload(True)
+            else:
+                return get_payload()
 
         if content_type == 'text/html':
             return text_from_html(get_payload())
-
-        self.warn("Unknown part content type: %r" % content_type)
-        self.flag('unknown_attachment')
 
     def get_attachments(self):
         message = self._message()
@@ -164,6 +167,8 @@ class EmailParser(object):
             content_type = part.get_content_type().lower()
             if content_type == "application/octet-stream":
                 content_type = guess_content_type(filename)
+            if content_type == 'text/plain' and self.encrypted:
+                content_type = guess_content_type(filename)
 
             rv[number] = {
                 'content_type': content_type,
@@ -175,7 +180,10 @@ class EmailParser(object):
 
     def _message(self):
         if self._parsed_message is None:
-            self._parsed_message = email.message_from_binary_file(self.file)
+            data = self.file.read()
+            if pgp.is_enabled() and pgp.contains_pgp_block(data):
+                self.encrypted = True
+            self._parsed_message = email.message_from_bytes(data)
         return self._parsed_message
 
     def get_text(self):
