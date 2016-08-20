@@ -138,58 +138,11 @@ def worker(id, verbose):
     try:
         data = digest(document)
 
-    except emails.MissingEmlxPart:
-        document.broken = 'missing_emlx_part'
+    except models.BrokenDocument as e:
+        assert e.flag is not None
+        document.broken = e.flag
         document.save()
-        if verbose: print('missing_emlx_part')
-        return
-
-    except emails.PayloadError:
-        document.broken = 'payload_error'
-        document.save()
-        if verbose: print('payload_error')
-        return
-
-    except emails.CorruptedFile:
-        document.broken = 'corrupted_file'
-        document.save()
-        if verbose: print('corrupted_file')
-        return
-
-    except archives.EncryptedArchiveFile:
-        document.broken = 'encrypted archive'
-        document.save()
-        if verbose: print('encrypted archive')
-        return
-
-    except archives.MissingArchiveFile:
-        document.broken = 'missing archive file'
-        document.save()
-        if verbose: print('missing archive file')
-        return
-
-    except archives.ExtractingFailed:
-        document.broken = 'extracting archive with 7z failed'
-        document.save()
-        if verbose: print('extracting archive with 7z failed')
-        return
-
-    except pgp.DecryptionError:
-        document.broken = 'decryption failed'
-        document.save()
-        if verbose: print('decryption failed')
-        return
-
-    except pst.MissingPSTFile:
-        document.broken = 'missing pst file'
-        document.save()
-        if verbose: print('missing pst file')
-        return
-
-    except pst.PSTExtractionFailed:
-        document.broken = 'extracting archive with readpst failed'
-        document.save()
-        if verbose: print('extracting archive with readpst failed')
+        if verbose: print(e.flag)
         return
 
     else:

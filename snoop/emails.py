@@ -56,11 +56,11 @@ def extract_email_data(tree):
 
     return rv
 
-class CorruptedFile(Exception):
-    pass
+class CorruptedFile(models.BrokenDocument):
+    flag = 'emails_corrupted_file'
 
-class PayloadError(Exception):
-    pass
+class PayloadError(models.BrokenDocument):
+    flag = 'emails_payload_error'
 
 class EmailParser(object):
 
@@ -194,8 +194,8 @@ class EmailParser(object):
                 text_parts.append(text)
         return '\n'.join(text_parts)
 
-class MissingEmlxPart(Exception):
-    pass
+class MissingEmlxPart(models.BrokenDocument):
+    flag = 'emails_missing_emlx_part'
 
 class EmlxParser(EmailParser):
 
