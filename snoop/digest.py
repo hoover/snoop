@@ -9,6 +9,7 @@ from . import queues
 from . import models
 from . import archives
 from . import pgp
+from . import pst
 from .content_types import guess_content_type, guess_filetype
 from .utils import chunks
 
@@ -81,6 +82,8 @@ def digest(doc):
 
     if archives.is_archive(doc):
         data.update(archives.list_files(doc))
+    elif pst.is_pst_file(doc):
+        data.update(pst.list_files(doc))
 
     return data
 
@@ -94,7 +97,7 @@ def create_children(doc, data, verbose=True):
                 'filename': info['filename'],
                 'size': info['size'],
             })
-    elif archives.is_archive(doc):
+    elif archives.is_archive(doc) or pst.is_pst_file(doc):
         for path in data['file_list']:
             children_info.append({
                 'path': path,
@@ -175,6 +178,18 @@ def worker(id, verbose):
         document.broken = 'decryption failed'
         document.save()
         if verbose: print('decryption failed')
+        return
+
+    except pst.MissingPSTFile:
+        document.broken = 'missing pst file'
+        document.save()
+        if verbose: print('missing pst file')
+        return
+
+    except pst.PSTExtractionFailed:
+        document.broken = 'extracting archive with readpst failed'
+        document.save()
+        if verbose: print('extracting archive with readpst failed')
         return
 
     else:

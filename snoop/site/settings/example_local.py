@@ -24,3 +24,6 @@ ELASTICSEARCH_INDEX = 'hoover'
 
 SNOOP_GPG_HOME = '/path/to/gpg/home'
 SNOOP_GPG_BINARY = 'gpg'
+
+SNOOP_PST_CACHE_ROOT = '/path/to/pst/cache'
+READPST_BINARY = 'readpst'
