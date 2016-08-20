@@ -21,3 +21,6 @@ MSGCONVERT_SCRIPT = 'msgconvert'
 ARCHIVE_CACHE_ROOT = '/path/to/archive/cache'
 SEVENZIP_BINARY = '7z'
 ELASTICSEARCH_INDEX = 'hoover'
+
+SNOOP_PST_CACHE_ROOT = '/path/to/pst/cache'
+READPST_BINARY = 'readpst'

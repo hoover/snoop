@@ -3,6 +3,8 @@ import mimetypes
 mimetypes.add_type('message/x-emlx', '.emlx')
 mimetypes.add_type('message/x-emlxpart', '.emlxpart')
 mimetypes.add_type('application/vnd.ms-outlook', '.msg')
+mimetypes.add_type('application/x-hoover-pst', '.pst')
+mimetypes.add_type('application/x-hoover-pst', '.ost')
 
 
 def guess_content_type(filename):
@@ -17,6 +19,8 @@ FILE_TYPES = {
     'message/x-emlx': 'email',
     'message/rfc822': 'email',
     'application/vnd.ms-outlook': 'email',
+
+    'application/x-hoover-pst': 'email-archive',
 
     'application/msword': 'doc',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'doc',

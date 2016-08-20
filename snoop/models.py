@@ -48,7 +48,7 @@ class ArchiveListCache(models.Model):
     time = models.DateTimeField(auto_now=True)
 
 from . import archives
-
+from . import pst
 
 class Document(models.Model):
     container = models.ForeignKey('Document', null=True)
@@ -84,6 +84,9 @@ class Document(models.Model):
 
             if archives.is_archive(self.container):
                 return archives.open_file(self.container, self.path)
+
+            if pst.is_pst_file(self.container):
+                return pst.open_file(self.container, self.path)
 
         raise RuntimeError
 
