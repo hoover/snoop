@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 from django.conf import settings
 import shutil
+from . import models
 
 KNOWN_TYPES = {
     'application/x-hoover-pst',
@@ -14,11 +15,11 @@ if settings.SNOOP_PST_CACHE_ROOT:
 else:
     CACHE_ROOT = None
 
-class PSTExtractionFailed(Exception):
-    pass
+class PSTExtractionFailed(models.BrokenDocument):
+    flag = 'pst_extraction_failed'
 
-class MissingPSTFile(Exception):
-    pass
+class MissingPSTFile(models.BrokenDocument):
+    flag = 'pst_missing_file'
 
 def _other_temps(sha1, current):
     for dir in CACHE_ROOT.iterdir():
