@@ -5,31 +5,21 @@ import tempfile
 from django.conf import settings
 import shutil
 from . import models
-from .content_types import guess_filetype
 
 KNOWN_TYPES = {
-    'application/zip',
-    'application/rar',
-    'application/x-7z-compressed',
-    'application/x-zip',
-    'application/x-gzip',
-    'application/x-zip-compressed',
-    'application/x-rar-compressed',
+    'application/x-hoover-pst',
 }
 
-if settings.ARCHIVE_CACHE_ROOT:
-    CACHE_ROOT = Path(settings.ARCHIVE_CACHE_ROOT)
+if settings.SNOOP_PST_CACHE_ROOT:
+    CACHE_ROOT = Path(settings.SNOOP_PST_CACHE_ROOT)
 else:
     CACHE_ROOT = None
 
-class MissingArchiveFile(models.BrokenDocument):
-    flag = 'archive_missing_file'
+class PSTExtractionFailed(models.BrokenDocument):
+    flag = 'pst_extraction_failed'
 
-class EncryptedArchiveFile(models.BrokenDocument):
-    flag = 'archive_encrypted'
-
-class ExtractingFailed(models.BrokenDocument):
-    flag = 'archive_extraction_failed'
+class MissingPSTFile(models.BrokenDocument):
+    flag = 'pst_missing_file'
 
 def _other_temps(sha1, current):
     for dir in CACHE_ROOT.iterdir():
@@ -40,26 +30,24 @@ def _other_temps(sha1, current):
             return True
     return False
 
-def call_7z(archive_path, output_dir):
+def call_readpst(pst_path, output_dir):
     try:
         subprocess.check_output([
-            settings.SEVENZIP_BINARY,
-            '-y',
-            '-pp',
-            'x',
-            str(archive_path),
-            '-o' + str(output_dir),
+            settings.READPST_BINARY,
+            '-D',
+            '-M',
+            '-e',
+            '-o',
+            str(output_dir),
+            '-teajc',
+            str(pst_path),
         ], stderr=subprocess.STDOUT)
 
     except subprocess.CalledProcessError as e:
-        sevenzip_output = e.output.decode()
-        if "Wrong password" in sevenzip_output:
-            raise EncryptedArchiveFile
-        else:
-            raise ExtractingFailed(sevenzip_output)
+        raise PSTExtractionFailed('readpst failed: ' + e.output.decode())
 
 def extract_to_base(doc):
-    if not settings.SEVENZIP_BINARY:
+    if not settings.READPST_BINARY:
         raise RuntimeError
 
     base = CACHE_ROOT / doc.sha1
@@ -76,9 +64,9 @@ def extract_to_base(doc):
         shutil.rmtree(str(tmp))
         raise RuntimeError("Another worker has taken this one")
 
-    with doc.open(filesystem=True) as archive:
+    with doc.open(filesystem=True) as pst_file:
         try:
-            call_7z(archive.path, tmp)
+            call_readpst(pst_file.path, tmp)
 
         except Exception:
             tmp.rename(tmp.with_name('broken_' + tmp.name))
@@ -88,7 +76,6 @@ def extract_to_base(doc):
             tmp.rename(base)
 
 
-@models.cache(models.ArchiveListCache, lambda doc: doc.sha1)
 def list_files(doc):
     base = CACHE_ROOT / doc.sha1
     if not base.is_dir():
@@ -117,8 +104,8 @@ def open_file(doc, name):
     if not path.exists():
         extract_to_base(doc)
         if not path.exists():
-            raise MissingArchiveFile(str(path))
+            raise MissingPSTFile(str(path))
     return path.open('rb')
 
-def is_archive(doc):
+def is_pst_file(doc):
     return doc.content_type in KNOWN_TYPES

@@ -8,6 +8,8 @@ from . import text
 from . import queues
 from . import models
 from . import archives
+from . import pgp
+from . import pst
 from .content_types import guess_content_type, guess_filetype
 from .utils import chunks
 
@@ -80,6 +82,8 @@ def digest(doc):
 
     if archives.is_archive(doc):
         data.update(archives.list_files(doc))
+    elif pst.is_pst_file(doc):
+        data.update(pst.list_files(doc))
 
     return data
 
@@ -93,7 +97,7 @@ def create_children(doc, data, verbose=True):
                 'filename': info['filename'],
                 'size': info['size'],
             })
-    elif archives.is_archive(doc):
+    elif archives.is_archive(doc) or pst.is_pst_file(doc):
         for path in data['file_list']:
             children_info.append({
                 'path': path,
@@ -134,40 +138,11 @@ def worker(id, verbose):
     try:
         data = digest(document)
 
-    except emails.MissingEmlxPart:
-        document.broken = 'missing_emlx_part'
+    except models.BrokenDocument as e:
+        assert e.flag is not None
+        document.broken = e.flag
         document.save()
-        if verbose: print('missing_emlx_part')
-        return
-
-    except emails.PayloadError:
-        document.broken = 'payload_error'
-        document.save()
-        if verbose: print('payload_error')
-        return
-
-    except emails.CorruptedFile:
-        document.broken = 'corrupted_file'
-        document.save()
-        if verbose: print('corrupted_file')
-        return
-
-    except archives.EncryptedArchiveFile:
-        document.broken = 'encrypted archive'
-        document.save()
-        if verbose: print('encrypted archive')
-        return
-
-    except archives.MissingArchiveFile:
-        document.broken = 'missing archive file'
-        document.save()
-        if verbose: print('missing archive file')
-        return
-
-    except archives.ExtractingFailed:
-        document.broken = 'extracting archive with 7z failed'
-        document.save()
-        if verbose: print('extracting archive with 7z failed')
+        if verbose: print(e.flag)
         return
 
     else:
