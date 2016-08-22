@@ -116,3 +116,19 @@ $ cpan -i Email::Outlook::Message
 
 Set `MSGCONVERT_SCRIPT` to the script's path.
 If it's installed system-wide, just use `msgconvert`.
+
+
+### `readpst` (for Outlook `.pst` and `.ost` emails)
+
+Current setup uses the `readpst` binary to convert `.pst` and `.ost` emails to
+the mbox format.
+
+```shell
+$ brew install libpst  #  mac
+$ apt-get install libpst pst-utils  #  debian / ubuntu
+```
+
+Set `READPST_BINARY` to the binary's path.
+If it's installed system-wide, just use `readpst`.
+
+Set `SNOOP_PST_CACHE_ROOT` to an existing folder with write access.

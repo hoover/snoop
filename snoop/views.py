@@ -103,7 +103,7 @@ def document(request, id):
                     data['files'] = files_in_archive(doc.container, doc.path + '/')
                 else:
                     data['files'] = files_in(doc.path + '/')
-            elif data.get('type') == 'archive':
+            elif data.get('type') in ['archive', 'email-archive']:
                 data['files'] = files_in_archive(doc, '')
 
             if 'files' in data:
