@@ -40,15 +40,10 @@ class EmailCache(models.Model):
     value = models.TextField()
     time = models.DateTimeField(auto_now=True)
 
-from . import emails  # moved here because circular import
-
 class ArchiveListCache(models.Model):
     sha1 = models.CharField(max_length=50, primary_key=True)
     value = models.TextField()
     time = models.DateTimeField(auto_now=True)
-
-from . import archives
-from . import pst
 
 class Document(models.Model):
     container = models.ForeignKey('Document', null=True)
@@ -79,6 +74,8 @@ class Document(models.Model):
             return self.absolute_path.open('rb')
 
         else:
+            from . import emails, archives, pst
+
             if emails.is_email(self.container):
                 return emails.get_email_part(self.container, self.path)
 
