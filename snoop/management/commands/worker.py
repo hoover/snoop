@@ -30,4 +30,4 @@ class Command(BaseCommand):
 
         for work in queue_iterator:
             with work() as data:
-                worker(**data, verbose=verbosity>0)
+                worker(verbose=verbosity>0, **data)
