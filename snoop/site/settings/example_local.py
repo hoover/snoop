@@ -5,10 +5,7 @@ DATABASES = {
     }
 }
 
-SECRET_KEY = 'some random secret key'
-
-DEBUG = True
-TIME_ZONE = 'Europe/Berlin'
+SECRET_KEY = TODO_generate_random_string
 
 SNOOP_ROOT = '/path/to/test/data'
 
