@@ -22,7 +22,7 @@ class DecryptionError(RuntimeError):
 
 def extract_pgp_block(content):
     if isinstance(content, bytes):
-        content = content.decode('utf-8')
+        content = content.decode('ascii')
     m = re.search(
         r'-----BEGIN PGP MESSAGE-----[^-]+-----END PGP MESSAGE-----',
         content, re.DOTALL)
@@ -33,7 +33,10 @@ def extract_pgp_block(content):
 
 def contains_pgp_block(content):
     if isinstance(content, bytes):
-        content = content.decode('utf-8')
+        try:
+            content = content.decode('ascii')
+        except ValueError:
+            return False
     m = re.search(r'-----BEGIN PGP MESSAGE-----', content)
     return bool(m)
 
