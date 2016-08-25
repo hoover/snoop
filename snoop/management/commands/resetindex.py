@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 from elasticsearch import Elasticsearch
 
-es = Elasticsearch(settings.ELASTICSEARCH_URL)
+es = Elasticsearch(settings.SNOOP_ELASTICSEARCH_URL)
 
 MAPPINGS = {
     "doc": {
@@ -43,8 +43,8 @@ class Command(BaseCommand):
     help = "Reset the elasticsearch index"
 
     def handle(self, **options):
-        es.indices.delete(settings.ELASTICSEARCH_INDEX, ignore=[400, 404])
-        es.indices.create(settings.ELASTICSEARCH_INDEX, {
+        es.indices.delete(settings.SNOOP_ELASTICSEARCH_INDEX, ignore=[400, 404])
+        es.indices.create(settings.SNOOP_ELASTICSEARCH_INDEX, {
             "mappings": MAPPINGS,
             "settings": SETTINGS,
         })

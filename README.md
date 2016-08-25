@@ -21,8 +21,8 @@ available for each indexed document.
 
    * `DATABASES`: django database configuration
    * `SNOOP_ROOT`: path to the dump
-   * `ELASTICSEARCH_URL`: url to elasticsearch server
-   * `ELASTICSEARCH_INDEX`: name of elasticsearch index where to index the data
+   * `SNOOP_ELASTICSEARCH_URL`: url to elasticsearch server
+   * `SNOOP_ELASTICSEARCH_INDEX`: name of elasticsearch index where to index the data
 
    Recommended: set up the dependencies below.
 
@@ -79,11 +79,11 @@ $ java -jar tika-server-1.13.jar
 ```
 
 After that, configure the following settings:
-   * `TIKA_SERVER_ENDPOINT`: url to tika server.
+   * `SNOOP_TIKA_SERVER_ENDPOINT`: url to tika server.
       For a local server running with default settings,
       this should be `http://localhost:9998/`
-   * `MAX_TIKA_FILE_SIZE`: in bytes. Files larger than this won't be sent to tika.
-   * `TIKA_FILE_TYPES`: a list of categories of files to send to tika.
+   * `SNOOP_TIKA_MAX_FILE_SIZE`: in bytes. Files larger than this won't be sent to tika.
+   * `SNOOP_TIKA_FILE_TYPES`: a list of categories of files to send to tika.
       Possible values are: `['pdf', 'doc', 'ppt', 'text', 'xls']`.
    * `SNOOP_ANALYZE_LANG`: `True` to use Tika for language detection for
       documents that have text.
@@ -99,10 +99,10 @@ $ sudo apt-get install p7zip-full
 $ sudo apt-get install p7zip-rar
 ```
 
-Configure `SEVENZIP_BINARY` to the `7z` binary's path.
+Configure `SNOOP_SEVENZIP_BINARY` to the `7z` binary's path.
 If it's installed system-wide, just use `7z`.
 
-Set `ARCHIVE_CACHE_ROOT` to an existing folder with write access.
+Set `SNOOP_ARCHIVE_CACHE_ROOT` to an existing folder with write access.
 This folder will serve as a cache for all the extracted archives.
 
 ### `msgconvert` (for Outlook `.msg` emails)
@@ -114,8 +114,10 @@ Docs: http://www.matijs.net/software/msgconv/
 $ cpan -i Email::Outlook::Message
 ```
 
-Set `MSGCONVERT_SCRIPT` to the script's path.
+Set `SNOOP_MSGCONVERT_SCRIPT` to the script's path.
 If it's installed system-wide, just use `msgconvert`.
+
+Set `SNOOP_MSG_CACHE` to an existing folder with write access.
 
 
 ### `readpst` (for Outlook `.pst` and `.ost` emails)
@@ -128,7 +130,7 @@ $ brew install libpst  #  mac
 $ apt-get install libpst pst-utils  #  debian / ubuntu
 ```
 
-Set `READPST_BINARY` to the binary's path.
+Set `SNOOP_READPST_BINARY` to the binary's path.
 If it's installed system-wide, just use `readpst`.
 
 Set `SNOOP_PST_CACHE_ROOT` to an existing folder with write access.

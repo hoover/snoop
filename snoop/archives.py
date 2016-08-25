@@ -17,8 +17,8 @@ KNOWN_TYPES = {
     'application/x-rar-compressed',
 }
 
-if settings.ARCHIVE_CACHE_ROOT:
-    CACHE_ROOT = Path(settings.ARCHIVE_CACHE_ROOT)
+if settings.SNOOP_ARCHIVE_CACHE_ROOT:
+    CACHE_ROOT = Path(settings.SNOOP_ARCHIVE_CACHE_ROOT)
 else:
     CACHE_ROOT = None
 
@@ -43,7 +43,7 @@ def _other_temps(sha1, current):
 def call_7z(archive_path, output_dir):
     try:
         subprocess.check_output([
-            settings.SEVENZIP_BINARY,
+            settings.SNOOP_SEVENZIP_BINARY,
             '-y',
             '-pp',
             'x',
@@ -59,7 +59,7 @@ def call_7z(archive_path, output_dir):
             raise ExtractingFailed(sevenzip_output)
 
 def extract_to_base(doc):
-    if not settings.SEVENZIP_BINARY:
+    if not settings.SNOOP_SEVENZIP_BINARY:
         raise RuntimeError
 
     base = CACHE_ROOT / doc.sha1
