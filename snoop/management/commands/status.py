@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 from elasticsearch import Elasticsearch
 
-es = Elasticsearch(settings.ELASTICSEARCH_URL)
+es = Elasticsearch(settings.SNOOP_ELASTICSEARCH_URL)
 
 class Command(BaseCommand):
 

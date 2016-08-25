@@ -1,3 +1,7 @@
 SNOOP_ROOT = '/path/to/testdata/data'
-MSGCONVERT_SCRIPT = 'msgconvert'
-SEVENZIP_BINARY = '7z'
+
+SNOOP_MSGCONVERT_SCRIPT = 'msgconvert'
+SNOOP_SEVENZIP_BINARY = '7z'
+SNOOP_READPST_BINARY = 'readpst'
+SNOOP_GPG_BINARY = 'gpg'
+

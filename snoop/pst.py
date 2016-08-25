@@ -32,7 +32,7 @@ def _other_temps(sha1, current):
 def call_readpst(pst_path, output_dir):
     try:
         subprocess.check_output([
-            settings.READPST_BINARY,
+            settings.SNOOP_READPST_BINARY,
             '-D',
             '-M',
             '-e',
@@ -46,7 +46,7 @@ def call_readpst(pst_path, output_dir):
         raise PSTExtractionFailed('readpst failed: ' + e.output.decode())
 
 def extract_to_base(doc):
-    if not settings.READPST_BINARY:
+    if not settings.SNOOP_READPST_BINARY:
         raise RuntimeError
 
     base = CACHE_ROOT / doc.sha1
