@@ -60,4 +60,7 @@ def text_from_html(html):
     soup = BeautifulSoup(html, 'lxml')
     for node in soup(["script", "style"]):
         node.extract()
-    return re.sub(r'\s+', ' ', soup.get_text().strip())
+    text = soup.get_text().strip()
+    text = re.sub(r'\n+', '\n', text)
+    text = re.sub(r'[ \t\r\f\v]+', ' ', text)
+    return text
