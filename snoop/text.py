@@ -1,5 +1,6 @@
 import chardet
 from .utils import text_from_html
+from .content_types import guess_filetype
 from . import models
 
 def decode_bytes(content):
@@ -22,7 +23,7 @@ def decode_bytes(content):
 def get_text(doc):
     with doc.open() as f:
         content = f.read()
-        if doc.content_type.startswith('text/html'):
+        if guess_filetype(doc) == 'html':
             return text_from_html(content)
         else:
             return decode_bytes(content)
