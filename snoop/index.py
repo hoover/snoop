@@ -3,7 +3,7 @@ import json
 from elasticsearch import Elasticsearch, helpers
 from . import models
 
-es = Elasticsearch(settings.ELASTICSEARCH_URL)
+es = Elasticsearch(settings.SNOOP_ELASTICSEARCH_URL)
 
 def get_index_data(digest_data):
     copy_keys = {
@@ -46,7 +46,7 @@ def worker(id, verbose):
     data = get_index_data(digest_data)
 
     es.index(
-        index=settings.ELASTICSEARCH_INDEX,
+        index=settings.SNOOP_ELASTICSEARCH_INDEX,
         doc_type='doc',
         id=digest.id,
         body=data,
@@ -61,7 +61,7 @@ def bulk_worker(data_list, verbose):
             data = get_index_data(digest_data)
             data.update({
                 '_op_type': 'index',
-                '_index': settings.ELASTICSEARCH_INDEX,
+                '_index': settings.SNOOP_ELASTICSEARCH_INDEX,
                 '_type': 'doc',
                 '_id': digest.id,
             })
