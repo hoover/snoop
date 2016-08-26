@@ -18,6 +18,7 @@ FILE_TYPES = {
     'application/pdf': 'pdf',
     'text/plain': 'text',
     'text/html': 'html',
+    'application/x-hush-pgp-encrypted-html-body': 'html',
     'message/x-emlx': 'email',
     'message/rfc822': 'email',
     'application/vnd.ms-outlook': 'email',
