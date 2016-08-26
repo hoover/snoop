@@ -15,24 +15,40 @@ available for each indexed document.
    * Text files
    * Html pages
 
-## Setting things up
+## Installation
+Snoop depends on _lxml_ (which compiles against _libxml2_ and _libxslt_) and
+_psycopg2_ (which compiles against the PostgreSQL client headers). On
+Debian/Ubuntu the required packages are `build-essential`, `python3-dev`,
+`libxml2-dev`, `libxslt1-dev` and `postgresql-server-dev-9.4` (or newer).
 
-1. Configuration - create `snoop/site/settings/local.py` with:
+Snoop can talk to a bunch of tools. Some understand a certain data format,
+others do useful processing. See "Optional Dependencies" to install them.
+
+1. Create a virtualenv and run `pip install -r requirements.txt`
+
+2. Configuration - create `snoop/site/settings/local.py` with:
 
    * `DATABASES`: django database configuration
    * `SNOOP_ROOT`: path to the dump
    * `SNOOP_ELASTICSEARCH_URL`: url to elasticsearch server
-   * `SNOOP_ELASTICSEARCH_INDEX`: name of elasticsearch index where to index the data
+   * `SNOOP_ELASTICSEARCH_INDEX`: name of elasticsearch index where to index
+     the data
 
-   Recommended: set up the dependencies below.
+3. Run the migrations:
 
-2. Create file and folder entries in the database:
+   ```shell
+   $ ./manage.py migrate
+   ```
+
+## Getting started
+
+1. List the files in the dump and create entries in the database.
 
    ```shell
    $ ./manage.py walk
    ```
 
-3. Select documents for analysis. The argument to the `digestqueue` command is
+2. Select documents for analysis. The argument to the `digestqueue` command is
    an SQL `WHERE` clause to choose which documents will be analyzed. `true`
    means all documents. They are added to the `digest` queue.
 
@@ -40,20 +56,23 @@ available for each indexed document.
    $ ./manage.py digestqueue "true"
    ```
 
-4. Run the `digest` worker to process. All documents successfully digested will
-   be automatically added to the `index` queue.
+3. Run the `digest` worker to process. All documents successfully digested will
+   be automatically added to the `index` queue. Run as many of these processes
+   as you want, they don't spawn any threads but are designed to be concurrent.
 
    ```shell
    $ ./manage.py worker digest
    ```
 
-5. Create/reset the elasticsearch index that you set up as `ELASTICSEARCH_INDEX`.
+   The `worker` command accepts a `-x`
+
+4. Create/reset the elasticsearch index that you set up as `ELASTICSEARCH_INDEX`.
 
    ```shell
    $ ./manage.py resetindex
    ```
 
-6. Run the `index` worker to push digested documents to elasticsearch.
+5. Run the `index` worker to push digested documents to elasticsearch.
 
    ```shell
    $ ./manage.py worker index
