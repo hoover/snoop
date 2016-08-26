@@ -260,9 +260,9 @@ def open_msg(doc):
         yield BytesIO()
         return
 
-    path = doc.absolute_path
-
-    with tempfile.TemporaryDirectory(suffix='-snoop') as tmp:
+    with tempfile.TemporaryDirectory(suffix='-snoop') as tmp, \
+            doc.open(filesystem=True) as file:
+        path = file.path
         msg = Path(tmp) / path.name
         msg.symlink_to(path)
 

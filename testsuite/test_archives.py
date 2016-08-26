@@ -131,3 +131,23 @@ def test_complex_container_structure():
     assert_archive_consistence(SEVENZ_EMAIL)
     assert_archive_consistence(SEVENZ_EMAIL_ZIP)
     assert_archive_consistence(SEVENZ_EMAIL_ZIP_FILE)
+
+ZIP_WITH_MSG = {
+    "parent": None,
+    "path": "msg-5-outlook/archive-with-msg.zip",
+    "filename": "archive-with-msg.zip",
+    "files": ["the-same-thing-zipped.msg"],
+    "sha1": "757028691204560f1e7ec2b9eabcdb1a35e364d9",
+}
+
+MSG_IN_ZIP = {
+    "parent": ZIP_WITH_MSG,
+    "path": "the-same-thing-zipped.msg",
+    "filename": "the-same-thing-zipped.msg",
+    "type": "email",
+    "md5": "38385c4487719fa9dd0fb695d3aad0ee",
+}
+
+def test_msg_inside_container():
+    assert_archive_consistence(ZIP_WITH_MSG)
+    assert_archive_consistence(MSG_IN_ZIP)
