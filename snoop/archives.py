@@ -22,14 +22,14 @@ if settings.SNOOP_ARCHIVE_CACHE_ROOT:
 else:
     CACHE_ROOT = None
 
-class MissingArchiveFile(Exception):
-    pass
+class MissingArchiveFile(models.BrokenDocument):
+    flag = 'archive_missing_file'
 
-class EncryptedArchiveFile(Exception):
-    pass
+class EncryptedArchiveFile(models.BrokenDocument):
+    flag = 'archive_encrypted'
 
-class ExtractingFailed(Exception):
-    pass
+class ExtractingFailed(models.BrokenDocument):
+    flag = 'archive_extraction_failed'
 
 def _other_temps(sha1, current):
     for dir in CACHE_ROOT.iterdir():
