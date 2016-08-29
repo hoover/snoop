@@ -5,6 +5,7 @@ import tempfile
 from django.conf import settings
 import shutil
 from . import models
+from . import exceptions
 from .content_types import guess_filetype
 
 KNOWN_TYPES = {
@@ -22,13 +23,13 @@ if settings.SNOOP_ARCHIVE_CACHE_ROOT:
 else:
     CACHE_ROOT = None
 
-class MissingArchiveFile(models.BrokenDocument):
+class MissingArchiveFile(exceptions.BrokenDocument):
     flag = 'archive_missing_file'
 
-class EncryptedArchiveFile(models.BrokenDocument):
+class EncryptedArchiveFile(exceptions.BrokenDocument):
     flag = 'archive_encrypted'
 
-class ExtractingFailed(models.BrokenDocument):
+class ExtractingFailed(exceptions.BrokenDocument):
     flag = 'archive_extraction_failed'
 
 def _other_temps(sha1, current):

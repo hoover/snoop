@@ -9,6 +9,7 @@ from io import BytesIO
 from pathlib import Path
 from django.conf import settings
 from . import models
+from . import exceptions
 from .utils import chunks, text_from_html
 from .content_types import guess_content_type
 from . import pgp
@@ -56,10 +57,10 @@ def extract_email_data(tree):
 
     return rv
 
-class CorruptedFile(models.BrokenDocument):
+class CorruptedFile(exceptions.BrokenDocument):
     flag = 'emails_corrupted_file'
 
-class PayloadError(models.BrokenDocument):
+class PayloadError(exceptions.BrokenDocument):
     flag = 'emails_payload_error'
 
 class EmailParser(object):
@@ -194,7 +195,7 @@ class EmailParser(object):
                 text_parts.append(text)
         return '\n'.join(text_parts)
 
-class MissingEmlxPart(models.BrokenDocument):
+class MissingEmlxPart(exceptions.BrokenDocument):
     flag = 'emails_missing_emlx_part'
 
 class EmlxParser(EmailParser):

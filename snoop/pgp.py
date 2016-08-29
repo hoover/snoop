@@ -1,7 +1,7 @@
 import re
 import gnupg
 from django.conf import settings
-from . import models
+from . import exceptions
 
 GPG = None
 
@@ -18,7 +18,7 @@ def _get_gpg():
     else:
         raise RuntimeError("MALDINI_GPG_BINARY or MALDINI_GPG_HOME not set")
 
-class DecryptionError(models.BrokenDocument):
+class DecryptionError(exceptions.BrokenDocument):
     flag = 'pgp_decryption_failed'
 
 def extract_pgp_block(content):
