@@ -147,7 +147,7 @@ class EmailParser(object):
             return payload_bytes.decode(charset, errors='replace')
 
         if content_type == 'text/plain':
-            if self.pgp:
+            if self.pgp and pgp.is_enabled():
                 if 'content-disposition' not in part:
                     return get_payload(True)
             else:
@@ -167,7 +167,7 @@ class EmailParser(object):
             content_type = part.get_content_type().lower()
             if content_type == "application/octet-stream":
                 content_type = guess_content_type(filename)
-            if content_type == 'text/plain' and self.pgp:
+            if content_type == 'text/plain' and self.pgp and pgp.is_enabled():
                 content_type = guess_content_type(filename)
 
             rv[number] = {
@@ -181,7 +181,7 @@ class EmailParser(object):
     def _message(self):
         if self._parsed_message is None:
             data = self.file.read()
-            if pgp.is_enabled() and pgp.contains_pgp_block(data):
+            if pgp.contains_pgp_block(data):
                 self.pgp = True
             self._parsed_message = email.message_from_bytes(data)
         return self._parsed_message
@@ -223,7 +223,7 @@ class EmlxParser(EmailParser):
             except:
                 raise CorruptedFile
             raw = extra + self.file.read(int(size) - len(extra))
-            if pgp.is_enabled() and pgp.contains_pgp_block(raw):
+            if pgp.contains_pgp_block(raw):
                 self.pgp = True
             self._parsed_message = email.message_from_bytes(raw)
 
