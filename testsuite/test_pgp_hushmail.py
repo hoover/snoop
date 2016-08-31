@@ -33,7 +33,7 @@ def test_header_data():
     data = parse_email(PATH_HUSH_MAIL)
     assert data['subject'] == "Fwd: test email"
     assert data['date'] == '2016-08-10T15:00:00'
-    assert data['encrypted']
+    assert data['pgp']
 
 def test_attachments():
     data = parse_email(PATH_HUSH_MAIL)
@@ -41,7 +41,7 @@ def test_attachments():
     assert len(attach) == 6
 
     email = open_email(PATH_HUSH_MAIL)
-    assert email.encrypted
+    assert email.pgp
 
     with email.open_part('3') as f:
         text = f.read().decode()

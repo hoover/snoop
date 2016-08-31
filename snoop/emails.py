@@ -66,7 +66,7 @@ class EmailParser(object):
 
     def __init__(self, file):
         self.file = file
-        self.encrypted = False
+        self.pgp = False
         self._parsed_message = None
         self._message() # TODO refactor so we don't parse the message here
 
@@ -90,7 +90,7 @@ class EmailParser(object):
         except:
             raise PayloadError
 
-        if self.encrypted and \
+        if self.pgp and \
                 pgp.is_enabled() and \
                 pgp.contains_pgp_block(data):
             data = pgp.decrypt_pgp_block(data)
@@ -147,7 +147,7 @@ class EmailParser(object):
             return payload_bytes.decode(charset, errors='replace')
 
         if content_type == 'text/plain':
-            if self.encrypted:
+            if self.pgp:
                 if 'content-disposition' not in part:
                     return get_payload(True)
             else:
@@ -167,7 +167,7 @@ class EmailParser(object):
             content_type = part.get_content_type().lower()
             if content_type == "application/octet-stream":
                 content_type = guess_content_type(filename)
-            if content_type == 'text/plain' and self.encrypted:
+            if content_type == 'text/plain' and self.pgp:
                 content_type = guess_content_type(filename)
 
             rv[number] = {
@@ -182,7 +182,7 @@ class EmailParser(object):
         if self._parsed_message is None:
             data = self.file.read()
             if pgp.is_enabled() and pgp.contains_pgp_block(data):
-                self.encrypted = True
+                self.pgp = True
             self._parsed_message = email.message_from_bytes(data)
         return self._parsed_message
 
@@ -224,7 +224,7 @@ class EmlxParser(EmailParser):
                 raise CorruptedFile
             raw = extra + self.file.read(int(size) - len(extra))
             if pgp.is_enabled() and pgp.contains_pgp_block(raw):
-                self.encrypted = True
+                self.pgp = True
             self._parsed_message = email.message_from_bytes(raw)
 
         return self._parsed_message
@@ -316,7 +316,7 @@ def raw_parse_email(doc):
         'tree': email.get_tree(),
         'attachments': email.get_attachments(),
         'text': email.get_text(),
-        'encrypted': email.encrypted,
+        'pgp': email.pgp,
     }
 
 def parse_email(doc):
@@ -326,6 +326,6 @@ def parse_email(doc):
         'text': parsed['text'],
         'tree': parsed['tree'],
         'attachments': parsed['attachments'],
-        'encrypted': parsed.get('encrypted', False),
+        'pgp': parsed.get('pgp', False),
     })
     return data

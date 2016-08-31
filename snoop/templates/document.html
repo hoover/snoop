@@ -136,10 +136,10 @@
             <td><b>{{ data.get('subject') }}</b></td>
           </tr>
 
-          {% if 'encrypted' in data %}
+          {% if 'pgp' in data %}
             <tr>
-              <td> PGP-Encrypted:</td>
-              <td><b>{{ data.get('encrypted') }}</b></td>
+              <td> PGP:</td>
+              <td><b>{{ data.get('pgp') }}</b></td>
             </tr>
           {% endif %}
 

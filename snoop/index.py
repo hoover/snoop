@@ -24,6 +24,7 @@ def get_index_data(digest_data):
         'message',
         'filename',
         'rev',
+        'pgp',
     }
 
     data = {key: digest_data.get(key) for key in copy_keys}
