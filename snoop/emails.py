@@ -223,6 +223,8 @@ class EmlxParser(EmailParser):
             except:
                 raise CorruptedFile
             raw = extra + self.file.read(int(size) - len(extra))
+            if pgp.is_enabled() and pgp.contains_pgp_block(raw):
+                self.encrypted = True
             self._parsed_message = email.message_from_bytes(raw)
 
         return self._parsed_message
