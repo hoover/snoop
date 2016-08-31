@@ -33,6 +33,7 @@ def test_header_data():
     data = parse_email(PATH_HUSH_MAIL)
     assert data['subject'] == "Fwd: test email"
     assert data['date'] == '2016-08-10T15:00:00'
+    assert data['encrypted']
 
 def test_attachments():
     data = parse_email(PATH_HUSH_MAIL)

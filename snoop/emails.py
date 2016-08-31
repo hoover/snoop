@@ -316,6 +316,7 @@ def raw_parse_email(doc):
         'tree': email.get_tree(),
         'attachments': email.get_attachments(),
         'text': email.get_text(),
+        'encrypted': email.encrypted,
     }
 
 def parse_email(doc):
@@ -325,5 +326,6 @@ def parse_email(doc):
         'text': parsed['text'],
         'tree': parsed['tree'],
         'attachments': parsed['attachments'],
+        'encrypted': parsed['encrypted'],
     })
     return data
