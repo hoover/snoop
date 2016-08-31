@@ -136,8 +136,8 @@ class EmailParser(object):
                 payload_bytes = part.get_payload(decode=True)
                 if encrypted:
                     payload_bytes = pgp.decrypt_pgp_block(payload_bytes)
-            except:
-                return '(error)'
+            except Exception as e:
+                return '(Error: ' + e.__class__.__name__ + ')\n'
 
             charset = part.get_content_charset() or 'latin-1'
             try:
