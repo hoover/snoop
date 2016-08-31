@@ -136,6 +136,13 @@
             <td><b>{{ data.get('subject') }}</b></td>
           </tr>
 
+          {% if 'encrypted' in data %}
+            <tr>
+              <td> PGP-Encrypted:</td>
+              <td><b>{{ data.get('encrypted') }}</b></td>
+            </tr>
+          {% endif %}
+
         {% endif %}
         </tbody>
       </table>
