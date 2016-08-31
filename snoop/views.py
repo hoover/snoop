@@ -94,7 +94,7 @@ def document(request, id):
         except Exception as e:
             error_message = doc.broken
             if not error_message:
-                error_message = e.__class__.__name__ + ' (not marked as broken)'
+                error_message = "{t.__name__} (not marked as broken)".format(t=type(e))
             data = {'type': 'ERROR: ' + error_message}
 
         else:
