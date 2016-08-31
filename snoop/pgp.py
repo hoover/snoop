@@ -23,7 +23,7 @@ class DecryptionError(models.BrokenDocument):
 
 def extract_pgp_block(content):
     if isinstance(content, bytes):
-        content = content.decode()
+        content = content.decode('latin-1')
     m = re.search(
         r'-----BEGIN PGP MESSAGE-----[^-]+-----END PGP MESSAGE-----',
         content, re.DOTALL)
@@ -35,7 +35,7 @@ def extract_pgp_block(content):
 def contains_pgp_block(content):
     if isinstance(content, bytes):
         try:
-            content = content.decode()
+            content = content.decode('latin-1')
         except ValueError:
             return False
     m = re.search(r'-----BEGIN PGP MESSAGE-----', content)
