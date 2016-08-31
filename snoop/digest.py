@@ -96,7 +96,7 @@ def create_children(doc, data, verbose=True):
                 'path': name,
                 'content_type': info['content_type'],
                 'filename': info['filename'],
-                'size': info['size'],
+                'size': info.get('size', 0),
             })
     elif archives.is_archive(doc) or pst.is_pst_file(doc):
         for path in data['file_list']:
