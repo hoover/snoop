@@ -47,6 +47,7 @@ FILE_TYPES = {
     'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'ppt',
     'application/vnd.openxmlformats-officedocument.presentationml.template': 'ppt',
     'application/vnd.openxmlformats-officedocument.presentationml.slideshow': 'ppt',
+    'application/vnd.ms-powerpoint': 'ppt',
     'application/vnd.ms-powerpoint.addin.macroEnabled.12': 'ppt',
     'application/vnd.ms-powerpoint.presentation.macroEnabled.12': 'ppt',
     'application/vnd.ms-powerpoint.template.macroEnabled.12': 'ppt',
@@ -63,6 +64,15 @@ FILE_TYPES = {
     'application/x-gzip': 'archive',
     'application/x-zip-compressed': 'archive',
     'application/x-rar-compressed': 'archive',
+
+    'image/jpeg': 'image',
+    'image/jpg': 'image',
+    'image/png': 'image',
+    'image/gif': 'image',
+    'image/bmp': 'image',
+    'image/tiff': 'image',
+
+    'video/x-ms-wmv': 'video',
 }
 
 
