@@ -9,6 +9,7 @@ from . import queues
 from . import models
 from . import archives
 from . import pst
+from . import exceptions
 from . import pgp
 from .content_types import guess_content_type, guess_filetype
 from .utils import chunks
@@ -139,7 +140,7 @@ def worker(id, verbose):
     try:
         data = digest(document)
 
-    except models.BrokenDocument as e:
+    except exceptions.BrokenDocument as e:
         assert e.flag is not None
         document.broken = e.flag
         document.save()

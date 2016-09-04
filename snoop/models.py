@@ -8,9 +8,6 @@ from django.db import models, transaction
 from django.contrib.postgres.fields import JSONField
 from django.conf import settings
 
-class BrokenDocument(Exception):
-    flag = None
-
 def cache(model, keyfunc):
 
     def decorator(func):
