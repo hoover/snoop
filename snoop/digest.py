@@ -14,6 +14,10 @@ from . import pgp
 from .content_types import guess_content_type, guess_filetype
 from .utils import chunks
 
+INHERITABLE_DOCUMENT_FLAGS = [
+    'pgp',
+]
+
 def _path_bits(doc):
     if doc.container:
         yield from _path_bits(doc.container)
@@ -58,6 +62,9 @@ def digest(doc):
 
     if emails.is_email(doc):
         data.update(emails.parse_email(doc))
+
+    if 'pgp' in doc.flags:
+        data['pgp'] = doc.flags['pgp']
 
     if doc.container_id:
         data['message'] = doc.container_id
@@ -115,6 +122,12 @@ def create_children(doc, data, verbose=True):
                 'size': 0,
             })
 
+    inherited_flags = {
+        key: doc.flags[key]
+        for key in doc.flags
+        if key in INHERITABLE_DOCUMENT_FLAGS
+    }
+
     for info in children_info:
         child, created = models.Document.objects.update_or_create(
             container=doc,
@@ -123,6 +136,7 @@ def create_children(doc, data, verbose=True):
                 'disk_size': info['size'],
                 'content_type': info['content_type'],
                 'filename': info['filename'],
+                'flags': inherited_flags,
             },
         )
 

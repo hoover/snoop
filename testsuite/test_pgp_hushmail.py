@@ -21,19 +21,26 @@ def patch_gpg_to_temp_dir(monkeypatch):
         monkeypatch.setattr(settings, 'SNOOP_GPG_BINARY', 'gpg')
         yield
 
-def parse_email(path):
+def create_email_doc(path):
     doc = models.Document(path=path, content_type='message/rfc822')
-    return emails.parse_email(doc)
+    doc.save = lambda *a, **k: None
+    return doc
+
+def parse_email(path):
+    return emails.parse_email(create_email_doc(path))
 
 def open_email(path):
-    doc = models.Document(path=path, content_type='message/rfc822')
-    return emails.open_email(doc)
+    return emails.open_email(create_email_doc(path))
+
+def test_doc_flags():
+    doc = create_email_doc(PATH_HUSH_MAIL)
+    emails.parse_email(doc)
+    assert doc.flags.get('pgp')
 
 def test_header_data():
     data = parse_email(PATH_HUSH_MAIL)
     assert data['subject'] == "Fwd: test email"
     assert data['date'] == '2016-08-10T15:00:00'
-    assert data['pgp']
 
 def test_attachments():
     data = parse_email(PATH_HUSH_MAIL)

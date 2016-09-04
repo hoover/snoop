@@ -292,20 +292,30 @@ def is_email(doc):
                                 'application/vnd.ms-outlook']
 
 def open_email(doc):
+    email = None
+
     if doc.content_type == 'message/x-emlx':
         with doc.open() as f:
             assert doc.container_id is None, "can't parse emlx in container"
-            return EmlxParser(f, doc.absolute_path)
+            email = EmlxParser(f, doc.absolute_path)
 
     if doc.content_type == 'message/rfc822':
         with doc.open() as f:
-            return EmailParser(f)
+            email = EmailParser(f)
 
     if doc.content_type == 'application/vnd.ms-outlook':
         with open_msg(doc) as f:
-            return EmailParser(f)
+            email = EmailParser(f)
 
-    raise RuntimeError
+    if email is None:
+        raise RuntimeError
+
+    if email.pgp:
+        if 'pgp' not in doc.flags:
+            doc.flags['pgp'] = True
+            doc.save()
+
+    return email
 
 def get_email_part(doc, part):
     return open_email(doc).open_part(part)
@@ -317,7 +327,6 @@ def raw_parse_email(doc):
         'tree': email.get_tree(),
         'attachments': email.get_attachments(),
         'text': email.get_text(),
-        'pgp': email.pgp,
     }
 
 def parse_email(doc):
@@ -327,6 +336,5 @@ def parse_email(doc):
         'text': parsed['text'],
         'tree': parsed['tree'],
         'attachments': parsed['attachments'],
-        'pgp': parsed.get('pgp', False),
     })
     return data
