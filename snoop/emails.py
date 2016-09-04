@@ -310,9 +310,10 @@ def open_email(doc):
     if email is None:
         raise RuntimeError
 
-    if email.pgp and not doc.flags.get('pgp'):
-        doc.flags['pgp'] = True
-        doc.save()
+    if email.pgp:
+        if 'pgp' not in doc.flags:
+            doc.flags['pgp'] = True
+            doc.save()
 
     return email
 

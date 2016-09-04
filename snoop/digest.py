@@ -63,7 +63,7 @@ def digest(doc):
     if emails.is_email(doc):
         data.update(emails.parse_email(doc))
 
-    if doc.flags.get('pgp'):
+    if 'pgp' in doc.flags:
         data['pgp'] = doc.flags['pgp']
 
     if doc.container_id:
