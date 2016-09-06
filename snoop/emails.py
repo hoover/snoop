@@ -10,7 +10,8 @@ from pathlib import Path
 from django.conf import settings
 from . import models
 from . import exceptions
-from .utils import chunks, text_from_html
+from .utils import chunks
+from .html import text_from_html
 from .content_types import guess_content_type
 from . import pgp
 

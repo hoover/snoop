@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, render
 from django.conf import settings
 from django.utils.encoding import filepath_to_uri
 from jinja2 import Environment
-from . import models
+from . import models, html
 from .digest import digest
 from .walker import files_in
 from .emails import open_msg
@@ -38,7 +38,11 @@ def _format_date(date_value):
 def document_raw(request, id):
     doc = get_object_or_404(models.Document, id=id)
     if doc.content_type == 'text/html':
-        return HttpResponse("Not serving HTML files, they can be dangerous")
+        return HttpResponse("This file has been stripped " +
+                            "of links, images, forms and javascript.\n\n" +
+                            html.get_safe_html(doc),
+                            content_type='text/plain',
+                            charset='UTF-8')
     with doc.open() as f:
         data = f.read()
         return HttpResponse(data, content_type=doc.content_type)
