@@ -42,7 +42,7 @@ class Command(BaseCommand):
                     done += 1
             else:
                 print("id:", doc.id, "is not an email file")
-            print(done, "documents dumped.")
+        print(done, "documents dumped.")
 
 
 def decrypt_email_file(email):
