@@ -68,7 +68,7 @@ def clean_html(html):
     try:
         html = dammit.unicode_markup
     except ValueError:
-        if type(html) is bytes:
+        if isinstance(html, bytes):
             html = html.decode('latin-1')
         else:
             html = html
@@ -82,7 +82,7 @@ def clean_html(html):
     # paranoid: run another pass using our settings
     cleanest = LXML_CLEANER.clean_html(clean)
 
-    if type(cleanest) is not str:
+    if not isinstance(cleanest, str):
         cleanest = lxml.html.tostring(cleanest, encoding='UTF-8')
     return cleanest
 
