@@ -12,20 +12,21 @@ def _extract_links(html):
     url_index = []
     i = 0
     for link in tree.findall('.//a'):
-        title = link.text
         url = link.get('href')
         if url:
             i += 1
+            index_data = {'title': link.text, 'url': url, 'id': i}
+
             link.tag = 'span'
-            link.text = '%s [%s]' % (link.text, i)
-            url_index.append({'title': title, 'url': url})
+            link.text = '{title} [{id}]'.format(**index_data)
+            url_index.append(index_data)
 
     html = tostring(tree, encoding="UTF-8", method='html').decode('utf-8')
-    print(type(html))
-    for i, link in enumerate(url_index):
-        if i == 0:
-            html += '<br/>\n<br/>\n'
-        html += '[%s] %s: \t %s <br/>\n' % (i + 1, link['title'], link['url'])
+
+    html += '<br/>\n<br/>\n'
+    for index_data in url_index:
+        html += '[{id}] {title}: \t {url} <br/>\n'.format(**index_data)
+
     return html
 
 def _create_lxml_html_cleaner():
