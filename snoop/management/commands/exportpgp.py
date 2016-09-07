@@ -10,15 +10,16 @@ class Command(BaseCommand):
     help = "Export digested pgp .eml files to a zip archive"
 
     def add_arguments(self, parser):
-        parser.add_argument('where',
-                            help='SQL `where` clause to be ran ' +
-                                 'on the snoop_document table')
         parser.add_argument('destination',
                             help='path to the folder where ' +
                                  'the files will be dumped')
+        parser.add_argument('--where',
+                            help='SQL `where` clause to be ran ' +
+                                 'on the snoop_document table',
+                            default="(flags->>'pgp')::bool")
 
 
-    def handle(self, where, destination, **options):
+    def handle(self, destination, where, **options):
         query = (
             'SELECT id FROM snoop_document WHERE ' +
             where.replace('%', '%%')
@@ -35,7 +36,7 @@ class Command(BaseCommand):
                     output = decrypt_email_file(email)
                     dump_eml(root, doc.md5, output)
                 except Exception as e:
-                    print("id:", doc.id, "failed because of:\n", e)
+                    print("id:", doc.id, "failed: " + type(e).__name__)
                 else:
                     print("id:", doc.id, "is done")
                     done += 1
