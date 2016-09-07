@@ -77,7 +77,7 @@ def digest(doc):
         data['text'] = text.get_text(doc)
 
     if filetype == 'html':
-        data['html'] = html.get_safe_html(doc)
+        data['safe_html'] = html.get_safe_html(doc)
 
     if filetype in settings.SNOOP_TIKA_FILE_TYPES and \
             doc.disk_size <= settings.SNOOP_TIKA_MAX_FILE_SIZE:

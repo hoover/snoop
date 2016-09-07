@@ -254,12 +254,12 @@
     </div>
   {% endif %}
 
-  {%  if 'html' in data and data.type == 'html' %}
+  {%  if data.type == 'html' and 'safe_html' in data %}
     <div class="row">
       <div class="col-lg-12">
         <h5>Stripped HTML</h5>
         <div class="html-container">
-          {{ data.html|safe }}
+          {{ data.safe_html|safe }}
         </div>
       </div>
     </div>
