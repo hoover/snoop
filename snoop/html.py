@@ -61,7 +61,7 @@ def _create_lxml_html_cleaner():
 
     return cleaner
 
-LXML_CLEANER = _create_lxml_html_cleaner()
+lxml_cleaner = _create_lxml_html_cleaner()
 
 def clean_html(html):
     dammit = UnicodeDammit(html, is_html=True)
@@ -80,7 +80,7 @@ def clean_html(html):
     clean = lxml.html.clean.clean_html(extracted_links)
 
     # paranoid: run another pass using our settings
-    cleanest = LXML_CLEANER.clean_html(clean)
+    cleanest = lxml_cleaner.clean_html(clean)
 
     if not isinstance(cleanest, str):
         cleanest = lxml.html.tostring(cleanest, encoding='UTF-8')
