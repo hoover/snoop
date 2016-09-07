@@ -30,25 +30,21 @@ def _extract_links(html):
     return html
 
 def _create_lxml_html_cleaner():
+    # Consult http://lxml.de/3.4/api/lxml.html.clean.Cleaner-class.html
     cleaner = lxml.html.clean.Cleaner()
 
-    # Only the tags will be removed, their content will get pulled up into
-    # the parent tag. The idea here is to make it explicit to copy/paste a link
-    # Also remove any tags that would make inline printing bad (html, head, body)
+    # The idea here is to make it explicit to copy/paste a link, as all of our
+    # links will be available as a text-only index.
+    # Also remove any tags that would make inline printing bad, like <html>,
+    # <head> and body.
     cleaner.remove_tags = ['a', 'img', 'head', 'html', 'body']
 
-    # removes all javascript, like onclick=
+    # remove the shady stuff
     cleaner.javascript = True
-    # removes <script>s
     cleaner.scripts = True
-    # removes <link>s
     cleaner.links = True
-    # removes flash, iframes
     cleaner.embedded = True
     cleaner.frames = True
-
-    # removes <blink> and <marquee>
-    cleaner.annoying_tags = True
 
     # may contain exploits for IE6
     cleaner.comments = True
@@ -56,6 +52,7 @@ def _create_lxml_html_cleaner():
     cleaner.meta = True
     cleaner.forms = True
     cleaner.remove_unknown_tags = True
+    cleaner.annoying_tags = True
 
     # remove <style> so they don't propagate through to the rest of the page
     cleaner.style = True
