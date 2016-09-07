@@ -1,5 +1,5 @@
 import chardet
-from .utils import text_from_html
+from .html import text_from_html
 from .content_types import guess_filetype
 from . import models
 
