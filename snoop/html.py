@@ -2,12 +2,10 @@ import re
 from bs4 import BeautifulSoup, UnicodeDammit
 import lxml.html
 import lxml.html.clean
-import lxml.etree
+from lxml import etree
 
 def _extract_links(html):
-    from lxml.etree import fromstring, tostring, HTMLParser
-
-    tree = fromstring(html, parser=HTMLParser())
+    tree = etree.fromstring(html, parser=etree.HTMLParser())
 
     url_index = []
     i = 0
@@ -21,7 +19,8 @@ def _extract_links(html):
             link.text = '{title} [{id}]'.format(**index_data)
             url_index.append(index_data)
 
-    html = tostring(tree, encoding="UTF-8", method='html').decode('utf-8')
+    html = etree.tostring(tree, encoding="UTF-8", method='html')
+    html = html.decode('utf-8')
 
     html += '<br/>\n<br/>\n'
     for index_data in url_index:
