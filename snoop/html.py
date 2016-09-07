@@ -71,15 +71,15 @@ LXML_CLEANER = _create_lxml_html_cleaner()
 def clean_html(html):
     dammit = UnicodeDammit(html, is_html=True)
     try:
-        doc = dammit.unicode_markup
+        html = dammit.unicode_markup
     except ValueError:
         if type(html) is bytes:
-            doc = html.decode('latin-1')
+            html = html.decode('latin-1')
         else:
-            doc = html
+            html = html
 
     # extract all links and move them to an index
-    extracted_links = _extract_links(doc)
+    extracted_links = _extract_links(html)
 
     # clean the html using the default params
     clean = lxml.html.clean.clean_html(extracted_links)
@@ -88,7 +88,7 @@ def clean_html(html):
     cleanest = LXML_CLEANER.clean_html(clean)
 
     if type(cleanest) is not str:
-        cleaner = lxml.html.tostring(cleanest, encoding='UTF-8')
+        cleanest = lxml.html.tostring(cleanest, encoding='UTF-8')
     return cleanest
 
 
