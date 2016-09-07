@@ -4,6 +4,7 @@ import base64
 from ... import models
 from ... import emails
 from ... import pgp
+from ... import utils
 from ...content_types import guess_content_type
 
 class Command(BaseCommand):
@@ -20,10 +21,7 @@ class Command(BaseCommand):
 
 
     def handle(self, destination, where, **options):
-        query = (
-            'SELECT id FROM snoop_document WHERE ' +
-            where.replace('%', '%%')
-        )
+        query = utils.build_raw_query(where, 'snoop_document')
         root = Path(destination)
         done = 0
         for doc in models.Document.objects.raw(query):

@@ -2,6 +2,7 @@ import simplejson as json
 from django.core.management.base import BaseCommand
 from ... import models
 from ... import queues
+from ... import utils
 
 class Command(BaseCommand):
 
@@ -11,7 +12,7 @@ class Command(BaseCommand):
         parser.add_argument('where')
 
     def handle(self, where, verbosity, **options):
-        query = 'SELECT id FROM snoop_document WHERE %s' % where
+        query = utils.build_raw_query(where, 'snoop_document')
         for document in models.Document.objects.raw(query):
             queues.put('index', {'id': document.id}, verbose=verbosity>0)
             if verbosity > 0:
