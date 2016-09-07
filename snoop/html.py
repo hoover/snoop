@@ -4,7 +4,6 @@ import lxml.html
 import lxml.html.clean
 import lxml.etree
 
-
 def _extract_links(html):
     from lxml.etree import fromstring, tostring, HTMLParser
 
@@ -28,7 +27,6 @@ def _extract_links(html):
             html += '<br/>\n<br/>\n'
         html += '[%s] %s: \t %s <br/>\n' % (i + 1, link['title'], link['url'])
     return html
-
 
 def _create_lxml_html_cleaner():
     cleaner = lxml.html.clean.Cleaner()
@@ -67,7 +65,6 @@ def _create_lxml_html_cleaner():
 
 LXML_CLEANER = _create_lxml_html_cleaner()
 
-
 def clean_html(html):
     dammit = UnicodeDammit(html, is_html=True)
     try:
@@ -91,7 +88,6 @@ def clean_html(html):
         cleanest = lxml.html.tostring(cleanest, encoding='UTF-8')
     return cleanest
 
-
 def text_from_html(html):
     soup = BeautifulSoup(html, 'lxml')
     for node in soup(["script", "style"]):
@@ -100,7 +96,6 @@ def text_from_html(html):
     text = re.sub(r'\n+', '\n', text)
     text = re.sub(r'[ \t\r\f\v]+', ' ', text)
     return text
-
 
 def get_safe_html(doc):
     with doc.open() as f:
