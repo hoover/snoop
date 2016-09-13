@@ -13,7 +13,7 @@ from . import exceptions
 from . import pgp
 from . import html
 from .content_types import guess_content_type, guess_filetype
-from .utils import chunks
+from .utils import chunks, word_count
 
 INHERITABLE_DOCUMENT_FLAGS = [
     'pgp',
@@ -88,6 +88,9 @@ def digest(doc):
     if settings.SNOOP_ANALYZE_LANG:
         if 'text' in data and len(data['text']) > 100:
             data['lang'] = tika_lang(data['text'])[:2]
+
+    if 'text' in data:
+        data['word-count'] = word_count(data['text'])
 
     ocr_items = list(models.Ocr.objects.filter(md5=doc.md5))
     if ocr_items:

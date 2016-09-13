@@ -1,4 +1,9 @@
 import subprocess
+import re
+
+def word_count(text):
+    words = re.findall(r'\w+', text)
+    return len(words)
 
 def chunks(file, blocksize=65536):
     while True:

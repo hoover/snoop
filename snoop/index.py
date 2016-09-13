@@ -25,6 +25,7 @@ def get_index_data(digest_data):
         'filename',
         'rev',
         'pgp',
+        'word-count',
     }
 
     data = {key: digest_data.get(key) for key in copy_keys}

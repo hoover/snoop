@@ -35,7 +35,7 @@ def test_text():
     assert "text" == data['type']
     assert "styles and parameters" in data['text']
     assert "serving thousands of conferences every year" in data['text']
-
+    assert data['word-count'] == 72
 
 def test_html_text():
     data = digest_path(PATH_HTML)
@@ -43,3 +43,4 @@ def test_html_text():
     assert 'html' == data['type']
     assert "HAHAHAHAH" in data['text']
     assert "more text" in data['text']
+    assert data['word-count'] == 5
