@@ -12,7 +12,7 @@ class Command(BaseCommand):
         parser.add_argument('where')
 
     def handle(self, where, verbosity, **options):
-        query = utils.build_raw_query(where, 'snoop_document')
+        query = utils.build_raw_query('snoop_document', where)
         for document in models.Document.objects.raw(query):
             queues.put('digest', {'id': document.id}, verbose=verbosity>0)
             if verbosity > 0:

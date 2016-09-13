@@ -10,9 +10,10 @@ def chunks(file, blocksize=65536):
 def pdftotext(input):
     return subprocess.check_output(['pdftotext', '-', '-'], stdin=input)
 
-def build_raw_query(where, table, field='id'):
+def build_raw_query(table, where):
+    """Build a raw SQL query with a user-defined `where` clause."""
     return " ".join([
-        'SELECT', field, 'FROM', table,
+        'SELECT', 'id', 'FROM', table,
         'WHERE', where.replace('%', '%%'),
     ])
 

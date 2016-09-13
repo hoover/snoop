@@ -21,7 +21,7 @@ class Command(BaseCommand):
 
 
     def handle(self, destination, where, **options):
-        query = utils.build_raw_query(where, 'snoop_document')
+        query = utils.build_raw_query('snoop_document', where)
         root = Path(destination)
         done = 0
         for doc in models.Document.objects.raw(query):
