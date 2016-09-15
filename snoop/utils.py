@@ -15,6 +15,13 @@ def chunks(file, blocksize=65536):
 def pdftotext(input):
     return subprocess.check_output(['pdftotext', '-', '-'], stdin=input)
 
+def build_raw_query(table, where):
+    """Build a raw SQL query with a user-defined `where` clause."""
+    return " ".join([
+        'SELECT', 'id', 'FROM', table,
+        'WHERE', where.replace('%', '%%'),
+    ])
+
 def timeit(name):
     """ Measure aggregate time for a function or code block
 

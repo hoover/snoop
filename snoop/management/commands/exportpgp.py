@@ -4,25 +4,24 @@ import base64
 from ... import models
 from ... import emails
 from ... import pgp
+from ... import utils
 from ...content_types import guess_content_type
 
 class Command(BaseCommand):
     help = "Export digested pgp .eml files to a zip archive"
 
     def add_arguments(self, parser):
-        parser.add_argument('where',
-                            help='SQL `where` clause to be ran ' +
-                                 'on the snoop_document table')
         parser.add_argument('destination',
                             help='path to the folder where ' +
                                  'the files will be dumped')
+        parser.add_argument('--where',
+                            help='SQL `where` clause to be ran ' +
+                                 'on the snoop_document table',
+                            default="(flags->>'pgp')::bool")
 
 
-    def handle(self, where, destination, **options):
-        query = (
-            'SELECT id FROM snoop_document WHERE ' +
-            where.replace('%', '%%')
-        )
+    def handle(self, destination, where, **options):
+        query = utils.build_raw_query('snoop_document', where)
         root = Path(destination)
         done = 0
         for doc in models.Document.objects.raw(query):
@@ -35,13 +34,13 @@ class Command(BaseCommand):
                     output = decrypt_email_file(email)
                     dump_eml(root, doc.md5, output)
                 except Exception as e:
-                    print("id:", doc.id, "failed because of:\n", e)
+                    print("id:", doc.id, "failed: " + type(e).__name__)
                 else:
                     print("id:", doc.id, "is done")
                     done += 1
             else:
                 print("id:", doc.id, "is not an email file")
-            print(done, "documents dumped.")
+        print(done, "documents dumped.")
 
 
 def decrypt_email_file(email):

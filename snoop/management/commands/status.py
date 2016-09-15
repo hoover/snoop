@@ -9,4 +9,4 @@ class Command(BaseCommand):
     help = "ES status"
 
     def handle(self, **options):
-        print 'count:', es.count()['count']
+        print('count:', es.count()['count'])
