@@ -8,25 +8,25 @@ beautifulsoup4==4.5.1
 chardet==2.3.0
 click==6.6                # via pip-tools
 Django==1.9.9
-elasticsearch==2.3.0
+elasticsearch==2.4.0
 first==2.0.1              # via pip-tools
 Jinja2==2.8
-lxml==3.6.1
+lxml==3.6.4
 MarkupSafe==0.23          # via jinja2
 pathlib==1.0.1
 pip-tools==1.7.0
 psycopg2==2.6.2
 py==1.4.31                # via pytest
-pytest-django==2.9.1
-pytest==2.9.2
+pytest-django==3.0.0
+pytest==3.0.2
 python-dateutil==2.5.3
-python-gnupg==0.3.8
-requests==2.10.0          # via tika
+python-gnupg==0.3.9
+requests==2.11.1          # via tika
 simplejson==3.8.2
 six==1.10.0               # via pip-tools, python-dateutil
 tika==1.13.1
-urllib3==1.16             # via elasticsearch
-waitress==0.9.0
+urllib3==1.17             # via elasticsearch
+waitress==1.0.0
 
 # The following packages are commented out because they are
 # considered to be unsafe in a requirements file:
