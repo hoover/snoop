@@ -39,6 +39,11 @@ def walk(tag, verbose=False):
 
 @transaction.atomic
 def worker(tag, md5, path, verbose):
+    status = {
+        'tag': tag,
+        'md5': md5,
+        'path': path,
+    }
     ocr_root = Path(settings.SNOOP_OCR_ROOT) / tag
 
     row, created = models.Ocr.objects.get_or_create(tag=tag, md5=md5)
@@ -51,3 +56,4 @@ def worker(tag, md5, path, verbose):
 
     else:
         if verbose: print(md5, 'skip')
+    return status

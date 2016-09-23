@@ -155,11 +155,15 @@ def create_children(doc, data, verbose=True):
             if verbose: print('new child', child.id)
 
 def worker(id, verbose):
+    status = {
+        'document': id,
+    }
     try:
         document = models.Document.objects.get(id=id)
     except models.Document.DoesNotExist:
         if verbose: print('MISSING')
-        return
+        status['error'] = 'document_missing'
+        return status
 
     try:
         data = digest(document)
@@ -169,7 +173,9 @@ def worker(id, verbose):
         document.broken = e.flag
         document.save()
         if verbose: print(e.flag)
-        return
+        status['error'] = 'broken'
+        status['broken'] = document.broken
+        return status
 
     else:
         if document.broken:
@@ -187,4 +193,6 @@ def worker(id, verbose):
     if verbose: print('type:', data.get('type'))
 
     queues.put('index', {'id': document.id}, verbose=verbose)
+
+    return status
 

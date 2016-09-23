@@ -38,11 +38,16 @@ def get_index_data(digest_data):
     return data
 
 def worker(id, verbose):
+    status = {
+        'document': id,
+        'index': settings.SNOOP_ELASTICSEARCH_INDEX,
+    }
     try:
         digest = models.Digest.objects.get(id=id)
     except models.Digest.DoesNotExist:
         if verbose: print('MISSING')
-        return
+        status['error'] = 'document_missing'
+        return status
 
     digest_data = json.loads(digest.data)
     data = get_index_data(digest_data)
@@ -53,6 +58,8 @@ def worker(id, verbose):
         id=digest.id,
         body=data,
     )
+
+    return status
 
 def bulk_worker(data_list, verbose):
     id_set = set(d['id'] for d in data_list)
