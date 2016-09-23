@@ -138,6 +138,7 @@ def create_children(doc, data, verbose=True):
         if key in INHERITABLE_DOCUMENT_FLAGS
     }
 
+    new_children = 0
     for info in children_info:
         child, created = models.Document.objects.update_or_create(
             container=doc,
@@ -153,6 +154,9 @@ def create_children(doc, data, verbose=True):
         if created:
             queues.put('digest', {'id': child.id}, verbose=verbose)
             if verbose: print('new child', child.id)
+            new_children += 1
+
+    return new_children
 
 def worker(id, verbose):
     status = {
@@ -183,7 +187,9 @@ def worker(id, verbose):
             document.broken = ''
             document.save()
 
-    create_children(document, data, verbose)
+    new_children = create_children(document, data, verbose)
+    if new_children > 0:
+        status['new_children'] = new_children
 
     models.Digest.objects.update_or_create(
         id=document.id,
