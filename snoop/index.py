@@ -2,6 +2,7 @@ from django.conf import settings
 import json
 from elasticsearch import Elasticsearch, helpers
 from . import models
+from .utils import log_result
 
 es = Elasticsearch(settings.SNOOP_ELASTICSEARCH_URL)
 
@@ -37,6 +38,7 @@ def get_index_data(digest_data):
 
     return data
 
+@log_result({"type": "worker", "queue": "index"})
 def worker(id, verbose):
     status = {
         'document': id,

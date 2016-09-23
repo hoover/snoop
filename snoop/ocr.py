@@ -4,7 +4,7 @@ import re
 from django.conf import settings
 from django.db import transaction
 from . import models
-from .utils import pdftotext
+from .utils import pdftotext, log_result
 from . import queues
 
 def walk(tag, verbose=False):
@@ -36,7 +36,7 @@ def walk(tag, verbose=False):
 
     if verbose: print('added', i, 'jobs to queue')
 
-
+@log_result({"type": "worker", "queue": "ocr"})
 @transaction.atomic
 def worker(tag, md5, path, verbose):
     status = {

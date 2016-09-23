@@ -13,7 +13,7 @@ from . import exceptions
 from . import pgp
 from . import html
 from .content_types import guess_content_type, guess_filetype
-from .utils import chunks, word_count, extract_exif
+from .utils import chunks, word_count, log_result, extract_exif
 
 INHERITABLE_DOCUMENT_FLAGS = [
     'pgp',
@@ -158,6 +158,7 @@ def create_children(doc, data, verbose=True):
 
     return new_children
 
+@log_result({"type": "worker", "queue": "digest"})
 def worker(id, verbose):
     status = {
         'document': id,
