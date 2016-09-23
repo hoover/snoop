@@ -2,6 +2,9 @@ import subprocess
 import re
 import exifread
 from datetime import datetime
+import fcntl
+from contextlib import contextmanager
+
 
 def extract_gps_location(tags):
     def ratio_to_float(ratio):
@@ -123,3 +126,16 @@ def timeit(name):
     decorator.cm = cm
 
     return decorator
+
+@contextmanager
+def flock(fd):
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)
+        yield fd
+    finally:
+        fcntl.flock(fd, fcntl.LOCK_UN)
+
+def append_with_lock(path, bytes):
+    with open(path, 'ab') as file:
+        with flock(file) as locked:
+            locked.write(bytes.encode('utf-8'))
