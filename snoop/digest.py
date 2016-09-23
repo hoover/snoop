@@ -13,7 +13,7 @@ from . import exceptions
 from . import pgp
 from . import html
 from .content_types import guess_content_type, guess_filetype
-from .utils import chunks, word_count
+from .utils import chunks, word_count, extract_exif
 
 INHERITABLE_DOCUMENT_FLAGS = [
     'pgp',
@@ -78,6 +78,9 @@ def digest(doc):
 
     if filetype == 'html':
         data['safe_html'] = html.get_safe_html(doc)
+
+    if filetype == 'image':
+        data.update(extract_exif(doc))
 
     if filetype in settings.SNOOP_TIKA_FILE_TYPES and \
             doc.disk_size <= settings.SNOOP_TIKA_MAX_FILE_SIZE:
