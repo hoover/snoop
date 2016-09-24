@@ -20,7 +20,7 @@ def extract_gps_location(tags):
     lng = tags.get('GPS GPSLongitude')
     lng_ref = tags.get('GPS GPSLongitudeRef')
 
-    if not lat or not lng or not lat_ref or not lng_ref:
+    if any(v is None for v in [lat, lat_ref, lng, lng_ref]):
         return None
 
     lat = convert(lat)
