@@ -17,19 +17,19 @@ def extract_gps_location(tags):
 
     lat = tags.get('GPS GPSLatitude')
     lat_ref = tags.get('GPS GPSLatitudeRef')
-    lon = tags.get('GPS GPSLongitude')
-    lon_ref = tags.get('GPS GPSLongitudeRef')
+    lng = tags.get('GPS GPSLongitude')
+    lng_ref = tags.get('GPS GPSLongitudeRef')
 
-    if not lat or not lon or not lat_ref or not lon_ref:
+    if not lat or not lng or not lat_ref or not lng_ref:
         return None
 
     lat = convert(lat)
     if lat_ref.values[0] != 'N':
         lat = -lat
-    lon = convert(lon)
-    if lon_ref.values[0] != 'E':
-        lon = -lon
-    return "{}, {}".format(lat, lon)
+    lng = convert(lng)
+    if lng_ref.values[0] != 'E':
+        lng = -lng
+    return "{}, {}".format(lat, lng)
 
 def convert_exif_date(str):
     try:
@@ -41,8 +41,8 @@ def convert_exif_date(str):
 def extract_exif(doc):
     # detauls=False removes thumbnails and MakerNote (manufacturer specific
     # information). See https://pypi.python.org/pypi/ExifRead#tag-descriptions
-    with doc.open(filesystem=True) as file:
-        tags = exifread.process_file(file, details=False)
+    with doc.open(filesystem=True) as f:
+        tags = exifread.process_file(f, details=False)
     if not tags:
         return {}
 
