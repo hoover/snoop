@@ -2,7 +2,7 @@ from django.conf import settings
 import json
 from elasticsearch import Elasticsearch, helpers
 from . import models
-from .utils import log_result
+from .utils import worker_metrics
 
 es = Elasticsearch(settings.SNOOP_ELASTICSEARCH_URL)
 
@@ -38,30 +38,28 @@ def get_index_data(digest_data):
 
     return data
 
-@log_result({"type": "worker", "queue": "index"})
 def worker(id, verbose):
-    status = {
-        'document': id,
-        'index': settings.SNOOP_ELASTICSEARCH_INDEX,
-    }
-    try:
-        digest = models.Digest.objects.get(id=id)
-    except models.Digest.DoesNotExist:
-        if verbose: print('MISSING')
-        status['error'] = 'document_missing'
-        return status
+    with worker_metrics(type='worker', queue='digest') as metrics:
+        metrics.update({
+            'document': id,
+            'index': settings.SNOOP_ELASTICSEARCH_INDEX
+        })
+        try:
+            digest = models.Digest.objects.get(id=id)
+        except models.Digest.DoesNotExist:
+            if verbose: print('MISSING')
+            metrics.update({'outcome': 'error', 'error': 'document_missing'})
+            return
 
-    digest_data = json.loads(digest.data)
-    data = get_index_data(digest_data)
+        digest_data = json.loads(digest.data)
+        data = get_index_data(digest_data)
 
-    es.index(
-        index=settings.SNOOP_ELASTICSEARCH_INDEX,
-        doc_type='doc',
-        id=digest.id,
-        body=data,
-    )
-
-    return status
+        es.index(
+            index=settings.SNOOP_ELASTICSEARCH_INDEX,
+            doc_type='doc',
+            id=digest.id,
+            body=data,
+        )
 
 def bulk_worker(data_list, verbose):
     id_set = set(d['id'] for d in data_list)

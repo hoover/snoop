@@ -1,20 +1,15 @@
 from django.core.management.base import BaseCommand
 from ... import queues
-from ...utils import log_result
+from ...utils import worker_metrics
 
-@log_result()
 def run_worker(worker, queue_name, queue_iterator, verbose):
-    num_items = 0
-    for work in queue_iterator:
-        with work() as data:
-            num_items += 1
-            worker(verbose=verbose, **data)
-
-    return {
-        'type': 'job',
-        'queue': queue_name,
-        'items': num_items,
-    }
+    with worker_metrics(type='job', queue=queue_name) as metrics:
+        num_items = 0
+        for work in queue_iterator:
+            with work() as data:
+                num_items += 1
+                worker(verbose=verbose, **data)
+        metrics['items'] = num_items
 
 class Command(BaseCommand):
 

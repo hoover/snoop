@@ -146,43 +146,25 @@ def append_with_lock(path, bytes):
         with flock(file) as locked:
             locked.write(bytes.encode('utf-8'))
 
-def log_result(extra_data=None):
-    """
-    Wrapps a function to log the result of running it. The function should
-    return a dict with serializable data.
-
-    :arg extra_data: a dict with additional data to be added to the log
-        message.
-    """
-
+@contextmanager
+def worker_metrics(**defaults):
     if settings.SNOOP_LOG_DIR is None:
-        def decorate_without_log(fn):
-            return fn
-        return decorate_without_log
+        yield {}
+        return
 
-    def decorate_with_log(fn):
-        @wraps(fn)
-        def wrapped(*args, **kwargs):
-            time_stared = datetime.now(timezone.utc).astimezone().isoformat()
-
-            t0 = time()
-            fn_result = fn(*args, **kwargs)
-            duration = time() - t0
-
-            if not extra_data:
-                data = dict(fn_result.items())
-            else:
-                data = dict(extra_data.items())
-                data.update(fn_result)
-            data['ok'] = 'error' not in data
-            data['started'] = time_stared
-            data['duration'] = duration
-
-            log_line = json.dumps(data) + '\n'
-            day = datetime.utcfromtimestamp(t0).date().isoformat()
-            logfile = Path(settings.SNOOP_LOG_DIR) / (day + '.txt')
-            logfile_path = str(logfile.absolute())
-            append_with_lock(logfile_path, log_line)
-            return fn_result
-        return wrapped
-    return decorate_with_log
+    t0 = time()
+    data = dict(defaults, start=t0)
+    try:
+        yield data
+    except:
+        data['outcome'] = 'exception'
+        raise
+    else:
+        data.setdefault('outcome', 'success')
+    finally:
+        data['duration'] = time() - t0
+        log_line = json.dumps(data) + '\n'
+        day = datetime.utcfromtimestamp(t0).date().isoformat()
+        logfile = Path(settings.SNOOP_LOG_DIR) / (day + '.txt')
+        logfile_path = str(logfile.absolute())
+        append_with_lock(logfile_path, log_line)

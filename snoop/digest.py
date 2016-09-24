@@ -13,7 +13,7 @@ from . import exceptions
 from . import pgp
 from . import html
 from .content_types import guess_content_type, guess_filetype
-from .utils import chunks, word_count, log_result, extract_exif
+from .utils import chunks, word_count, worker_metrics, extract_exif
 
 INHERITABLE_DOCUMENT_FLAGS = [
     'pgp',
@@ -158,48 +158,42 @@ def create_children(doc, data, verbose=True):
 
     return new_children
 
-@log_result({"type": "worker", "queue": "digest"})
+
 def worker(id, verbose):
-    status = {
-        'document': id,
-    }
-    try:
-        document = models.Document.objects.get(id=id)
-    except models.Document.DoesNotExist:
-        if verbose: print('MISSING')
-        status['error'] = 'document_missing'
-        return status
+    with worker_metrics(type='worker', queue='digest') as metrics:
+        metrics['document'] = id
+        try:
+            document = models.Document.objects.get(id=id)
+        except models.Document.DoesNotExist:
+            if verbose: print('MISSING')
+            metrics.update({'outcome': 'error', 'error': 'document_missing'})
+            return
+        try:
+            data = digest(document)
 
-    try:
-        data = digest(document)
-
-    except exceptions.BrokenDocument as e:
-        assert e.flag is not None
-        document.broken = e.flag
-        document.save()
-        if verbose: print(e.flag)
-        status['error'] = 'broken'
-        status['broken'] = document.broken
-        return status
-
-    else:
-        if document.broken:
-            if verbose: print('removing broken flag', document.broken)
-            document.broken = ''
+        except exceptions.BrokenDocument as e:
+            assert e.flag is not None
+            document.broken = e.flag
             document.save()
+            if verbose: print(e.flag)
+            metrics.update({'outcome': 'broken', 'broken': document.broken})
+            return
 
-    new_children = create_children(document, data, verbose)
-    if new_children > 0:
-        status['new_children'] = new_children
+        else:
+            if document.broken:
+                if verbose: print('removing broken flag', document.broken)
+                document.broken = ''
+                document.save()
 
-    models.Digest.objects.update_or_create(
-        id=document.id,
-        defaults={'data': json.dumps(data)},
-    )
+        new_children = create_children(document, data, verbose)
+        if new_children > 0:
+            metrics['new_children'] = new_children
 
-    if verbose: print('type:', data.get('type'))
+        models.Digest.objects.update_or_create(
+            id=document.id,
+            defaults={'data': json.dumps(data)},
+        )
 
-    queues.put('index', {'id': document.id}, verbose=verbose)
+        if verbose: print('type:', data.get('type'))
 
-    return status
-
+        queues.put('index', {'id': document.id}, verbose=verbose)
