@@ -9,6 +9,7 @@ chardet==2.3.0
 click==6.6                # via pip-tools
 Django==1.9.9
 elasticsearch==2.4.0
+exifread==2.1.2
 first==2.0.1              # via pip-tools
 Jinja2==2.8
 lxml==3.6.4

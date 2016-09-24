@@ -4,6 +4,7 @@ from snoop.content_types import guess_content_type
 
 PATH_TEXT = "disk-files/pdf-doc-txt/easychair.txt"
 PATH_HTML = "disk-files/bad-html/alert.html"
+PATH_IMAGE = 'disk-files/images/bikes.jpg'
 
 @pytest.fixture(autouse=True)
 def no_ocr_models(monkeypatch):
@@ -44,3 +45,9 @@ def test_html_text():
     assert "HAHAHAHAH" in data['text']
     assert "more text" in data['text']
     assert data['word-count'] == 5
+
+def test_digest_image_exif():
+    data = digest_path(PATH_IMAGE)
+
+    assert data['location'] == '33.87546081542969, -116.3016196017795'
+    assert data['date-created'] == '2006-02-11T11:06:37'

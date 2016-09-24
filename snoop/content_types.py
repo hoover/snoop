@@ -64,18 +64,15 @@ FILE_TYPES = {
     'application/x-gzip': 'archive',
     'application/x-zip-compressed': 'archive',
     'application/x-rar-compressed': 'archive',
-
-    'image/jpeg': 'image',
-    'image/jpg': 'image',
-    'image/png': 'image',
-    'image/gif': 'image',
-    'image/bmp': 'image',
-    'image/tiff': 'image',
-
-    'video/x-ms-wmv': 'video',
 }
 
 
 def guess_filetype(doc):
     content_type = doc.content_type.split(';')[0]
-    return FILE_TYPES.get(content_type)
+    if content_type in FILE_TYPES:
+        return FILE_TYPES[content_type]
+    else:
+        supertype = content_type.split('/')[0]
+        if supertype in ['audio', 'video', 'image']:
+            return supertype
+    return None
