@@ -1,16 +1,12 @@
 import subprocess
 import re
 import exifread
-from datetime import datetime
-import fcntl
 import json
-from datetime import datetime, timezone
+from datetime import datetime
 from time import time
 from pathlib import Path
-from functools import wraps
 from contextlib import contextmanager
 from django.conf import settings
-
 
 def extract_gps_location(tags):
     def ratio_to_float(ratio):
@@ -133,26 +129,14 @@ def timeit(name):
 
     return decorator
 
-@contextmanager
-def flock(fd):
-    try:
-        fcntl.flock(fd, fcntl.LOCK_EX)
-        yield fd
-    finally:
-        fcntl.flock(fd, fcntl.LOCK_UN)
-
-def append_with_lock(path, bytes):
-    with open(path, 'ab') as file:
-        with flock(file) as locked:
-            locked.write(bytes.encode('utf-8'))
-
 def save_worker_metrics(timestamp, data):
     log_line = json.dumps(data) + '\n'
     day = datetime.utcfromtimestamp(timestamp).date().isoformat()
     logfile = Path(settings.SNOOP_LOG_DIR) / (day + '.txt')
     logfile_path = str(logfile.absolute())
-    append_with_lock(logfile_path, log_line)
-
+    with open(logfile_path, 'ab') as f:
+        f.write(log_line.encode('utf-8'))
+        f.flush()
 
 @contextmanager
 def worker_metrics(**defaults):

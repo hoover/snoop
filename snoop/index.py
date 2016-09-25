@@ -40,10 +40,8 @@ def get_index_data(digest_data):
 
 def worker(id, verbose):
     with worker_metrics(type='worker', queue='digest') as metrics:
-        metrics.update({
-            'document': id,
-            'index': settings.SNOOP_ELASTICSEARCH_INDEX
-        })
+        metrics['document'] = id
+        metrics['index'] = settings.SNOOP_ELASTICSEARCH_INDEX
         try:
             digest = models.Digest.objects.get(id=id)
         except models.Digest.DoesNotExist:
