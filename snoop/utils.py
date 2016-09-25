@@ -146,6 +146,14 @@ def append_with_lock(path, bytes):
         with flock(file) as locked:
             locked.write(bytes.encode('utf-8'))
 
+def save_worker_metrics(timestamp, data):
+    log_line = json.dumps(data) + '\n'
+    day = datetime.utcfromtimestamp(timestamp).date().isoformat()
+    logfile = Path(settings.SNOOP_LOG_DIR) / (day + '.txt')
+    logfile_path = str(logfile.absolute())
+    append_with_lock(logfile_path, log_line)
+
+
 @contextmanager
 def worker_metrics(**defaults):
     if settings.SNOOP_LOG_DIR is None:
@@ -163,8 +171,4 @@ def worker_metrics(**defaults):
         data.setdefault('outcome', 'success')
     finally:
         data['duration'] = time() - t0
-        log_line = json.dumps(data) + '\n'
-        day = datetime.utcfromtimestamp(t0).date().isoformat()
-        logfile = Path(settings.SNOOP_LOG_DIR) / (day + '.txt')
-        logfile_path = str(logfile.absolute())
-        append_with_lock(logfile_path, log_line)
+        save_worker_metrics(t0, data)
