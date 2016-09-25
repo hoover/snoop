@@ -33,6 +33,7 @@ others do useful processing. See "Optional Dependencies" to install them.
    * `SNOOP_ELASTICSEARCH_URL`: url to elasticsearch server
    * `SNOOP_ELASTICSEARCH_INDEX`: name of elasticsearch index where to index
      the data
+   * `SNOOP_LOG_DIR`: path to the dir where worker logs will be dumped
 
 3. Run the migrations:
 
