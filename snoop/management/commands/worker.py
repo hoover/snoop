@@ -1,5 +1,15 @@
 from django.core.management.base import BaseCommand
 from ... import queues
+from ...utils import worker_metrics
+
+def run_worker(worker, queue_name, queue_iterator, verbose):
+    with worker_metrics(type='job', queue=queue_name) as metrics:
+        num_items = 0
+        for work in queue_iterator:
+            with work() as data:
+                num_items += 1
+                worker(verbose=verbose, **data)
+        metrics['items'] = num_items
 
 class Command(BaseCommand):
 
@@ -28,6 +38,4 @@ class Command(BaseCommand):
             in_order=stop_first_error,
         )
 
-        for work in queue_iterator:
-            with work() as data:
-                worker(verbose=verbosity>0, **data)
+        run_worker(worker, queue, queue_iterator, verbosity>0)

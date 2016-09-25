@@ -1,7 +1,12 @@
 import subprocess
 import re
 import exifread
+import json
 from datetime import datetime
+from time import time
+from pathlib import Path
+from contextlib import contextmanager
+from django.conf import settings
 
 def extract_gps_location(tags):
     def ratio_to_float(ratio):
@@ -123,3 +128,31 @@ def timeit(name):
     decorator.cm = cm
 
     return decorator
+
+def save_worker_metrics(timestamp, data):
+    log_line = json.dumps(data) + '\n'
+    day = datetime.utcfromtimestamp(timestamp).date().isoformat()
+    logfile = Path(settings.SNOOP_LOG_DIR) / (day + '.txt')
+    logfile_path = str(logfile.absolute())
+    with open(logfile_path, 'ab') as f:
+        f.write(log_line.encode('utf-8'))
+        f.flush()
+
+@contextmanager
+def worker_metrics(**defaults):
+    if settings.SNOOP_LOG_DIR is None:
+        yield {}
+        return
+
+    t0 = time()
+    data = dict(defaults, start=t0)
+    try:
+        yield data
+    except:
+        data['outcome'] = 'exception'
+        raise
+    else:
+        data.setdefault('outcome', 'success')
+    finally:
+        data['duration'] = time() - t0
+        save_worker_metrics(t0, data)

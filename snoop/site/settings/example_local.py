@@ -28,3 +28,5 @@ SNOOP_READPST_BINARY = 'readpst'
 
 SNOOP_GPG_HOME = '/path/to/gpg/home'
 SNOOP_GPG_BINARY = 'gpg'
+
+SNOOP_LOG_DIR = '/path/to/log/dir'

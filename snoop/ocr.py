@@ -4,7 +4,7 @@ import re
 from django.conf import settings
 from django.db import transaction
 from . import models
-from .utils import pdftotext
+from .utils import pdftotext, worker_metrics
 from . import queues
 
 def walk(tag, verbose=False):
@@ -36,18 +36,19 @@ def walk(tag, verbose=False):
 
     if verbose: print('added', i, 'jobs to queue')
 
-
 @transaction.atomic
 def worker(tag, md5, path, verbose):
-    ocr_root = Path(settings.SNOOP_OCR_ROOT) / tag
+    with worker_metrics(type='worker', queue='ocr') as metrics:
+        metrics.update({'tag': tag, 'md5': md5, 'path': path})
+        ocr_root = Path(settings.SNOOP_OCR_ROOT) / tag
 
-    row, created = models.Ocr.objects.get_or_create(tag=tag, md5=md5)
-    if created:
-        row.path = path
-        with (ocr_root / path).open('rb') as f:
-            row.text = pdftotext(f)
-        row.save()
-        if verbose: print(md5, 'add')
+        row, created = models.Ocr.objects.get_or_create(tag=tag, md5=md5)
+        if created:
+            row.path = path
+            with (ocr_root / path).open('rb') as f:
+                row.text = pdftotext(f)
+            row.save()
+            if verbose: print(md5, 'add')
 
-    else:
-        if verbose: print(md5, 'skip')
+        else:
+            if verbose: print(md5, 'skip')
