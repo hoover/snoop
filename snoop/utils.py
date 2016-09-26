@@ -145,7 +145,7 @@ def worker_metrics(**defaults):
         return
 
     t0 = time()
-    data = dict(defaults, start=t0)
+    data = dict(defaults, time=t0)
     try:
         yield data
     except:
