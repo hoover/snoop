@@ -45,7 +45,9 @@
         <h4>{{ '#' + id }}</h4>
       {% endif %}
 
-      {% if not embed %}
+      {% if embed %}
+        <a href="" class="btn btn-info" target="_blank" role="button">Open in new tab</a>
+      {% else %}
         {% if up != None %}
           <a href="{{ up }}" class="btn btn-info" role="button">Up</a>
         {% endif %}
