@@ -9,7 +9,7 @@ SECRET_KEY = TODO_generate_random_string
 
 SNOOP_ROOT = '/path/to/test/data'
 
-SNOOP_ELASTICSEARCH_ENDPOINT = 'http://localhost:9200'
+SNOOP_ELASTICSEARCH_URL = 'http://localhost:9200'
 SNOOP_ELASTICSEARCH_INDEX = 'hoover'
 
 SNOOP_TIKA_SERVER_ENDPOINT = 'http://localhost:9998'
