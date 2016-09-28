@@ -45,24 +45,26 @@
         <h4>{{ '#' + id }}</h4>
       {% endif %}
 
-      {% if up != None %}
-        <a href="{{ up }}" class="btn btn-info" role="button">Up</a>
-      {% endif %}
+      {% if not embed %}
+        {% if up != None %}
+          <a href="{{ up }}" class="btn btn-info" role="button">Up</a>
+        {% endif %}
 
-      {% if data.type != 'folder' %}
-        <a href="./{{ id }}/raw/{{ uriencode(data.filename) }}"
-           class="btn btn-primary" role="button">Original file</a>
-      {% endif %}
+        {% if data.type != 'folder' %}
+          <a href="./{{ id }}/raw/{{ uriencode(data.filename) }}"
+             class="btn btn-primary" role="button">Original file</a>
+        {% endif %}
 
-      {% if as_eml %}
-        <a href="./{{ id }}/eml/{{ as_eml }}"
-           class="btn btn-primary" role="button">as .eml file</a>
-      {% endif %}
+        {% if as_eml %}
+          <a href="./{{ id }}/eml/{{ as_eml }}"
+             class="btn btn-primary" role="button">as .eml file</a>
+        {% endif %}
 
-      {% for tag in data.get('ocr', {}) %}
-        <a href="./{{ id }}/ocr/{{ tag }}/{{ uriencode(data.filename) }}"
-           class="btn btn-secondary" role="button">OCR {{ tag }}</a>
-      {% endfor %}
+        {% for tag in data.get('ocr', {}) %}
+          <a href="./{{ id }}/ocr/{{ tag }}/{{ uriencode(data.filename) }}"
+             class="btn btn-secondary" role="button">OCR {{ tag }}</a>
+        {% endfor %}
+      {% endif %}
     </div>
   </div>
 

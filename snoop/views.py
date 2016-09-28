@@ -149,10 +149,13 @@ def document(request, id):
         if data.get(field):
             data[field] = _format_date(data[field])
 
+    embed = request.GET.get('embed') == 'on'
+
     return render(request, 'document.html', {
         'id': id,
         'up': up,
         'data': data,
         'attachments': attachments,
         'as_eml': as_eml,
+        'embed': embed,
     })
