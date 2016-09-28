@@ -44,7 +44,8 @@ others do useful processing. See "Optional Dependencies" to install them.
 
 ## Getting started
 
-1. List the files in the dump and create entries in the database.
+1. List the files in the dump, from the path configured in `SNOOP_ROOT`, and
+   create entries in the database.
 
    ```shell
    $ ./manage.py walk
