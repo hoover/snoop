@@ -5,7 +5,8 @@ DATABASES = {
     }
 }
 
-SECRET_KEY = TODO_generate_random_string
+DEBUG = True
+SECRET_KEY = 'FIME: generate random string'
 
 SNOOP_ROOT = '/path/to/test/data'
 

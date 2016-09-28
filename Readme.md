@@ -26,7 +26,8 @@ others do useful processing. See "Optional Dependencies" to install them.
 
 1. Create a virtualenv and run `pip install -r requirements.txt`
 
-2. Configuration - create `snoop/site/settings/local.py` with:
+2. Configuration - create `snoop/site/settings/local.py`, you can use
+   `example_local.py` as a template.
 
    * `DATABASES`: django database configuration
    * `SNOOP_ROOT`: path to the dump
