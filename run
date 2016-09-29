@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+set -e
+
+COMMAND=$1
+shift
+
+case "$COMMAND" in
+
+  'devserver')
+    #@ localhost:8001
+    set -x
+    exec ./manage.py runserver 8001 "$@"
+    ;;
+
+  'server')
+    #@ --host=0.0.0.0
+    #@ --port=8081
+    set -x
+    exec waitress-serve --port=8081 "$@" hoover.wsgi:application
+    ;;
+
+  'worker')
+    set -x
+    exec ./manage.py worker "$@"
+    ;;
+
+  'walk')
+    set -x
+    exec ./manage.py walk "$@"
+    ;;
+
+  'queueall')
+    exec ./manage.py digestqueue "true"
+    ;;
+
+  'digest')
+    exec ./manage.py worker digest "$@"
+    ;;
+
+  'resetindex')
+    exec ./manage.py resetindex "$@"
+    ;;
+
+  'index')
+    exec ./manage.py worker index "$@"
+    ;;
+
+  *)
+    echo "Unknown command $COMMAND"
+    ;;
+
+esac
