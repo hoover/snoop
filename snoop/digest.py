@@ -2,6 +2,7 @@ from django.conf import settings
 import hashlib
 import json
 from pathlib import Path
+from datetime import datetime
 from .tikalib import tika_parse, extract_meta, tika_lang
 from . import emails
 from . import text
@@ -58,7 +59,6 @@ def digest(doc):
         'sha1': doc.sha1,
         'md5': doc.md5,
         'filename': doc.filename,
-        'rev': doc.rev,
     }
 
     if emails.is_email(doc):
@@ -169,6 +169,8 @@ def worker(id, verbose):
             metrics.update({'outcome': 'error', 'error': 'document_missing'})
             return
         try:
+            document.last_digest = datetime.now()
+            document.save()
             data = digest(document)
 
         except exceptions.BrokenDocument as e:

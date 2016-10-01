@@ -24,7 +24,6 @@ def get_index_data(digest_data):
         'references',
         'message',
         'filename',
-        'rev',
         'pgp',
         'word-count',
     }
