@@ -46,7 +46,12 @@ class ArchiveListCache(models.Model):
     time = models.DateTimeField(auto_now=True)
 
 class Document(models.Model):
-    container = models.ForeignKey('Document', null=True)
+    container = models.ForeignKey('Document',
+                                  related_name='snoop_document_container',
+                                  null=True)
+    parent = models.ForeignKey('Document',
+                               related_name='snoop_document_parent',
+                               null=True)
     path = models.CharField(max_length=4000)
     content_type = models.CharField(max_length=100, blank=True)
     filename = models.CharField(max_length=1000)
