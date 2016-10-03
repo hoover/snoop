@@ -26,42 +26,49 @@ class Walker(object):
     def _path(self, file):
         return file.relative_to(self.root)
 
-    def handle(self, item=None):
+    def handle(self, item=None, parent=None):
         if item is None:
             item = self.root
 
         if item.is_dir():
-            self.handle_folder(item)
+            self.handle_folder(item, parent)
 
         else:
-            self.handle_file(item)
+            self.handle_file(item, parent)
 
-    def handle_folder(self, folder):
+    def handle_folder(self, folder, parent):
         path = self._path(folder)
         print('FOLDER', path)
         if models.FolderMark.objects.filter(path=path).count():
             print('SKIP', path)
             return
         if str(path) != '.':
-            models.Document.objects.get_or_create(
+            new_doc, _ = models.Document.objects.get_or_create(
                 path=path,
                 disk_size=0,
                 content_type=FOLDER,
                 filename=path.name,
+                parent=parent,
             )
+        else:
+            new_doc = None
         for child in folder.iterdir():
-            self.handle(child)
+            self.handle(child, new_doc)
         models.FolderMark.objects.create(path=path)
         print('MARK', path)
 
-    def handle_file(self, file):
+    def handle_file(self, file, parent):
         path = self._path(file)
         print('FILE', path)
-        models.Document.objects.get_or_create(path=path, defaults={
-            'disk_size': file.stat().st_size,
-            'content_type': guess_content_type(file.name),
-            'filename': path.name,
-        })
+        models.Document.objects.get_or_create(
+            path=path,
+            parent=parent,
+            defaults={
+                'disk_size': file.stat().st_size,
+                'content_type': guess_content_type(file.name),
+                'filename': path.name,
+            },
+        )
 
 def files_in(parent_path):
     child_documents = models.Document.objects.filter(
