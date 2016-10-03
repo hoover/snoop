@@ -37,7 +37,17 @@ class Walker(object):
 
     def handle_folder(self, folder, parent):
         path = self._path(folder)
-        if str(path) != '.':
+        if str(path) == '.':
+            if self.container_doc:
+                new_doc = self.container_doc
+            else:
+                new_doc, _ = models.Document.objects.get_or_create(
+                    path='',
+                    disk_size=0,
+                    content_type=FOLDER,
+                    filename='',
+                )
+        else:
             new_doc, created = models.Document.objects.get_or_create(
                 path=path,
                 disk_size=0,
@@ -47,8 +57,6 @@ class Walker(object):
                 container=self.container_doc,
             )
             self.documents.append((new_doc, created))
-        else:
-            new_doc = self.container_doc
         for child in folder.iterdir():
             self.handle(child, new_doc)
 
