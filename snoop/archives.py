@@ -7,6 +7,7 @@ import shutil
 from . import models
 from . import exceptions
 from .content_types import guess_filetype
+from .walker import Walker
 
 KNOWN_TYPES = {
     'application/zip',
@@ -88,30 +89,12 @@ def extract_to_base(doc):
         else:
             tmp.rename(base)
 
-
-@models.cache(models.ArchiveListCache, lambda doc: doc.sha1)
-def list_files(doc):
+def list_children(doc):
     base = CACHE_ROOT / doc.sha1
     if not base.is_dir():
         extract_to_base(doc)
-
-    file_list = []
-    folder_list = []
-
-    for root, dirs, files in os.walk(str(base)):
-        for file in files:
-            abs = Path(root) / file
-            rel = abs.relative_to(base)
-            file_list.append(str(rel))
-        for folder in dirs:
-            abs = Path(root) / folder
-            rel = abs.relative_to(base)
-            folder_list.append(str(rel))
-
-    return {
-        'file_list': file_list,
-        'folder_list': folder_list,
-    }
+    child_list = Walker.walk(base, None, False, doc)
+    return [(doc.id, created) for doc, created in child_list]
 
 def open_file(doc, name):
     path = CACHE_ROOT / doc.sha1 / name

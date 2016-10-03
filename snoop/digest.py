@@ -100,63 +100,57 @@ def digest(doc):
         data['ocr'] = {ocr.tag: ocr.text for ocr in ocr_items}
 
     if archives.is_archive(doc):
-        data.update(archives.list_files(doc))
-    elif pst.is_pst_file(doc):
-        data.update(pst.list_files(doc))
+        archives.extract_to_base(doc)
+    if pst.is_pst_file(doc):
+        pst.extract_to_base(doc)
 
     return data
 
 def create_children(doc, data, verbose=True):
-    children_info = []
-    if emails.is_email(doc):
-        for name, info in data.get('attachments', {}).items():
-            children_info.append({
-                'path': name,
-                'content_type': info['content_type'],
-                'filename': info['filename'],
-                'size': info.get('size', 0),
-            })
-    elif archives.is_archive(doc) or pst.is_pst_file(doc):
-        for path in data['file_list']:
-            children_info.append({
-                'path': path,
-                'content_type': guess_content_type(path),
-                'filename': Path(path).name,
-                'size': 0,
-            })
-        for path in data['folder_list']:
-            children_info.append({
-                'path': path,
-                'content_type': 'application/x-directory',
-                'filename': Path(path).name,
-                'size': 0,
-            })
-
     inherited_flags = {
         key: doc.flags[key]
         for key in doc.flags
         if key in INHERITABLE_DOCUMENT_FLAGS
     }
+    new_children_ids = []
+    children_ids = []
 
-    new_children = 0
-    for info in children_info:
-        child, created = models.Document.objects.update_or_create(
-            container=doc,
-            path=info['path'],
-            defaults={
-                'disk_size': info['size'],
-                'content_type': info['content_type'],
-                'filename': info['filename'],
-                'flags': inherited_flags,
-            },
-        )
+    if emails.is_email(doc):
+        for name, info in data.get('attachments', {}).items():
+            child, created = models.Document.objects.update_or_create(
+                container=doc,
+                parent=doc,
+                path=name,
+                defaults={
+                    'disk_size': info.get('size', 0),
+                    'content_type': info['content_type'],
+                    'filename': info['filename'],
+                    'flags': inherited_flags,
+                },
+            )
+            children_ids.append(child.id)
+            if created:
+                new_children_ids.append(child.id)
+    elif archives.is_archive(doc) or pst.is_pst_file(doc):
+        if archives.is_archive(doc):
+            children = archives.list_children(doc)
+        else:
+            children = pst.list_children(doc)
+        for id, created in children:
+            children_ids.append(id)
+            if created:
+                new_children_ids.append(id)
 
-        if created:
-            queues.put('digest', {'id': child.id}, verbose=verbose)
-            if verbose: print('new child', child.id)
-            new_children += 1
+    for id in children_ids:
+        child = models.Document.objects.get(id=id)
+        child.flags.update(inherited_flags)
+        child.save()
 
-    return new_children
+    for id in new_children_ids:
+        queues.put('digest', {'id': id}, verbose=verbose)
+        if verbose: print('new child', id)
+
+    return len(new_children_ids)
 
 
 def worker(id, verbose):
