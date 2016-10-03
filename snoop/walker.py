@@ -7,68 +7,64 @@ FOLDER = 'application/x-directory'
 
 class Walker(object):
 
-    def __init__(self, generation, root, prefix, restart):
-        self.generation = generation
+    def __init__(self, root, prefix, restart, container_doc):
         self.root = Path(root)
         self.prefix = Path(prefix) if prefix else None
+        self.container_doc = container_doc
+        self.documents = []
         if restart:
             models.FolderMark.objects.all().delete()
-
 
     @classmethod
     def walk(cls, *args):
         self = cls(*args)
         try:
-            return self.handle(self.root / self.prefix if self.prefix else None)
+            first_item = self.root / self.prefix if self.prefix else self.root
+            first_parent = self.container_doc
+            self.handle(first_item, first_parent)
         except KeyboardInterrupt:
             pass
+        return self.documents
 
     def _path(self, file):
         return file.relative_to(self.root)
 
-    def handle(self, item=None, parent=None):
-        if item is None:
-            item = self.root
-
+    def handle(self, item, parent):
         if item.is_dir():
             self.handle_folder(item, parent)
-
         else:
             self.handle_file(item, parent)
 
     def handle_folder(self, folder, parent):
         path = self._path(folder)
-        print('FOLDER', path)
-        if models.FolderMark.objects.filter(path=path).count():
-            print('SKIP', path)
-            return
         if str(path) != '.':
-            new_doc, _ = models.Document.objects.get_or_create(
+            new_doc, created = models.Document.objects.get_or_create(
                 path=path,
                 disk_size=0,
                 content_type=FOLDER,
                 filename=path.name,
                 parent=parent,
+                container=self.container_doc,
             )
+            self.documents.append((new_doc, created))
         else:
-            new_doc = None
+            new_doc = self.container_doc
         for child in folder.iterdir():
             self.handle(child, new_doc)
-        models.FolderMark.objects.create(path=path)
-        print('MARK', path)
 
     def handle_file(self, file, parent):
         path = self._path(file)
-        print('FILE', path)
-        models.Document.objects.get_or_create(
+        new_doc, created = models.Document.objects.get_or_create(
             path=path,
             parent=parent,
+            container=self.container_doc,
             defaults={
                 'disk_size': file.stat().st_size,
                 'content_type': guess_content_type(file.name),
                 'filename': path.name,
             },
         )
+        self.documents.append((new_doc, created))
 
 def files_in(parent_path):
     child_documents = models.Document.objects.filter(

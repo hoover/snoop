@@ -33,10 +33,16 @@ EMAIL_TWO = {
 }
 
 @pytest.fixture(autouse=True)
-def no_ocr_models(monkeypatch):
-    func_empty_list = lambda *a, **k: []
-    monkeypatch.setattr(models.Ocr.objects, "filter", func_empty_list)
-    monkeypatch.setattr(models.Ocr.objects, "all", func_empty_list)
+def no_models(monkeypatch):
+    def disable(item, attr, default):
+        def dummy(*a, **k):
+            return default
+        monkeypatch.setattr(item, attr, dummy)
+    class DummyDocument:
+        id = 0
+    disable(models.Ocr.objects, 'filter', [])
+    disable(models.Ocr.objects, 'all', [])
+    disable(models.Document.objects, 'get_or_create', (DummyDocument(), False))
 
 @pytest.yield_fixture(autouse=True)
 def archive_dir(monkeypatch):
@@ -69,10 +75,6 @@ def assert_archive_consistence(obj):
     for key in keys:
         if key in obj:
             assert obj[key] == data[key]
-
-    if 'files' in obj:
-        assert set(obj['files']) == set(data['file_list'])
-
 
 def test_simple_pst_data():
     assert_archive_consistence(PST_JANE_AND_DOE)
