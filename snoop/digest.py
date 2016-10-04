@@ -106,51 +106,48 @@ def digest(doc):
 
     return data
 
+def create_email_children(doc, data, flags):
+    children = []
+    for name, info in data.get('attachments', {}).items():
+        child, created = models.Document.objects.update_or_create(
+            container=doc,
+            parent=doc,
+            path=name,
+            defaults={
+                'disk_size': info.get('size', 0),
+                'content_type': info['content_type'],
+                'filename': info['filename'],
+            },
+        )
+        children.append((child.id, created))
+    return children
+
 def create_children(doc, data, verbose=True):
     inherited_flags = {
         key: doc.flags[key]
         for key in doc.flags
         if key in INHERITABLE_DOCUMENT_FLAGS
     }
-    new_children_ids = []
-    children_ids = []
+    children = []
 
     if emails.is_email(doc):
-        for name, info in data.get('attachments', {}).items():
-            child, created = models.Document.objects.update_or_create(
-                container=doc,
-                parent=doc,
-                path=name,
-                defaults={
-                    'disk_size': info.get('size', 0),
-                    'content_type': info['content_type'],
-                    'filename': info['filename'],
-                    'flags': inherited_flags,
-                },
-            )
-            children_ids.append(child.id)
-            if created:
-                new_children_ids.append(child.id)
-    elif archives.is_archive(doc) or pst.is_pst_file(doc):
-        if archives.is_archive(doc):
-            children = archives.list_children(doc)
-        else:
-            children = pst.list_children(doc)
-        for id, created in children:
-            children_ids.append(id)
-            if created:
-                new_children_ids.append(id)
+        children = create_email_children(doc, data, inherited_flags)
+    elif archives.is_archive(doc):
+        children = archives.list_children(doc)
+    elif pst.is_pst_file(doc):
+        children = pst.list_children(doc)
 
-    for id in children_ids:
-        child = models.Document.objects.get(id=id)
+    new_children = 0
+    for doc_id, created in children:
+        child = models.Document.objects.get(id=doc_id)
         child.flags.update(inherited_flags)
         child.save()
+        if created:
+            queues.put('digest', {'id': doc_id}, verbose=verbose)
+            if verbose: print('new child', doc_id)
+            new_children += 1
 
-    for id in new_children_ids:
-        queues.put('digest', {'id': id}, verbose=verbose)
-        if verbose: print('new child', id)
-
-    return len(new_children_ids)
+    return new_children
 
 
 def worker(id, verbose):
