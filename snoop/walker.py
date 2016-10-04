@@ -74,14 +74,11 @@ class Walker(object):
         )
         self.documents.append((new_doc, created))
 
-def files_in(parent_path):
-    child_documents = models.Document.objects.filter(
-        container=None,
-        path__iregex=r'^' + re.escape(parent_path) + r'[^/]+$',
-    )
+def files_in(doc):
+    child_documents = models.Document.objects.filter(parent=doc)
     return [{
         'id': child.id,
-        'filename': child.path[len(parent_path):],
+        'filename': child.filename,
         'size': child.disk_size,
         'content_type': child.content_type,
     } for child in child_documents]
