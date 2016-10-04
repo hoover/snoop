@@ -55,17 +55,6 @@ def document_ocr(request, id, tag):
         content_type='application/pdf',
     )
 
-def files_in_archive(doc, path):
-    children = models.Document.objects.filter(
-        container=doc,
-        path__iregex=r'^' + re.escape(path) + r'[^/]+$')
-    return [{
-                'id': child.id,
-                'filename': child.filename,
-                'size': child.disk_size,
-                'content_type': child.content_type,
-            } for child in children]
-
 def _as_eml(doc):
     if doc.content_type == 'application/vnd.ms-outlook':
         return str(Path(doc.filename).with_suffix('.eml'))
@@ -102,15 +91,8 @@ def document(request, id):
             data = {'type': 'ERROR: ' + error_message}
 
         else:
-            if data.get('type') == 'folder':
-                if doc.container:
-                    data['files'] = files_in_archive(doc.container, doc.path + '/')
-                else:
-                    data['files'] = files_in(doc.path + '/')
-            elif data.get('type') in ['archive', 'email-archive']:
-                data['files'] = files_in_archive(doc, '')
-
-            if 'files' in data:
+            if data.get('type') in ['folder', 'archive', 'email-archive']:
+                data['files'] = files_in(doc)
                 for file in data['files']:
                     file['size'] = _format_size(file['size'])
 
@@ -131,17 +113,7 @@ def document(request, id):
                 'content_type': a['content_type'],
             } for n, a in data.get('attachments', {}).items()]
 
-            if '/' in doc.path:
-                up_path = doc.path.rsplit('/', 1)[0]
-                up = (
-                    models.Document.objects
-                    .get(container=doc.container, path=up_path)
-                    .id
-                )
-            elif doc.container:
-                up = doc.container.id
-            else:
-                up = 0
+            up = doc.parent_id
 
         as_eml = _as_eml(doc)
 
