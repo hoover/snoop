@@ -12,12 +12,9 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('destination',
-                            help='path to the folder where ' +
-                                 'the files will be dumped')
-        parser.add_argument('--where',
-                            help='SQL `where` clause to be ran ' +
-                                 'on the snoop_document table',
-                            default="(flags->>'pgp')::bool")
+            help='path to the folder where the files will be dumped')
+        parser.add_argument('--where', default="(flags->>'pgp')::bool",
+            help='SQL "WHERE" clause on the snoop_document table')
 
 
     def handle(self, destination, where, **options):
