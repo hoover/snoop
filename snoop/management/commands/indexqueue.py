@@ -9,7 +9,8 @@ class Command(BaseCommand):
     help = "Add documents to the index queue"
 
     def add_arguments(self, parser):
-        parser.add_argument('where')
+        parser.add_argument('--where', default='true',
+            help='SQL "WHERE" clause on the snoop_document table')
 
     def handle(self, where, verbosity, **options):
         query = utils.build_raw_query('snoop_document', where)
