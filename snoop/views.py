@@ -70,52 +70,43 @@ def _process_document(id):
     up = None
     attachments = []
 
-    if id == '0':
-        data = {
-            'type': 'folder',
-            'files': files_in(''),
-        }
-        ocr_tags = []
-        as_eml = False
+    doc = get_object_or_404(models.Document, id=id)
+
+    try:
+        data = digest(doc)
+
+    except Exception as e:
+        error_message = doc.broken
+        if not error_message:
+            error_message = "{t.__name__} (not marked as broken)".format(t=type(e))
+        data = {'type': 'ERROR: ' + error_message}
 
     else:
-        doc = get_object_or_404(models.Document, id=id)
+        if data.get('type') in ['folder', 'archive', 'email-archive']:
+            data['files'] = files_in(doc)
+            for file in data['files']:
+                file['size'] = _format_size(file['size'])
 
-        try:
-            data = digest(doc)
+        def attachment_id(n):
+            try:
+                a = doc.contained_set.get(path=n)
+            except models.Document.DoesNotExist:
+                return None
+            else:
+                return a.id
 
-        except Exception as e:
-            error_message = doc.broken
-            if not error_message:
-                error_message = "{t.__name__} (not marked as broken)".format(t=type(e))
-            data = {'type': 'ERROR: ' + error_message}
+        if data.get('tree'):
+            data['tree'] = pformat(data.get('tree'), indent=4, width=120)
 
-        else:
-            if data.get('type') in ['folder', 'archive', 'email-archive']:
-                data['files'] = files_in(doc)
-                for file in data['files']:
-                    file['size'] = _format_size(file['size'])
+        attachments = [{
+            'filename': a['filename'],
+            'id': attachment_id(n),
+            'content_type': a['content_type'],
+        } for n, a in data.get('attachments', {}).items()]
 
-            def attachment_id(n):
-                try:
-                    a = doc.contained_set.get(path=n)
-                except models.Document.DoesNotExist:
-                    return None
-                else:
-                    return a.id
+        up = doc.parent_id
 
-            if data.get('tree'):
-                data['tree'] = pformat(data.get('tree'), indent=4, width=120)
-
-            attachments = [{
-                'filename': a['filename'],
-                'id': attachment_id(n),
-                'content_type': a['content_type'],
-            } for n, a in data.get('attachments', {}).items()]
-
-            up = doc.parent_id
-
-        as_eml = _as_eml(doc)
+    as_eml = _as_eml(doc)
 
     for field in ['date', 'date-created']:
         if data.get(field):
