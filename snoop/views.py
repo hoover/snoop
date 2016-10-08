@@ -85,7 +85,7 @@ def _process_document(id):
         if data.get('type') in ['folder', 'archive', 'email-archive']:
             data['files'] = files_in(doc)
             for file in data['files']:
-                file['size'] = _format_size(file['size'])
+                file['size_pretty'] = _format_size(file['size'])
 
         def attachment_id(n):
             try:
