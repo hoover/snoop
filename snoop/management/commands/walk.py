@@ -8,7 +8,6 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('prefix', nargs='?', default=None)
-        parser.add_argument('-r', action='store_true', dest='restart')
 
-    def handle(self, prefix, restart, **options):
-        Walker.walk(settings.SNOOP_ROOT, prefix, restart, None)
+    def handle(self, prefix, **options):
+        Walker.walk(root=settings.SNOOP_ROOT, prefix=prefix, container_doc=None)

@@ -80,7 +80,7 @@ def list_children(doc):
     base = CACHE_ROOT / doc.sha1
     if not base.is_dir():
         extract_to_base(doc)
-    child_list = Walker.walk(base, None, False, doc)
+    child_list = Walker.walk(root=base, prefix=None, container_doc=doc)
     return [(doc.id, created) for doc, created in child_list]
 
 def open_file(doc, name):
