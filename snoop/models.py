@@ -40,11 +40,6 @@ class EmailCache(models.Model):
     value = models.TextField()
     time = models.DateTimeField(auto_now=True)
 
-class ArchiveListCache(models.Model):
-    sha1 = models.CharField(max_length=50, primary_key=True)
-    value = models.TextField()
-    time = models.DateTimeField(auto_now=True)
-
 class Document(models.Model):
     container = models.ForeignKey('Document',
                                   related_name='contained_set',
