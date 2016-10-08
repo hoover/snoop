@@ -135,9 +135,6 @@ class Digest(models.Model):
     data = models.TextField()
     updated_at = models.DateTimeField(auto_now=True)
 
-class FolderMark(models.Model):
-    path = models.CharField(max_length=4000, unique=True, db_index=True)
-
 class Job(models.Model):
     queue = models.CharField(max_length=100)
     data = JSONField(null=True)

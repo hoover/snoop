@@ -1,5 +1,4 @@
 from pathlib import Path
-import re
 from . import models
 from .content_types import guess_content_type
 
@@ -12,8 +11,6 @@ class Walker(object):
         self.prefix = Path(prefix) if prefix else None
         self.container_doc = container_doc
         self.documents = []
-        if restart:
-            models.FolderMark.objects.all().delete()
 
     @classmethod
     def walk(cls, *args):
