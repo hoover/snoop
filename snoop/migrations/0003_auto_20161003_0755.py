@@ -16,11 +16,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='document',
             name='parent',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='snoop_document_parent', to='snoop.Document'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='child_set', to='snoop.Document'),
         ),
         migrations.AlterField(
             model_name='document',
             name='container',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='snoop_document_container', to='snoop.Document'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='contained_set', to='snoop.Document'),
         ),
     ]
