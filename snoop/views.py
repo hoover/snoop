@@ -67,7 +67,7 @@ def document_as_eml(request, id):
         return HttpResponse(f.read(), content_type='message/rfc822')
 
 def _process_document(id):
-    up = None
+    parent_id = None
     attachments = []
 
     doc = get_object_or_404(models.Document, id=id)
@@ -104,7 +104,7 @@ def _process_document(id):
             'content_type': a['content_type'],
         } for n, a in data.get('attachments', {}).items()]
 
-        up = doc.parent_id
+        parent_id = doc.parent_id
 
     as_eml = _as_eml(doc)
 
@@ -114,7 +114,7 @@ def _process_document(id):
 
     return {
         'id': id,
-        'up': up,
+        'parent_id': parent_id,
         'data': data,
         'attachments': attachments,
         'as_eml': as_eml,

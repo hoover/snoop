@@ -53,8 +53,8 @@
             .setAttribute('href', window.location.href.split('?')[0])
         </script>
       {% else %}
-        {% if up != None %}
-          <a href="{{ up }}" class="btn btn-info" role="button">Up</a>
+        {% if parent_id != None %}
+          <a href="{{ parent_id }}" class="btn btn-info" role="button">Up</a>
         {% endif %}
 
         {% if data.type != 'folder' %}
