@@ -2,7 +2,7 @@ import re
 from pathlib import Path
 from dateutil import parser
 from pprint import pformat
-from django.http import HttpResponse, FileResponse, HttpResponseNotFound
+from django.http import HttpResponse, FileResponse, HttpResponseNotFound, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.conf import settings
 from django.utils.encoding import filepath_to_uri
@@ -125,3 +125,6 @@ def document(request, id):
     data = _process_document(id)
     data['embed'] = embed
     return render(request, 'document.html', data)
+
+def document_json(request, id):
+    return JsonResponse(_process_document(id))
