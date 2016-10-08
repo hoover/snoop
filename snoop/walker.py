@@ -6,15 +6,15 @@ FOLDER = 'application/x-directory'
 
 class Walker(object):
 
-    def __init__(self, root, prefix, restart, container_doc):
+    def __init__(self, root, prefix, container_doc):
         self.root = Path(root)
         self.prefix = Path(prefix) if prefix else None
         self.container_doc = container_doc
         self.documents = []
 
     @classmethod
-    def walk(cls, *args):
-        self = cls(*args)
+    def walk(cls, root, prefix, container_doc):
+        self = cls(root, prefix, container_doc)
         try:
             first_item = self.root / self.prefix if self.prefix else self.root
             first_parent = self.container_doc
