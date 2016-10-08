@@ -98,7 +98,7 @@ def document(request, id):
 
             def attachment_id(n):
                 try:
-                    a = doc.snoop_document_container.get(path=n)
+                    a = doc.contained_set.get(path=n)
                 except models.Document.DoesNotExist:
                     return None
                 else:

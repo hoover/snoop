@@ -47,10 +47,10 @@ class ArchiveListCache(models.Model):
 
 class Document(models.Model):
     container = models.ForeignKey('Document',
-                                  related_name='snoop_document_container',
+                                  related_name='contained_set',
                                   null=True)
     parent = models.ForeignKey('Document',
-                               related_name='snoop_document_parent',
+                               related_name='child_set',
                                null=True)
     path = models.CharField(max_length=4000)
     content_type = models.CharField(max_length=100, blank=True)
