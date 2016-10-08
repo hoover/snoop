@@ -66,7 +66,7 @@ def document_as_eml(request, id):
     with open_msg(doc) as f:
         return HttpResponse(f.read(), content_type='message/rfc822')
 
-def document(request, id):
+def _process_document(id):
     up = None
     attachments = []
 
@@ -121,13 +121,16 @@ def document(request, id):
         if data.get(field):
             data[field] = _format_date(data[field])
 
-    embed = request.GET.get('embed') == 'on'
-
-    return render(request, 'document.html', {
+    return {
         'id': id,
         'up': up,
         'data': data,
         'attachments': attachments,
         'as_eml': as_eml,
-        'embed': embed,
-    })
+    }
+
+def document(request, id):
+    embed = request.GET.get('embed') == 'on'
+    data = _process_document(id)
+    data['embed'] = embed
+    return render(request, 'document.html', data)
