@@ -31,7 +31,7 @@ case "$COMMAND" in
     ;;
 
   'queueall')
-    exec ./manage.py digestqueue "true"
+    exec ./manage.py digestqueue
     ;;
 
   'digest')

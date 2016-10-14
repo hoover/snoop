@@ -56,7 +56,7 @@ others do useful processing. See "Optional Dependencies" to install them.
    means all documents. They are added to the `digest` queue.
 
    ```shell
-   $ ./manage.py digestqueue "true"
+   $ ./manage.py digestqueue
    ```
 
 3. Run the `digest` worker to process. All documents successfully digested will
@@ -163,4 +163,3 @@ Set `SNOOP_PST_CACHE_ROOT` to an existing folder with write access.
 Set:
    * `SNOOP_GPG_HOME`: path to the existing gpg home directory with keys to be used for decryption
    * `SNOOP_GPG_BINARY`: path to the `gpg` binary to be used in conjuction with `SNOOP_GPG_HOME`
-
