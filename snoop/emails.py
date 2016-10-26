@@ -257,7 +257,7 @@ def msgcache(func):
 @msgcache
 @contextmanager
 def open_msg(doc):
-    if settings.SNOOP_MSGCONVERT_SCRIPT is None:
+    if not settings.SNOOP_MSGCONVERT_SCRIPT:
         raise RuntimeError("Path to 'msgconvert' is not configured")
 
     if doc.flags.get('msgconvert_fail'):

@@ -140,7 +140,7 @@ def save_worker_metrics(timestamp, data):
 
 @contextmanager
 def worker_metrics(**defaults):
-    if settings.SNOOP_LOG_DIR is None:
+    if not settings.SNOOP_LOG_DIR:
         yield {}
         return
 
