@@ -68,20 +68,18 @@ DELETE_ROOT = """
     path = '' and filename = '' and content_type = 'application/x-directory'
 """
 
-def count_documents(apps, schema_editor):
+def documents_exist(apps, schema_editor):
     db_alias = schema_editor.connection.alias
     Document = apps.get_model('snoop', 'Document')
     document_count = Document.objects.using(db_alias).count()
-    return document_count
+    return document_count > 0
 
 def insert_root(apps, schema_editor):
-    document_count = count_documents(apps, schema_editor)
-    if document_count > 0:
+    if documents_exist(apps, schema_editor):
         schema_editor.execute(INSERT_ROOT)
 
 def delete_root(apps, schema_editor):
-    document_count = count_documents(apps, schema_editor)
-    if document_count > 0:
+    if documents_exist(apps, schema_editor):
         schema_editor.execute(DELETE_ROOT)
 
 class Migration(migrations.Migration):
