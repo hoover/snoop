@@ -42,14 +42,13 @@ class EmailCache(models.Model):
 
 class Collection(models.Model):
     path = models.CharField(max_length=4000)
-    slug = models.CharField(max_length=100, db_index=True, unique=True)
+    slug = models.CharField(max_length=100, unique=True)
     title = models.CharField(max_length=200)
     es_index = models.CharField(max_length=200)
     description = models.TextField(blank=True)
 
 class Document(models.Model):
-    collection = models.ForeignKey('Collection',
-                                   related_name='document_set')
+    collection = models.ForeignKey('Collection')
     container = models.ForeignKey('Document',
                                   related_name='contained_set',
                                   null=True)
