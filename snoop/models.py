@@ -40,7 +40,16 @@ class EmailCache(models.Model):
     value = models.TextField()
     time = models.DateTimeField(auto_now=True)
 
+class Collection(models.Model):
+    id = models.IntegerField(primary_key=True)
+    slug = models.CharField(max_length=100, db_index=True)
+    title = models.CharField(max_length=200)
+    es_index = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+
 class Document(models.Model):
+    collection = models.ForeignKey('Collection',
+                                   related_name='document_set')
     container = models.ForeignKey('Document',
                                   related_name='contained_set',
                                   null=True)
