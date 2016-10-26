@@ -1,3 +1,4 @@
+import sys
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from ...walker import Walker
@@ -16,7 +17,7 @@ class Command(BaseCommand):
             collection = models.Collection.objects.get(slug=collection_slug)
         except models.Collection.DoesNotExist:
             print("Collection with slug", collection_slug, "does not exist.")
-            return
+            sys.exit(1)
 
         Walker.walk(
             root=collection.path,

@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-import os
+import os, sys
 from ... import models
 
 class Command(BaseCommand):
@@ -33,11 +33,12 @@ class Command(BaseCommand):
         if not os.path.exists(path):
             print("The path", path, "does not exist.")
             print("Please check the provided path.")
-            return
+            sys.exit(1)
+
         if not os.path.isabs(path):
             print("The path", path, "is not absolute.")
             print("Please provide an absolute path.")
-            return
+            sys.exit(1)
 
         c = models.Collection(
             path=path,

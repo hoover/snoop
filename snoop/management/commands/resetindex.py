@@ -1,3 +1,4 @@
+import sys
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from elasticsearch import Elasticsearch
@@ -55,7 +56,8 @@ class Command(BaseCommand):
             collection = models.Collection.objects.get(slug=collection_slug)
         except models.Collection.DoesNotExist:
             print("A collection with slug", collection_slug, "does not exist.")
-            return
+            sys.exit(1)
+
         es.indices.delete(collection.es_index, ignore=[400, 404])
         es.indices.create(collection.es_index, {
             "mappings": MAPPINGS,

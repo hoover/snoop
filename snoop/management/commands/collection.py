@@ -1,3 +1,4 @@
+import sys
 from django.core.management.base import BaseCommand
 from ... import models
 
@@ -52,7 +53,7 @@ class Command(BaseCommand):
             collection = models.Collection.objects.filter(slug=collection_slug).get()
         except models.Collection.DoesNotExist:
             print("Collection with slug", collection_slug, "does not exist.")
-            return
+            sys.exit(1)
 
         modify_collection(collection, **options)
         print_info_for_collections([collection])
