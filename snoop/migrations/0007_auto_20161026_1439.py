@@ -11,7 +11,7 @@ DEFAULT_COLLECTION_DESCRIPTION = "This collection was automatically " \
                                  "created by the snoop setup."
 
 
-def forward(apps, schema_editor):
+def create_default_collection_if_documents_exist(apps, schema_editor):
     db_alias = schema_editor.connection.alias
 
     Document = apps.get_model('snoop', 'Document')
@@ -36,7 +36,7 @@ def forward(apps, schema_editor):
             )
         ])
 
-def reverse(apps, schema_editor):
+def delete_default_collection_if_documents_exist(apps, schema_editor):
     db_alias = schema_editor.connection.alias
 
     Document = apps.get_model('snoop', 'Document')
@@ -66,8 +66,8 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.RunPython(
-            forward,
-            reverse
+            create_default_collection_if_documents_exist,
+            delete_default_collection_if_documents_exist,
         ),
         migrations.AddField(
             model_name='document',
