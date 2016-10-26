@@ -6,16 +6,16 @@ FOLDER = 'application/x-directory'
 
 class Walker(object):
 
-    def __init__(self, root, prefix, container_doc, collection_id):
+    def __init__(self, root, prefix, container_doc, collection):
         self.root = Path(root)
         self.prefix = Path(prefix) if prefix else None
         self.container_doc = container_doc
         self.documents = []
-        self.collection_id = collection_id
+        self.collection = collection
 
     @classmethod
-    def walk(cls, root, prefix, container_doc, collection_id):
-        self = cls(root, prefix, container_doc, collection_id)
+    def walk(cls, root, prefix, container_doc, collection):
+        self = cls(root, prefix, container_doc, collection)
         try:
             first_item = self.root / self.prefix if self.prefix else self.root
             first_parent = self.container_doc
@@ -44,7 +44,7 @@ class Walker(object):
                     disk_size=0,
                     content_type=FOLDER,
                     filename='',
-                    collection_id=self.collection_id,
+                    collection=self.collection,
                 )
         else:
             new_doc, created = models.Document.objects.get_or_create(
@@ -54,7 +54,7 @@ class Walker(object):
                 filename=path.name,
                 parent=parent,
                 container=self.container_doc,
-                collection_id=self.collection_id,
+                collection=self.collection,
             )
             self.documents.append((new_doc, created))
         for child in folder.iterdir():
@@ -66,7 +66,7 @@ class Walker(object):
             path=path,
             parent=parent,
             container=self.container_doc,
-            collection_id=self.collection_id,
+            collection=self.collection,
             defaults={
                 'disk_size': file.stat().st_size,
                 'content_type': guess_content_type(file.name),

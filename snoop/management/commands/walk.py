@@ -22,5 +22,5 @@ class Command(BaseCommand):
             root=collection.path,
             prefix=prefix,
             container_doc=None,
-            collection_id=collection.id
+            collection=collection
         )

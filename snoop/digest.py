@@ -113,7 +113,7 @@ def create_email_children(doc, data, flags):
             container=doc,
             parent=doc,
             path=name,
-            collection_id=doc.collection_id,
+            collection=doc.collection,
             defaults={
                 'disk_size': info.get('size', 0),
                 'content_type': info['content_type'],

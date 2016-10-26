@@ -97,7 +97,7 @@ def list_children(doc):
         root=base,
         prefix=None,
         container_doc=doc,
-        collection_id=doc.collection.id
+        collection=doc.collection
     )
     return [(doc.id, created) for doc, created in child_list]
 
