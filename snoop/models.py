@@ -42,7 +42,7 @@ class EmailCache(models.Model):
 
 class Collection(models.Model):
     id = models.IntegerField(primary_key=True)
-    slug = models.CharField(max_length=100, db_index=True)
+    slug = models.CharField(max_length=100, db_index=True, unique=True)
     title = models.CharField(max_length=200)
     es_index = models.CharField(max_length=200)
     description = models.TextField(blank=True)
