@@ -35,8 +35,12 @@ def _format_size(num):
 def _format_date(date_value):
     return parser.parse(date_value).strftime("%d %B %Y")
 
-def document_raw(request, id):
-    doc = get_object_or_404(models.Document, id=id)
+def document_raw(request, collection_slug, id):
+    doc = get_object_or_404(
+        models.Document,
+        id=id,
+        collection__slug=collection_slug,
+    )
     if doc.content_type == 'text/html':
         return HttpResponse("This file has been stripped " +
                             "of links, images, forms and javascript.\n\n" +
@@ -47,8 +51,12 @@ def document_raw(request, id):
         data = f.read()
         return HttpResponse(data, content_type=doc.content_type)
 
-def document_ocr(request, id, tag):
-    doc = get_object_or_404(models.Document, id=id)
+def document_ocr(request, collection_slug, id, tag):
+    doc = get_object_or_404(
+        models.Document,
+        id=id,
+        collection__slug=collection_slug,
+    )
     ocr = get_object_or_404(models.Ocr, tag=tag, md5=doc.md5)
     return FileResponse(
         ocr.absolute_path.open('rb'),
@@ -59,18 +67,26 @@ def _as_eml(doc):
     if doc.content_type == 'application/vnd.ms-outlook':
         return str(Path(doc.filename).with_suffix('.eml'))
 
-def document_as_eml(request, id):
-    doc = get_object_or_404(models.Document, id=id)
+def document_as_eml(request, collection_slug, id):
+    doc = get_object_or_404(
+        models.Document,
+        id=id,
+        collection__slug=collection_slug,
+    )
     if not _as_eml(doc):
         return HttpResponseNotFound()
     with open_msg(doc) as f:
         return HttpResponse(f.read(), content_type='message/rfc822')
 
-def _process_document(id):
+def _process_document(collection_slug, id):
     parent_id = None
     attachments = []
 
-    doc = get_object_or_404(models.Document, id=id)
+    doc = get_object_or_404(
+        models.Document,
+        id=id,
+        collection__slug=collection_slug,
+    )
 
     try:
         data = digest(doc)
@@ -120,11 +136,11 @@ def _process_document(id):
         'as_eml': as_eml,
     }
 
-def document(request, id):
+def document(request, collection_slug, id):
     embed = request.GET.get('embed') == 'on'
-    data = _process_document(id)
+    data = _process_document(collection_slug, id)
     data['embed'] = embed
     return render(request, 'document.html', data)
 
-def document_json(request, id):
-    return JsonResponse(_process_document(id))
+def document_json(request, collection_slug, id):
+    return JsonResponse(_process_document(collection_slug, id))
