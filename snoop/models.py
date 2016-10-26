@@ -73,7 +73,7 @@ class Document(models.Model):
     @property
     def absolute_path(self):
         assert self.container is None
-        return Path(settings.SNOOP_ROOT) / self.path
+        return Path(self.collection.path) / self.path
 
     def _open_file(self):
         if self.content_type == 'application/x-directory':

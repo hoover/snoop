@@ -68,6 +68,21 @@ DELETE_ROOT = """
     path = '' and filename = '' and content_type = 'application/x-directory'
 """
 
+def count_documents(apps, schema_editor):
+    db_alias = schema_editor.connection.alias
+    Document = apps.get_model('snoop', 'Document')
+    document_count = Document.objects.using(db_alias).count()
+    return document_count
+
+def insert_root(apps, schema_editor):
+    document_count = count_documents(apps, schema_editor)
+    if document_count > 0:
+        schema_editor.execute(INSERT_ROOT)
+
+def delete_root(apps, schema_editor):
+    document_count = count_documents(apps, schema_editor)
+    if document_count > 0:
+        schema_editor.execute(DELETE_ROOT)
 
 class Migration(migrations.Migration):
 
@@ -76,9 +91,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunSQL( # create root document
-            INSERT_ROOT,
-            DELETE_ROOT,
+        migrations.RunPython( # create root document
+            insert_root,
+            delete_root,
         ),
         migrations.RunSQL( # create temporary table with id, path
             CREATE_TABLE_TEMP_FOLDER,

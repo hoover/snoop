@@ -16,7 +16,6 @@ def forward(apps, schema_editor):
 
     Document = apps.get_model('snoop', 'Document')
     document_count = Document.objects.using(db_alias).count()
-
     if document_count > 0:
         Collection = apps.get_model('snoop', 'Collection')
         try:

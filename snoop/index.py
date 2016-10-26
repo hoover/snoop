@@ -40,8 +40,9 @@ def get_index_data(digest_data):
 
 def worker(id, verbose):
     with worker_metrics(type='worker', queue='digest') as metrics:
-        metrics['document'] = id
-        metrics['index'] = settings.SNOOP_ELASTICSEARCH_INDEX
+        doc = models.Document.objects.get(id=id)
+        metrics['document'] = doc.id
+        metrics['index'] = doc.collection.es_index
         try:
             digest = models.Digest.objects.get(id=id)
         except models.Digest.DoesNotExist:
@@ -53,7 +54,7 @@ def worker(id, verbose):
         data = get_index_data(digest_data)
 
         es.index(
-            index=settings.SNOOP_ELASTICSEARCH_INDEX,
+            index=doc.collection.es_index,
             doc_type='doc',
             id=digest.id,
             body=data,
@@ -64,11 +65,12 @@ def bulk_worker(data_list, verbose):
 
     def iter_actions():
         for digest in models.Digest.objects.filter(id__in=id_set).iterator():
+            index = models.Document.objects.get(id=digest.id).collection.index
             digest_data = json.loads(digest.data)
             data = get_index_data(digest_data)
             data.update({
                 '_op_type': 'index',
-                '_index': settings.SNOOP_ELASTICSEARCH_INDEX,
+                '_index': index,
                 '_type': 'doc',
                 '_id': digest.id,
             })
