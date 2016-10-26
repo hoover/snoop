@@ -13,6 +13,12 @@ class Command(BaseCommand):
             help="The slug of the collection to view/modify"
         )
         parser.add_argument(
+            '--set-path',
+            dest='set_path',
+            default=None,
+            help='Modify the path for the collection'
+        )
+        parser.add_argument(
             '--set-title',
             dest='set_title',
             default=None,
@@ -68,6 +74,7 @@ def print_info_for_collections(collections):
 def modify_collection(collection, **options):
     options = {k: options[k] for k in options.keys() if options[k] if not None}
     keys = {
+        'set_path',
         'set_slug',
         'set_index',
         'set_title',
@@ -77,6 +84,8 @@ def modify_collection(collection, **options):
     if not modified:
         return
 
+    if 'set_path' in options:
+        collection.path = options['set_path']
     if 'set_slug' in options:
         collection.slug = options['set_slug']
     if 'set_index' in options:

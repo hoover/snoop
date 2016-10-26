@@ -41,6 +41,7 @@ class EmailCache(models.Model):
     time = models.DateTimeField(auto_now=True)
 
 class Collection(models.Model):
+    path = models.CharField(max_length=4000)
     slug = models.CharField(max_length=100, db_index=True, unique=True)
     title = models.CharField(max_length=200)
     es_index = models.CharField(max_length=200)
