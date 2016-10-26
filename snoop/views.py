@@ -35,12 +35,15 @@ def _format_size(num):
 def _format_date(date_value):
     return parser.parse(date_value).strftime("%d %B %Y")
 
-def document_raw(request, collection_slug, id):
-    doc = get_object_or_404(
+def _find_doc(collection_slug, id):
+    return get_object_or_404(
         models.Document,
         id=id,
         collection__slug=collection_slug,
     )
+
+def document_raw(request, collection_slug, id):
+    doc = _find_doc(collection_slug, id)
     if doc.content_type == 'text/html':
         return HttpResponse("This file has been stripped " +
                             "of links, images, forms and javascript.\n\n" +
@@ -52,11 +55,7 @@ def document_raw(request, collection_slug, id):
         return HttpResponse(data, content_type=doc.content_type)
 
 def document_ocr(request, collection_slug, id, tag):
-    doc = get_object_or_404(
-        models.Document,
-        id=id,
-        collection__slug=collection_slug,
-    )
+    doc = _find_doc(collection_slug, id)
     ocr = get_object_or_404(models.Ocr, tag=tag, md5=doc.md5)
     return FileResponse(
         ocr.absolute_path.open('rb'),
@@ -68,11 +67,7 @@ def _as_eml(doc):
         return str(Path(doc.filename).with_suffix('.eml'))
 
 def document_as_eml(request, collection_slug, id):
-    doc = get_object_or_404(
-        models.Document,
-        id=id,
-        collection__slug=collection_slug,
-    )
+    doc = _find_doc(collection_slug, id)
     if not _as_eml(doc):
         return HttpResponseNotFound()
     with open_msg(doc) as f:
@@ -82,11 +77,7 @@ def _process_document(collection_slug, id):
     parent_id = None
     attachments = []
 
-    doc = get_object_or_404(
-        models.Document,
-        id=id,
-        collection__slug=collection_slug,
-    )
+    doc = _find_doc(collection_slug, id)
 
     try:
         data = digest(doc)
