@@ -21,33 +21,37 @@ def patch_gpg_to_temp_dir(monkeypatch):
         monkeypatch.setattr(settings, 'SNOOP_GPG_BINARY', 'gpg')
         yield
 
-def create_email_doc(path):
-    doc = models.Document(path=path, content_type='message/rfc822')
+def create_email_doc(path, collection):
+    doc = models.Document(
+        path=path,
+        content_type='message/rfc822',
+        collection=collection,
+    )
     doc.save = lambda *a, **k: None
     return doc
 
-def parse_email(path):
-    return emails.parse_email(create_email_doc(path))
+def parse_email(path, document_collection):
+    return emails.parse_email(create_email_doc(path, document_collection))
 
-def open_email(path):
-    return emails.open_email(create_email_doc(path))
+def open_email(path, document_collection):
+    return emails.open_email(create_email_doc(path, document_collection))
 
-def test_doc_flags():
-    doc = create_email_doc(PATH_HUSH_MAIL)
+def test_doc_flags(document_collection):
+    doc = create_email_doc(PATH_HUSH_MAIL, document_collection)
     emails.parse_email(doc)
     assert doc.flags.get('pgp')
 
-def test_header_data():
-    data = parse_email(PATH_HUSH_MAIL)
+def test_header_data(document_collection):
+    data = parse_email(PATH_HUSH_MAIL, document_collection)
     assert data['subject'] == "Fwd: test email"
     assert data['date'] == '2016-08-10T15:00:00'
 
-def test_attachments():
-    data = parse_email(PATH_HUSH_MAIL)
+def test_attachments(document_collection):
+    data = parse_email(PATH_HUSH_MAIL, document_collection)
     attach = data['attachments']
     assert len(attach) == 6
 
-    email = open_email(PATH_HUSH_MAIL)
+    email = open_email(PATH_HUSH_MAIL, document_collection)
     assert email.pgp
 
     with email.open_part('3') as f:

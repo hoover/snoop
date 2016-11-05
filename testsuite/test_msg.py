@@ -3,12 +3,16 @@ from snoop import models, emails
 PATH_MSG_DISEARA = ("msg-5-outlook/DISEARĂ-Te-așteptăm-la-"
                     "discuția-despre-finanțarea-culturii.msg")
 
-def parse_email(path):
-    doc = models.Document(path=path, content_type='application/vnd.ms-outlook')
+def parse_email(path, collection):
+    doc = models.Document(
+        path=path,
+        content_type='application/vnd.ms-outlook',
+        collection=collection,
+    )
     return emails.parse_email(doc)
 
-def test_content():
-    data = parse_email(PATH_MSG_DISEARA)
+def test_content(document_collection):
+    data = parse_email(PATH_MSG_DISEARA, document_collection)
     tree = data['tree']
     text = data['text']
 
