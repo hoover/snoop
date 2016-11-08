@@ -2,8 +2,8 @@ pip-tools
 psycopg2
 pathlib
 beautifulsoup4
-Django<1.10
-elasticsearch
+Django
+elasticsearch==2.4.0
 simplejson
 waitress
 lxml
