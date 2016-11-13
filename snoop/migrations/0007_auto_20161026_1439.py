@@ -36,17 +36,6 @@ def create_default_collection_if_documents_exist(apps, schema_editor):
             )
         ])
 
-def delete_default_collection_if_documents_exist(apps, schema_editor):
-    db_alias = schema_editor.connection.alias
-
-    Document = apps.get_model('snoop', 'Document')
-    document_count = Document.objects.using(db_alias).count()
-
-    if document_count > 0:
-        Collection = apps.get_model('snoop', 'Collection')
-        Collection.objects.using(db_alias).filter(id=1).delete()
-
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -67,7 +56,6 @@ class Migration(migrations.Migration):
         ),
         migrations.RunPython(
             create_default_collection_if_documents_exist,
-            delete_default_collection_if_documents_exist,
         ),
         migrations.AddField(
             model_name='document',
