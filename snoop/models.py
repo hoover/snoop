@@ -69,6 +69,9 @@ class Document(models.Model):
         # TODO: constraint does not apply to container=None rows
         unique_together = ('container', 'path')
 
+    def __str__(self):
+        return str(self.path)
+
     @property
     def absolute_path(self):
         assert self.container is None
