@@ -66,37 +66,38 @@ def archive_dir(monkeypatch):
         monkeypatch.setattr(archives, 'CACHE_ROOT', Path(tmp))
         yield
 
-def doc_obj(obj):
+def doc_obj(obj, collection):
     filename = obj.get('filename') or obj['path'].split('/')[-1]
     content_type = guess_content_type(filename)
     doc = models.Document(path=obj['path'],
                           content_type=content_type,
-                          filename=filename)
+                          filename=filename,
+                          collection=collection)
     doc.save = lambda *a, **k: None
     if obj.get('sha1'):
         doc.sha1 = obj['sha1']
     if obj.get('parent'):
-        doc.container = doc_obj(obj['parent'])
+        doc.container = doc_obj(obj['parent'], collection)
     return doc
 
-def digest_obj(obj):
-    return digest.digest(doc_obj(obj))
+def digest_obj(obj, collection):
+    return digest.digest(doc_obj(obj, collection))
 
-def assert_archive_consistence(obj):
-    data = digest_obj(obj)
+def assert_archive_consistence(obj, collection):
+    data = digest_obj(obj, collection)
     keys = ['filename', 'sha1', 'md5', 'type', 'text']
     for key in keys:
         if key in obj:
             assert obj[key] == data[key]
 
-def test_simple_zip_archive():
-    assert_archive_consistence(ZIP_SIMPLE)
+def test_simple_zip_archive(document_collection):
+    assert_archive_consistence(ZIP_SIMPLE, document_collection)
 
-def test_simple_rar_archive():
-    assert_archive_consistence(RAR_SIMPLE)
+def test_simple_rar_archive(document_collection):
+    assert_archive_consistence(RAR_SIMPLE, document_collection)
 
-def test_zip_attachment():
-    assert_archive_consistence(ZIP_ATTACHMENT)
+def test_zip_attachment(document_collection):
+    assert_archive_consistence(ZIP_ATTACHMENT, document_collection)
 
 SEVENZ = {
     "parent": None,
@@ -128,11 +129,11 @@ SEVENZ_EMAIL_ZIP_FILE = {
     'text': 'GET OUT OF MY LIFE, JILL\n\n',
 }
 
-def test_complex_container_structure():
-    assert_archive_consistence(SEVENZ)
-    assert_archive_consistence(SEVENZ_EMAIL)
-    assert_archive_consistence(SEVENZ_EMAIL_ZIP)
-    assert_archive_consistence(SEVENZ_EMAIL_ZIP_FILE)
+def test_complex_container_structure(document_collection):
+    assert_archive_consistence(SEVENZ, document_collection)
+    assert_archive_consistence(SEVENZ_EMAIL, document_collection)
+    assert_archive_consistence(SEVENZ_EMAIL_ZIP, document_collection)
+    assert_archive_consistence(SEVENZ_EMAIL_ZIP_FILE, document_collection)
 
 ZIP_WITH_MSG = {
     "parent": None,
@@ -150,6 +151,6 @@ MSG_IN_ZIP = {
     "md5": "38385c4487719fa9dd0fb695d3aad0ee",
 }
 
-def test_msg_inside_container():
-    assert_archive_consistence(ZIP_WITH_MSG)
-    assert_archive_consistence(MSG_IN_ZIP)
+def test_msg_inside_container(document_collection):
+    assert_archive_consistence(ZIP_WITH_MSG, document_collection)
+    assert_archive_consistence(MSG_IN_ZIP, document_collection)

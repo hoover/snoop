@@ -1,6 +1,8 @@
+import sys
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from elasticsearch import Elasticsearch
+from ... import models
 
 es = Elasticsearch(settings.SNOOP_ELASTICSEARCH_URL)
 
@@ -43,9 +45,21 @@ SETTINGS = {
 class Command(BaseCommand):
     help = "Reset the elasticsearch index"
 
-    def handle(self, **options):
-        es.indices.delete(settings.SNOOP_ELASTICSEARCH_INDEX, ignore=[400, 404])
-        es.indices.create(settings.SNOOP_ELASTICSEARCH_INDEX, {
+    def add_arguments(self, parser):
+        parser.add_argument(
+            'collection_slug',
+            help='Slug of the collection that needs its index reset.'
+        )
+
+    def handle(self, collection_slug, **options):
+        try:
+            collection = models.Collection.objects.get(slug=collection_slug)
+        except models.Collection.DoesNotExist:
+            print("A collection with slug", collection_slug, "does not exist.")
+            sys.exit(1)
+
+        es.indices.delete(collection.es_index, ignore=[400, 404])
+        es.indices.create(collection.es_index, {
             "mappings": MAPPINGS,
             "settings": SETTINGS,
         })

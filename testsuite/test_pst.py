@@ -50,36 +50,39 @@ def archive_dir(monkeypatch):
         monkeypatch.setattr(pst, 'CACHE_ROOT', Path(tmp))
         yield
 
-def doc_obj(obj):
+def doc_obj(obj, collection):
     filename = obj.get('filename') or obj['path'].split('/')[-1]
     content_type = guess_content_type(filename)
-    doc = models.Document(path=obj['path'],
-                          content_type=content_type,
-                          filename=filename)
+    doc = models.Document(
+        path=obj['path'],
+        content_type=content_type,
+        filename=filename,
+        collection=collection,
+    )
     doc.save = lambda *a, **k: None
     if obj.get('sha1'):
         doc.sha1 = obj['sha1']
     if obj.get('md5'):
         doc.md5 = obj['md5']
     if obj.get('parent'):
-        doc.container = doc_obj(obj['parent'])
+        doc.container = doc_obj(obj['parent'], collection)
     return doc
 
-def digest_obj(obj):
-    return digest.digest(doc_obj(obj))
+def digest_obj(obj, collection):
+    return digest.digest(doc_obj(obj, collection))
 
-def assert_archive_consistence(obj):
-    data = digest_obj(obj)
+def assert_archive_consistence(obj, collection):
+    data = digest_obj(obj, collection)
     print(data)
     keys = ['filename', 'sha1', 'md5', 'type', 'text']
     for key in keys:
         if key in obj:
             assert obj[key] == data[key]
 
-def test_simple_pst_data():
-    assert_archive_consistence(PST_JANE_AND_DOE)
-    assert_archive_consistence(EMAIL_TWO)
+def test_simple_pst_data(document_collection):
+    assert_archive_consistence(PST_JANE_AND_DOE, document_collection)
+    assert_archive_consistence(EMAIL_TWO, document_collection)
 
-def test_pst_email():
-    data = digest_obj(EMAIL_TWO)
+def test_pst_email(document_collection):
+    data = digest_obj(EMAIL_TWO, document_collection)
     assert "This email has never been read." in data['text']

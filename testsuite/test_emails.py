@@ -19,16 +19,20 @@ MAIL_PATH_OCTET_STREAM_CONTENT_TYPE = "eml-2-attachment/attachments-have-" \
 MAIL_PATH_DOUBLE_DECODE_ATTACHMENT_FILENAME = "eml-8-double-encoded/double-" \
                                               "encoding.eml"
 
-def parse_email(path):
-    doc = models.Document(path=path, content_type='message/rfc822')
+def parse_email(path, collection):
+    doc = models.Document(
+        path=path,
+        content_type='message/rfc822',
+        collection=collection
+    )
     return emails.parse_email(doc)
 
-def test_subject():
-    data = parse_email(MAIL_PATH_MAPBOX)
+def test_subject(document_collection):
+    data = parse_email(MAIL_PATH_MAPBOX, document_collection)
     assert data['subject'] == "Introducing Mapbox Android Services"
 
-def test_no_subject_or_text():
-    data = parse_email(MAIL_PATH_NO_SUBJECT)
+def test_no_subject_or_text(document_collection):
+    data = parse_email(MAIL_PATH_NO_SUBJECT, document_collection)
 
     assert 'subject' in data
     assert len(data['subject']) == 0
@@ -38,15 +42,15 @@ def test_no_subject_or_text():
     assert type(text) is str
     assert len(text) <= 2
 
-def test_text():
-    data_codin = parse_email(MAIL_PATH_CODINGAME)
+def test_text(document_collection):
+    data_codin = parse_email(MAIL_PATH_CODINGAME, document_collection)
     assert data_codin['text'].startswith("New on CodinGame: Check it out!")
 
-    data_mapbox = parse_email(MAIL_PATH_MAPBOX)
+    data_mapbox = parse_email(MAIL_PATH_MAPBOX, document_collection)
     assert "Android Services includes RxJava" in data_mapbox['text']
 
-def test_people():
-    data = parse_email(MAIL_PATH_MAPBOX)
+def test_people(document_collection):
+    data = parse_email(MAIL_PATH_MAPBOX, document_collection)
 
     assert type(data['to']) is list
     assert len(data['to']) == 1
@@ -55,22 +59,22 @@ def test_people():
     assert type(data['from']) is str
     assert "newsletter@mapbox.com" in data['from']
 
-def test_normal_attachments():
-    data = parse_email(MAIL_PATH_CAMPUS)
+def test_normal_attachments(document_collection):
+    data = parse_email(MAIL_PATH_CAMPUS, document_collection)
     attachments = data['attachments']
 
     assert attachments
     assert type(attachments) is dict
     assert len(attachments) == 2
 
-def test_attachment_with_long_filename():
-    data = parse_email(MAIL_PATH_LONG_FILENAMES)
+def test_attachment_with_long_filename(document_collection):
+    data = parse_email(MAIL_PATH_LONG_FILENAMES, document_collection)
     attachments = data['attachments']
 
     assert len(attachments) == 3
 
-def test_tree_without_attachments():
-    data = parse_email(MAIL_PATH_MAPBOX)
+def test_tree_without_attachments(document_collection):
+    data = parse_email(MAIL_PATH_MAPBOX, document_collection)
     tree = data['tree']
 
     assert set(tree.keys()) == {'headers', 'parts'}
@@ -79,8 +83,8 @@ def test_tree_without_attachments():
     headers = {'subject', 'to', 'from', 'date', 'content-type'}
     assert headers.issubset(set(tree['headers'].keys()))
 
-def test_tree_with_attachments():
-    data = parse_email(MAIL_PATH_LONG_FILENAMES)
+def test_tree_with_attachments(document_collection):
+    data = parse_email(MAIL_PATH_LONG_FILENAMES, document_collection)
     tree = data['tree']
 
     assert set(tree.keys()) == {'headers', 'parts'}
@@ -93,8 +97,8 @@ def test_tree_with_attachments():
     for part in tree['parts']:
         assert 'headers' in part.keys()
 
-def test_double_decoding_of_attachment_filenames():
-    data = parse_email(MAIL_PATH_DOUBLE_DECODE_ATTACHMENT_FILENAME)
+def test_double_decoding_of_attachment_filenames(document_collection):
+    data = parse_email(MAIL_PATH_DOUBLE_DECODE_ATTACHMENT_FILENAME, document_collection)
     without_encoding = "atașament_pârș.jpg"
     simple_encoding = "=?utf-8?b?YXRhyJlhbWVudF9ww6JyyJkuanBn?="
     double_encoding = "=?utf-8?b?PT91dGYtOD9iP1lYUmh5S" \
@@ -104,8 +108,8 @@ def test_double_decoding_of_attachment_filenames():
     assert double_encoding not in filenames
     assert {simple_encoding, without_encoding} == set(filenames)
 
-def test_attachment_with_octet_stream_content_type():
-    data = parse_email(MAIL_PATH_OCTET_STREAM_CONTENT_TYPE)
+def test_attachment_with_octet_stream_content_type(document_collection):
+    data = parse_email(MAIL_PATH_OCTET_STREAM_CONTENT_TYPE, document_collection)
 
     assert data['attachments']['2']['content_type'] == 'application/msword'
     assert data['attachments']['3']['content_type'] == 'application/zip'

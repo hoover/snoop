@@ -40,7 +40,15 @@ class EmailCache(models.Model):
     value = models.TextField()
     time = models.DateTimeField(auto_now=True)
 
+class Collection(models.Model):
+    path = models.CharField(max_length=4000)
+    slug = models.CharField(max_length=100, unique=True)
+    title = models.CharField(max_length=200)
+    es_index = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+
 class Document(models.Model):
+    collection = models.ForeignKey('Collection')
     container = models.ForeignKey('Document',
                                   related_name='contained_set',
                                   null=True)
@@ -64,7 +72,7 @@ class Document(models.Model):
     @property
     def absolute_path(self):
         assert self.container is None
-        return Path(settings.SNOOP_ROOT) / self.path
+        return Path(self.collection.path) / self.path
 
     def _open_file(self):
         if self.content_type == 'application/x-directory':
