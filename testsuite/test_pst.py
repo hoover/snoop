@@ -1,8 +1,12 @@
 import pytest
 from pathlib import Path
 import tempfile
+from django.conf import settings
 from snoop import digest, models, pst
 from snoop.content_types import guess_content_type
+
+pytestmark = pytest.mark.skipif(not settings.SNOOP_READPST_BINARY,
+    reason="SNOOP_READPST_BINARY not set")
 
 PST_JANE_AND_DOE = {
     'parent': None,

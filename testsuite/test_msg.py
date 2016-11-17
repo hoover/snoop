@@ -1,4 +1,9 @@
+import pytest
+from django.conf import settings
 from snoop import models, emails
+
+pytestmark = pytest.mark.skipif(not settings.SNOOP_MSGCONVERT_SCRIPT,
+    reason="SNOOP_MSGCONVERT_SCRIPT not set")
 
 PATH_MSG_DISEARA = ("msg-5-outlook/DISEARĂ-Te-așteptăm-la-"
                     "discuția-despre-finanțarea-culturii.msg")
