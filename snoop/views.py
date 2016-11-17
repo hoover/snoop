@@ -76,6 +76,7 @@ def document_as_eml(request, collection_slug, id):
 def _process_document(collection_slug, id):
     parent_id = None
     attachments = []
+    children = []
 
     doc = _find_doc(collection_slug, id)
 
@@ -111,6 +112,12 @@ def _process_document(collection_slug, id):
             'content_type': a['content_type'],
         } for n, a in data.get('attachments', {}).items()]
 
+        children = [{
+            'id': str(doc.id),
+            'filename': str(doc.filename),
+            'content_type': doc.content_type,
+        } for doc in doc.child_set.order_by('id')]
+
         parent_id = doc.parent_id
 
     as_eml = _as_eml(doc)
@@ -124,6 +131,7 @@ def _process_document(collection_slug, id):
         'parent_id': parent_id,
         'data': data,
         'attachments': attachments,
+        'children': children,
         'as_eml': as_eml,
     }
 
