@@ -31,3 +31,13 @@ def test_get_data(collection):
     assert content['from'] == \
         'Negoita Camelia <don.t_mess_with_miky@yahoo.com>'
     assert content['md5'] == '2008f17802012f11fc4b35234a4af672'
+
+def test_attachments(collection):
+    from snoop.digest import create_children, digest
+    email = collection.document_set.get(path='message-without-subject.eml')
+    new_children = create_children(email, digest(email), True)
+    data = views._process_document(collection.slug, email.id)
+    children = data['children']
+    assert len(children) == 2
+    assert children[0]['filename'] == 'IMAG1077.jpg'
+    assert children[0]['content_type'] == 'image/jpeg'
