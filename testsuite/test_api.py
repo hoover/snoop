@@ -6,7 +6,8 @@ skip_if_no_db = pytest.mark.skipif(not settings.DATABASES,
     reason="DATABASES not set")
 pytestmark = [pytest.mark.django_db, skip_if_no_db]
 
-def test_get_data():
+@pytest.fixture
+def collection():
     collection = models.Collection.objects.create(
         slug='apitest',
         path=settings.SNOOP_ROOT + '/eml-2-attachment',
@@ -17,6 +18,9 @@ def test_get_data():
         container_doc=None,
         collection=collection,
     )
+    return collection
+
+def test_get_data(collection):
     email = collection.document_set.get(path='message-without-subject.eml')
     data = views._process_document(collection.slug, email.id)
     content = data['data']
