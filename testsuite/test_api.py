@@ -23,7 +23,7 @@ def collection():
 def test_get_data(collection):
     email = collection.document_set.get(path='message-without-subject.eml')
     data = views._process_document(collection.slug, email.id)
-    content = data['data']
+    content = data['content']
     assert content['date'] == '10 October 2013'
     assert content['type'] == 'email'
     assert content['filename'] == 'message-without-subject.eml'

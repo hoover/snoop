@@ -129,7 +129,7 @@ def _process_document(collection_slug, id):
     return {
         'id': id,
         'parent_id': parent_id,
-        'data': data,
+        'content': data,
         'attachments': attachments,
         'children': children,
         'as_eml': as_eml,
