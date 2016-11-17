@@ -108,7 +108,7 @@ def digest(doc):
 
 def create_email_children(doc, data, flags):
     children = []
-    for name, info in data.get('attachments', {}).items():
+    for name, info in sorted(data.get('attachments', {}).items()):
         child, created = models.Document.objects.update_or_create(
             container=doc,
             parent=doc,
