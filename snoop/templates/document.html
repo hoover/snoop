@@ -39,8 +39,8 @@
   <div class="row">
     <div class="col-lg-12">
 
-      {% if 'filename' in data %}
-        <h4>{{ '#' + id + ': ' + data.get('filename') }}</h4>
+      {% if 'filename' in content %}
+        <h4>{{ '#' + id + ': ' + content.get('filename') }}</h4>
       {% else %}
         <h4>{{ '#' + id }}</h4>
       {% endif %}
@@ -57,8 +57,8 @@
           <a href="{{ parent_id }}" class="btn btn-info" role="button">Up</a>
         {% endif %}
 
-        {% if data.type != 'folder' %}
-          <a href="./{{ id }}/raw/{{ uriencode(data.filename) }}"
+        {% if content.type != 'folder' %}
+          <a href="./{{ id }}/raw/{{ uriencode(content.filename) }}"
              class="btn btn-primary" role="button">Original file</a>
         {% endif %}
 
@@ -67,8 +67,8 @@
              class="btn btn-primary" role="button">as .eml file</a>
         {% endif %}
 
-        {% for tag in data.get('ocr', {}) %}
-          <a href="./{{ id }}/ocr/{{ tag }}/{{ uriencode(data.filename) }}"
+        {% for tag in content.get('ocr', {}) %}
+          <a href="./{{ id }}/ocr/{{ tag }}/{{ uriencode(content.filename) }}"
              class="btn btn-secondary" role="button">OCR {{ tag }}</a>
         {% endfor %}
       {% endif %}
@@ -83,80 +83,80 @@
         <tbody>
         <tr>
           <td> Path:</td>
-          <td><b><code>{{ data.get('path') }}</code></b>
+          <td><b><code>{{ content.get('path') }}</code></b>
           </td>
         </tr>
 
         <tr>
           <td> Filename:</td>
           <td>
-            <b><code>{{ data.get('filename') }}</code></b>
+            <b><code>{{ content.get('filename') }}</code></b>
           </td>
         </tr>
 
         <tr>
           <td> Type:</td>
-          <td><code>{{ data.get('type') }}</code></td>
+          <td><code>{{ content.get('type') }}</code></td>
         </tr>
 
-        {% if data.type != 'folder' and 'sha1' in data %}
+        {% if content.type != 'folder' and 'sha1' in content %}
           <tr>
             <td> MD5:</td>
-            <td><code>{{ data.md5 }}</code></td>
+            <td><code>{{ content.md5 }}</code></td>
           </tr>
           <tr>
             <td> SHA1:</td>
-            <td><code>{{ data.sha1 }}</code></td>
+            <td><code>{{ content.sha1 }}</code></td>
           </tr>
         {% endif %}
 
 
-        {% if data.lang %}
+        {% if content.lang %}
           <tr>
             <td> Language:</td>
-            <td><code>{{ data.lang }}</code></td>
+            <td><code>{{ content.lang }}</code></td>
           </tr>
         {% endif %}
 
-        {% if data.get('type') in ['pdf', 'doc'] %}
+        {% if content.get('type') in ['pdf', 'doc'] %}
           <tr>
             <td> Created:</td>
-            <td>{{ data.get('date-created') }}</td>
+            <td>{{ content.get('date-created') }}</td>
           </tr>
 
           <tr>
             <td> Modified:</td>
-            <td>{{ data.get('date') }}</td>
+            <td>{{ content.get('date') }}</td>
           </tr>
         {% endif %}
 
 
-        {% if 'pgp' in data %}
+        {% if 'pgp' in content %}
           <tr>
             <td> PGP:</td>
-            <td><b>{{ data.get('pgp') }}</b></td>
+            <td><b>{{ content.get('pgp') }}</b></td>
           </tr>
         {% endif %}
 
-        {% if data.type == 'email' %}
+        {% if content.type == 'email' %}
           <tr>
             <td> From:</td>
-            <td>{{ data.get('from') }}</td>
+            <td>{{ content.get('from') }}</td>
           </tr>
 
           <tr>
             <td> To:</td>
-            <td>{{ data.get('to', [])|join(', ') }}</td>
+            <td>{{ content.get('to', [])|join(', ') }}</td>
           </tr>
 
           <tr>
             <td> Date:</td>
-            <td>{{ data.get('date') }}</td>
+            <td>{{ content.get('date') }}</td>
           </tr>
 
           <tr>
             <td> Subject:</td>
-            <td><b>{{ data.get('subject') }}</b></td>
+            <td><b>{{ content.get('subject') }}</b></td>
           </tr>
         {% endif %}
         </tbody>
@@ -218,7 +218,7 @@
 
 
 
-  {% if data.type in ['folder', 'archive', 'email-archive'] %}
+  {% if content.type in ['folder', 'archive', 'email-archive'] %}
     <div class="row">
       <div class="col-lg-12">
         <h5>Files:</h5>
@@ -232,7 +232,7 @@
           </tr>
           </thead>
           <tbody>
-          {% for file in data.files %}
+          {% for file in content.files %}
             <tr>
               <td>
                 {% if file.id %}
@@ -263,37 +263,37 @@
     </div>
   {% endif %}
 
-  {%  if data.type == 'html' and 'safe_html' in data %}
+  {%  if content.type == 'html' and 'safe_html' in content %}
     <div class="row">
       <div class="col-lg-12">
         <h5>Stripped HTML</h5>
         <div class="html-container">
-          {{ data.safe_html|safe }}
+          {{ content.safe_html|safe }}
         </div>
       </div>
     </div>
 
   {%  endif %}
 
-  {% if 'text' in data %}
+  {% if 'text' in content %}
     <div class="row">
       <div class="col-lg-12">
         <h5>Text</h5>
-        <div class="content">{{ data['text'] }}</div>
+        <div class="content">{{ content['text'] }}</div>
       </div>
     </div>
   {% endif %}
 
-  {% for ocr_tag, ocr_text in data.get('ocr', {}).items() %}
+  {% for ocr_tag, ocr_text in content.get('ocr', {}).items() %}
     <h5>OCR {{ ocr_tag }}</h5>
     <pre class="content">{{ ocr_text }}</pre>
   {% endfor %}
 
-  {% if data.type == 'email' %}
+  {% if content.type == 'email' %}
     <div class="row">
       <div class="col-lg-12">
         <h5>Headers & Parts</h5>
-        <pre class="content vertical-scroll">{{ data.get('tree', '') }}</pre>
+        <pre class="content vertical-scroll">{{ content.get('tree', '') }}</pre>
       </div>
     </div>
   {% endif %}
