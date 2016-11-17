@@ -6,6 +6,9 @@ from django.conf import settings
 from snoop import digest, models, archives
 from snoop.content_types import guess_content_type
 
+pytestmark = pytest.mark.skipif(not settings.SNOOP_SEVENZIP_BINARY,
+    reason="SNOOP_SEVENZIP_BINARY not set")
+
 ZIP_SIMPLE = {
     'parent': None,
     'path': "disk-files/archives/zip-with-docx-and-doc.zip",
