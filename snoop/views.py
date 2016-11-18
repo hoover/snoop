@@ -1,4 +1,5 @@
 import re
+import json
 from pathlib import Path
 from dateutil import parser
 from pprint import pformat
@@ -6,6 +7,7 @@ from django.http import HttpResponse, FileResponse, HttpResponseNotFound, JsonRe
 from django.shortcuts import get_object_or_404, render
 from django.conf import settings
 from django.utils.encoding import filepath_to_uri
+from django.db.models.expressions import RawSQL
 from jinja2 import Environment
 from . import models, html
 from .digest import digest
@@ -78,7 +80,7 @@ def document_as_eml(request, collection_slug, id):
     with open_msg(doc) as f:
         return HttpResponse(f.read(), content_type='message/rfc822')
 
-def _process_document(collection_slug, id):
+def _process_document(collection_slug, id, data=None):
     parent_id = None
     attachments = []
     children = []
@@ -86,7 +88,8 @@ def _process_document(collection_slug, id):
     doc = _find_doc(collection_slug, id)
 
     try:
-        data = digest(doc)
+        if data is None:
+            data = digest(doc)
 
     except Exception as e:
         error_message = doc.broken
@@ -152,15 +155,19 @@ def document_json(request, collection_slug, id):
 def feed(request, collection_slug):
     collection = get_object_or_404(models.Collection, slug=collection_slug)
 
-    def dump(doc):
-        return {
-            'id': str(doc.id),
-            'content': {
-                'path': doc.path,
-            },
-        }
+    ids = RawSQL("(SELECT id FROM snoop_document WHERE collection_id=%s)",
+        (collection.id,))
+    query = models.Digest.objects.filter(id__in=ids).order_by('-updated_at')
 
-    rv = {'documents': [dump(doc) for doc in collection.document_set.all()]}
+
+    def dump(digest):
+        digest_data = json.loads(digest.data)
+        data = _process_document(collection_slug, digest.id, digest_data)
+        version = digest.updated_at.isoformat().replace('+00:00', 'Z')
+        data['version'] = version
+        return data
+
+    rv = {'documents': [dump(digest) for digest in query]}
     return JsonResponse(rv)
 
 def collection(request, collection_slug):
