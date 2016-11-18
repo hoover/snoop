@@ -149,8 +149,23 @@ def document(request, collection_slug, id):
 def document_json(request, collection_slug, id):
     return JsonResponse(_process_document(collection_slug, id))
 
+def feed(request, collection_slug):
+    collection = get_object_or_404(models.Collection, slug=collection_slug)
+
+    def dump(doc):
+        return {
+            'id': str(doc.id),
+            'content': {
+                'path': doc.path,
+            },
+        }
+
+    rv = {'documents': [dump(doc) for doc in collection.document_set.all()]}
+    return JsonResponse(rv)
+
 def collection(request, collection_slug):
     collection = get_object_or_404(models.Collection, slug=collection_slug)
     return JsonResponse({
         'title': collection.title,
+        'feed': 'feed',
     })

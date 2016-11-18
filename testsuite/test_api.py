@@ -1,5 +1,6 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from urllib.parse import urljoin
 import pytest
 from django.conf import settings
 from snoop import models, walker, views
@@ -52,9 +53,29 @@ def mockdata():
     with TemporaryDirectory() as tmp:
         root = Path(tmp) / 'mock'
         root.mkdir()
-        yield _collection(slug='mock', path=str(root), title="Mock")
+        for n in range(42):
+            with (root / 'doc_{}.txt'.format(n)).open('w') as f: pass
+        col = _collection(slug='mock', path=str(root), title="Mock")
+        from snoop.digest import worker
+        for doc in col.document_set.all():
+            worker(doc.id, False)
+        yield col
 
 def test_collection_metadata_and_feed(mockdata, client):
     col_url = '/mock/json'
     col = client.get(col_url).json()
     assert col['title'] == "Mock"
+
+    def feed_page(url):
+        page = client.get(url).json()
+        next_url = urljoin(url, page['next']) if page.get('next') else None
+        return next_url, page['documents']
+
+    docs = []
+    feed_url = urljoin(col_url, col['feed'])
+    while feed_url:
+        feed_url, page_docs = feed_page(feed_url)
+        docs.extend(page_docs)
+
+    expected_paths = {''} ^ {"doc_{}.txt".format(n) for n in range(42)}
+    assert {d['content']['path'] for d in docs} == expected_paths
