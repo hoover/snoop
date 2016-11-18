@@ -159,6 +159,16 @@ def feed(request, collection_slug):
         (collection.id,))
     query = models.Digest.objects.filter(id__in=ids).order_by('-updated_at')
 
+    if 'lt' in request.GET:
+        try:
+            lt = parser.parse(request.GET['lt'])
+        except ValueError:
+            pass
+        else:
+            query = query.filter(updated_at__lt=lt)
+
+    page_size = settings.SNOOP_FEED_PAGE_SIZE
+    page = query[:page_size]
 
     def dump(digest):
         digest_data = json.loads(digest.data)
@@ -167,7 +177,11 @@ def feed(request, collection_slug):
         data['version'] = version
         return data
 
-    rv = {'documents': [dump(digest) for digest in query]}
+    documents = [dump(digest) for digest in page]
+    rv = {'documents': documents}
+    if documents:
+        last_document = documents[-1]
+        rv['next'] = '?lt={}'.format(last_document['version'])
     return JsonResponse(rv)
 
 def collection(request, collection_slug):
