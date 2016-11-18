@@ -148,3 +148,9 @@ def document(request, collection_slug, id):
 
 def document_json(request, collection_slug, id):
     return JsonResponse(_process_document(collection_slug, id))
+
+def collection(request, collection_slug):
+    collection = get_object_or_404(models.Collection, slug=collection_slug)
+    return JsonResponse({
+        'title': collection.title,
+    })

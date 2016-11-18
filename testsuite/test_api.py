@@ -1,3 +1,5 @@
+from pathlib import Path
+from tempfile import TemporaryDirectory
 import pytest
 from django.conf import settings
 from snoop import models, walker, views
@@ -6,19 +8,22 @@ skip_if_no_db = pytest.mark.skipif(not settings.DATABASES,
     reason="DATABASES not set")
 pytestmark = [pytest.mark.django_db, skip_if_no_db]
 
+def _collection(**kwargs):
+    col = models.Collection.objects.create(**kwargs)
+    walker.Walker.walk(
+        root=col.path,
+        prefix=None,
+        container_doc=None,
+        collection=col,
+    )
+    return col
+
 @pytest.fixture
 def testdata():
-    testdata = models.Collection.objects.create(
+    return _collection(
         slug='apitest',
         path=settings.SNOOP_ROOT + '/eml-2-attachment',
     )
-    walker.Walker.walk(
-        root=testdata.path,
-        prefix=None,
-        container_doc=None,
-        collection=testdata,
-    )
-    return testdata
 
 def test_get_data(testdata):
     email = testdata.document_set.get(path='message-without-subject.eml')
@@ -41,3 +46,15 @@ def test_attachments(testdata):
     assert len(children) == 2
     assert children[0]['filename'] == 'IMAG1077.jpg'
     assert children[0]['content_type'] == 'image/jpeg'
+
+@pytest.fixture
+def mockdata():
+    with TemporaryDirectory() as tmp:
+        root = Path(tmp) / 'mock'
+        root.mkdir()
+        yield _collection(slug='mock', path=str(root), title="Mock")
+
+def test_collection_metadata_and_feed(mockdata, client):
+    col_url = '/mock/json'
+    col = client.get(col_url).json()
+    assert col['title'] == "Mock"
