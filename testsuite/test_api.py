@@ -7,22 +7,22 @@ skip_if_no_db = pytest.mark.skipif(not settings.DATABASES,
 pytestmark = [pytest.mark.django_db, skip_if_no_db]
 
 @pytest.fixture
-def collection():
-    collection = models.Collection.objects.create(
+def testdata():
+    testdata = models.Collection.objects.create(
         slug='apitest',
         path=settings.SNOOP_ROOT + '/eml-2-attachment',
     )
     walker.Walker.walk(
-        root=collection.path,
+        root=testdata.path,
         prefix=None,
         container_doc=None,
-        collection=collection,
+        collection=testdata,
     )
-    return collection
+    return testdata
 
-def test_get_data(collection):
-    email = collection.document_set.get(path='message-without-subject.eml')
-    data = views._process_document(collection.slug, email.id)
+def test_get_data(testdata):
+    email = testdata.document_set.get(path='message-without-subject.eml')
+    data = views._process_document(testdata.slug, email.id)
     content = data['content']
     assert content['date'] == '10 October 2013'
     assert content['type'] == 'email'
@@ -32,11 +32,11 @@ def test_get_data(collection):
         'Negoita Camelia <don.t_mess_with_miky@yahoo.com>'
     assert content['md5'] == '2008f17802012f11fc4b35234a4af672'
 
-def test_attachments(collection):
+def test_attachments(testdata):
     from snoop.digest import create_children, digest
-    email = collection.document_set.get(path='message-without-subject.eml')
+    email = testdata.document_set.get(path='message-without-subject.eml')
     new_children = create_children(email, digest(email), True)
-    data = views._process_document(collection.slug, email.id)
+    data = views._process_document(testdata.slug, email.id)
     children = data['children']
     assert len(children) == 2
     assert children[0]['filename'] == 'IMAG1077.jpg'
