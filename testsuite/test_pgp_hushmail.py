@@ -5,6 +5,9 @@ import pytest
 from django.conf import settings
 from snoop import emails, models, pgp
 
+pytestmark = pytest.mark.skipif(not settings.SNOOP_GPG_BINARY,
+    reason="SNOOP_GPG_BINARY not set")
+
 PATH_HUSH_MAIL = 'eml-9-pgp/encrypted-hushmail-knockoff.eml'
 HEIN_PRIVATE_KEY = 'eml-9-pgp/keys/hein-priv.gpg'
 HEIN_PUBLIC_KEY = 'eml-9-pgp/keys/hein-pub.gpg'
@@ -18,7 +21,6 @@ def patch_gpg_to_temp_dir(monkeypatch):
                 gpg.import_keys(f.read())
         monkeypatch.setattr(pgp, 'GPG', gpg)
         monkeypatch.setattr(settings, 'SNOOP_GPG_HOME', '/tmp')
-        monkeypatch.setattr(settings, 'SNOOP_GPG_BINARY', 'gpg')
         yield
 
 def create_email_doc(path, collection):
