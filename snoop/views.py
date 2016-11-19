@@ -27,6 +27,16 @@ def environment(**options):
     })
     return env
 
+def json_response(request, data):
+    json_dumps_params = {'separators': [',', ':']}
+    if 'text/html' in request.META.get('HTTP_ACCEPT', ''):
+        json_dumps_params = {
+            'separators': [', ', ': '],
+            'sort_keys': True,
+            'indent': 2,
+        }
+    return JsonResponse(data, json_dumps_params=json_dumps_params)
+
 def _format_size(num):
     for unit in ['', 'KB', 'MB', 'GB', 'TB']:
         if abs(num) < 1024.0:
@@ -150,7 +160,7 @@ def document(request, collection_slug, id):
     return render(request, 'document.html', data)
 
 def document_json(request, collection_slug, id):
-    return JsonResponse(_process_document(collection_slug, id))
+    return json_response(request, _process_document(collection_slug, id))
 
 def feed(request, collection_slug):
     collection = get_object_or_404(models.Collection, slug=collection_slug)
@@ -182,11 +192,11 @@ def feed(request, collection_slug):
     if documents:
         last_document = documents[-1]
         rv['next'] = '?lt={}'.format(last_document['version'])
-    return JsonResponse(rv)
+    return json_response(request, rv)
 
 def collection(request, collection_slug):
     collection = get_object_or_404(models.Collection, slug=collection_slug)
-    return JsonResponse({
+    return json_response(request, {
         'title': collection.title,
         'feed': 'feed',
     })
