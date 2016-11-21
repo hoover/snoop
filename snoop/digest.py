@@ -100,7 +100,7 @@ def digest(doc):
         md5=doc.md5
     ))
     if ocr_items:
-        data['ocr'] = {ocr.key: ocr.text for ocr in ocr_items}
+        data['ocr'] = {ocr.tag: ocr.text for ocr in ocr_items}
 
     if archives.is_archive(doc):
         archives.extract_to_base(doc)
