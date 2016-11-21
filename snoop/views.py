@@ -56,7 +56,12 @@ def document_raw(request, collection_slug, id):
 
 def document_ocr(request, collection_slug, id, tag):
     doc = _find_doc(collection_slug, id)
-    ocr = get_object_or_404(models.Ocr, tag=tag, md5=doc.md5)
+    ocr = get_object_or_404(
+        models.Ocr,
+        collection_id=doc.collection.id,
+        key=tag,
+        md5=doc.md5
+    )
     return FileResponse(
         ocr.absolute_path.open('rb'),
         content_type='application/pdf',
