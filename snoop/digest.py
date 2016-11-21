@@ -95,9 +95,12 @@ def digest(doc):
     if 'text' in data:
         data['word-count'] = word_count(data['text'])
 
-    ocr_items = list(models.Ocr.objects.filter(md5=doc.md5))
+    ocr_items = list(models.Ocr.objects.filter(
+        collection_id=doc.collection.id,
+        md5=doc.md5
+    ))
     if ocr_items:
-        data['ocr'] = {ocr.tag: ocr.text for ocr in ocr_items}
+        data['ocr'] = {ocr.key: ocr.text for ocr in ocr_items}
 
     if archives.is_archive(doc):
         archives.extract_to_base(doc)
