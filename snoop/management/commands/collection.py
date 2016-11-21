@@ -48,7 +48,7 @@ class Command(BaseCommand):
             nargs=2,
             dest='ocr',
             default=None,
-            help='[--set-ocr KEY PATH] Add or modify the path for an OCR file set'
+            help='[--set-ocr TAG PATH] Add or modify the path for an OCR file set'
         )
         parser.add_argument(
             '--remove-ocr',
@@ -88,8 +88,8 @@ def print_info_for_collections(collections):
 def modify_ocr_data(collection, **options):
     modified = False
     if options['ocr'] is not None:
-        key, path = options['ocr']
-        collection.ocr[key] = path
+        tag, path = options['ocr']
+        collection.ocr[tag] = path
         modified = True
     if options['remove_ocr'] is not None:
         del collection.ocr[options['remove_ocr']]

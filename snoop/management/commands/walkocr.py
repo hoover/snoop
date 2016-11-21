@@ -14,19 +14,19 @@ class Command(BaseCommand):
             help="The slug of the collection"
         )
         parser.add_argument(
-            'ocr_key',
+            'tag',
             default=None,
             help="The key of the OCR file set"
         )
 
-    def handle(self, verbosity, collection_slug, ocr_key, **options):
+    def handle(self, verbosity, collection_slug, tag, **options):
         try:
             c = models.Collection.objects.get(slug=collection_slug)
         except models.Collection.DoesNotExist:
             print("Collection with slug", collection_slug, "does not exist.")
             sys.exit(1)
-        if ocr_key not in c.ocr:
-            print("Collection with slug", collection_slug, "does not have OCR key", ocr_key)
+        if tag not in c.ocr:
+            print("Collection with slug", collection_slug, "does not have OCR key", tag)
             sys.exit(1)
-        ocr_path = c.ocr[ocr_key]
-        walk(c, ocr_key, ocr_path, verbose=verbosity > 0)
+        ocr_path = c.ocr[tag]
+        walk(c, tag, ocr_path, verbose=verbosity > 0)

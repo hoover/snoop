@@ -59,7 +59,7 @@ def document_ocr(request, collection_slug, id, tag):
     ocr = get_object_or_404(
         models.Ocr,
         collection_id=doc.collection.id,
-        key=tag,
+        tag=tag,
         md5=doc.md5
     )
     return FileResponse(

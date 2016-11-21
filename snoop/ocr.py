@@ -7,7 +7,7 @@ from . import models
 from .utils import pdftotext, worker_metrics
 from . import queues
 
-def walk(collection, key, path, verbose=False):
+def walk(collection, tag, path, verbose=False):
 
     def _traverse(folder, prefix=''):
         for item in folder.iterdir():
@@ -30,7 +30,7 @@ def walk(collection, key, path, verbose=False):
         job = {
             'collection_id': collection.id,
             'ocr_root': str(ocr_root),
-            'key': key,
+            'tag': tag,
             'md5': md5,
             'path': str(path.relative_to(ocr_root)),
         }
@@ -39,14 +39,14 @@ def walk(collection, key, path, verbose=False):
     if verbose: print('added', i, 'jobs to queue')
 
 @transaction.atomic
-def worker(collection_id, ocr_root, key, md5, path, verbose):
+def worker(collection_id, ocr_root, tag, md5, path, verbose):
     with worker_metrics(type='worker', queue='ocr') as metrics:
-        metrics.update({'collection_id': collection_id, 'key': key, 'md5': md5, 'path': path})
+        metrics.update({'collection_id': collection_id, 'tag': tag, 'md5': md5, 'path': path})
         ocr_root = Path(ocr_root)
 
         row, created = models.Ocr.objects.get_or_create(
             collection_id=collection_id,
-            key=key,
+            tag=tag,
             md5=md5
         )
         if created:

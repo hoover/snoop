@@ -134,17 +134,17 @@ class Ocr(models.Model):
         'Collection',
         related_name='ocr_documents',
     )
-    key = models.CharField(max_length=100)
+    tag = models.CharField(max_length=100)
     md5 = models.CharField(max_length=40, db_index=True)
     path = models.CharField(max_length=4000)
     text = models.TextField(blank=True)
 
     class Meta:
-        unique_together = ('collection', 'key', 'md5')
+        unique_together = ('collection', 'tag', 'md5')
 
     @property
     def absolute_path(self):
-        return Path(self.collection.ocr[self.key]) / self.path
+        return Path(self.collection.ocr[self.tag]) / self.path
 
 class Digest(models.Model):
     id = models.IntegerField(primary_key=True)

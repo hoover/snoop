@@ -13,11 +13,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameField(
-            model_name='ocr',
-            old_name='tag',
-            new_name='key',
-        ),
         migrations.AddField(
             model_name='ocr',
             name='collection',
@@ -26,6 +21,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='ocr',
-            unique_together=set([('collection', 'key', 'md5')]),
+            unique_together=set([('collection', 'tag', 'md5')]),
         ),
     ]
