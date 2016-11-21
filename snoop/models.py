@@ -46,6 +46,7 @@ class Collection(models.Model):
     title = models.CharField(max_length=200)
     es_index = models.CharField(max_length=200)
     description = models.TextField(blank=True)
+    ocr = JSONField(default=dict, blank=True)
 
 class Document(models.Model):
     collection = models.ForeignKey('Collection')
