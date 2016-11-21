@@ -43,6 +43,19 @@ class Command(BaseCommand):
             default=None,
             help='Modify the single-line user-readable for the collection'
         )
+        parser.add_argument(
+            '--set-ocr',
+            nargs=2,
+            dest='ocr',
+            default=None,
+            help='[--set-ocr KEY PATH] Add or modify the path for an OCR file set'
+        )
+        parser.add_argument(
+            '--remove-ocr',
+            dest='remove_ocr',
+            default=None,
+            help='Remove a path for an OCR file set'
+        )
 
     def handle(self, collection_slug, **options):
         if not collection_slug:
@@ -56,6 +69,7 @@ class Command(BaseCommand):
             sys.exit(1)
 
         modify_collection(collection, **options)
+        modify_ocr_data(collection, **options)
         print_info_for_collections([collection])
 
 
@@ -64,13 +78,24 @@ def print_all_collections():
 
 
 def print_info_for_collections(collections):
-    template = "{:4s} {:15s} {:20s} {:30s} {:s}"
-    head_line = template.format("ID", "SLUG", "ES INDEX", "TITLE", "DESCRIPTION")
+    template = "{:4s} {:15s} {:20s} {:20s} {:35s} {:s}"
+    head_line = template.format("ID", "SLUG", "ES INDEX", "TITLE", "DESCRIPTION", "OCR")
     print(head_line)
     for c in collections:
-        c_line = template.format(str(c.id), c.slug, c.es_index, c.title, c.description)
+        c_line = template.format(str(c.id), c.slug, c.es_index, c.title, c.description, str(c.ocr))
         print(c_line)
 
+def modify_ocr_data(collection, **options):
+    modified = False
+    if options['ocr'] is not None:
+        key, path = options['ocr']
+        collection.ocr[key] = path
+        modified = True
+    if options['remove_ocr'] is not None:
+        del collection.ocr[options['remove_ocr']]
+        modified = True
+    if modified:
+        collection.save()
 
 def modify_collection(collection, **options):
     keys = {
