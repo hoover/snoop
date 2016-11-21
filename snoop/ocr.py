@@ -7,7 +7,7 @@ from . import models
 from .utils import pdftotext, worker_metrics
 from . import queues
 
-def walk(tag, verbose=False):
+def walk(collection, key, path, verbose=False):
 
     def _traverse(folder, prefix=''):
         for item in folder.iterdir():
@@ -25,10 +25,12 @@ def walk(tag, verbose=False):
                 assert len(md5) == 32
                 yield (md5, item)
 
-    ocr_root = Path(settings.SNOOP_OCR_ROOT) / tag
+    ocr_root = Path(path)
     for i, (md5, path) in enumerate(_traverse(ocr_root), 1):
         job = {
-            'tag': tag,
+            'collection_id': collection.id,
+            'ocr_root': str(ocr_root),
+            'key': key,
             'md5': md5,
             'path': str(path.relative_to(ocr_root)),
         }
@@ -37,12 +39,16 @@ def walk(tag, verbose=False):
     if verbose: print('added', i, 'jobs to queue')
 
 @transaction.atomic
-def worker(tag, md5, path, verbose):
+def worker(collection_id, ocr_root, key, md5, path, verbose):
     with worker_metrics(type='worker', queue='ocr') as metrics:
-        metrics.update({'tag': tag, 'md5': md5, 'path': path})
-        ocr_root = Path(settings.SNOOP_OCR_ROOT) / tag
+        metrics.update({'collection_id': collection_id, 'key': key, 'md5': md5, 'path': path})
+        ocr_root = Path(ocr_root)
 
-        row, created = models.Ocr.objects.get_or_create(tag=tag, md5=md5)
+        row, created = models.Ocr.objects.get_or_create(
+            collection_id=collection_id,
+            key=key,
+            md5=md5
+        )
         if created:
             row.path = path
             with (ocr_root / path).open('rb') as f:
