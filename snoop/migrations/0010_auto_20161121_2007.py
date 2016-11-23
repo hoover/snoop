@@ -37,6 +37,8 @@ def generate_default_ocr_sets(apps, schema_editor):
         Ocr.objects.using(db_alias).filter(tag=tag).update(collection=collection)
     Ocr.objects.using(db_alias).filter(collection_id__isnull=True).update(collection_id=default_collection.id)
 
+def do_nothing(*args):
+    pass
 
 class Migration(migrations.Migration):
 
@@ -54,7 +56,7 @@ class Migration(migrations.Migration):
                 related_name='ocr_documents',
                 to='snoop.Collection'),
         ),
-        migrations.RunPython(generate_default_ocr_sets),
+        migrations.RunPython(generate_default_ocr_sets, do_nothing),
         migrations.AlterField(
             model_name='ocr',
             name='collection',
