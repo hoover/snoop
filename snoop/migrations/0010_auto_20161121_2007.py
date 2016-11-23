@@ -16,18 +16,26 @@ def generate_default_ocr_sets(apps, schema_editor):
     db_alias = schema_editor.connection.alias
     Ocr = apps.get_model('snoop', 'Ocr')
     Collection = apps.get_model('snoop', 'Collection')
+    Document = apps.get_model('snoop', 'Document')
 
     try:
-        collection = Collection.objects.using(db_alias).order_by('id').get()
+        default_collection = Collection.objects.using(db_alias).order_by('id').get()
     except Collection.NotFound:
         return
 
     tags = {ocr.tag for ocr in Ocr.objects.using(db_alias).distinct('tag')}
     for tag in tags:
+        ocrDocument = Ocr.objects.using(db_alias).get(tag=tag)
+        try:
+            document = Document.objects.using(db_alias).get(md5=ocrDocument.md5)
+            collection = document.collection
+        except Document.NotFound:
+            collection = default_collection
         path = Path(old_root) / tag
         collection.ocr[tag] = str(path.resolve())
         collection.save()
-    Ocr.objects.using(db_alias).update(collection_id=collection.id)
+        Ocr.objects.using(db_alias).filter(tag=tag).update(collection=collection)
+    Ocr.objects.using(db_alias).filter(collection_id__isnull=True).update(collection_id=default_collection.id)
 
 
 class Migration(migrations.Migration):
@@ -40,12 +48,24 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='ocr',
             name='collection',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, related_name='ocr_documents', to='snoop.Collection'),
-            preserve_default=False,
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='ocr_documents',
+                to='snoop.Collection'),
+        ),
+        migrations.RunPython(generate_default_ocr_sets),
+        migrations.AlterField(
+            model_name='ocr',
+            name='collection',
+            field=models.ForeignKey(
+                null=False,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='ocr_documents',
+                to='snoop.Collection'),
         ),
         migrations.AlterUniqueTogether(
             name='ocr',
             unique_together=set([('collection', 'tag', 'md5')]),
         ),
-        migrations.RunPython(generate_default_ocr_sets),
     ]
