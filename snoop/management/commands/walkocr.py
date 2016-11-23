@@ -10,12 +10,10 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
             'collection_slug',
-            default=None,
             help="The slug of the collection"
         )
         parser.add_argument(
             'tag',
-            default=None,
             help="The key of the OCR file set"
         )
 
