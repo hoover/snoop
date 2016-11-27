@@ -19,7 +19,12 @@ def generate_default_ocr_sets(apps, schema_editor):
     Document = apps.get_model('snoop', 'Document')
 
     try:
-        default_collection = Collection.objects.using(db_alias).order_by('id').get()
+        default_collection = (
+            Collection.objects
+            .using(db_alias)
+            .order_by('id')
+            .first()
+        )
     except Collection.NotFound:
         return
 
@@ -27,7 +32,12 @@ def generate_default_ocr_sets(apps, schema_editor):
     for tag in tags:
         ocrDocument = Ocr.objects.using(db_alias).get(tag=tag)
         try:
-            document = Document.objects.using(db_alias).get(md5=ocrDocument.md5)
+            document = (
+                Document.objects
+                .using(db_alias)
+                .filter(md5=ocrDocument.md5)
+                .first()
+            )
             collection = document.collection
         except Document.NotFound:
             collection = default_collection
