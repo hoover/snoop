@@ -30,7 +30,7 @@ def generate_default_ocr_sets(apps, schema_editor):
 
     tags = {ocr.tag for ocr in Ocr.objects.using(db_alias).distinct('tag')}
     for tag in tags:
-        ocrDocument = Ocr.objects.using(db_alias).get(tag=tag)
+        ocrDocument = Ocr.objects.using(db_alias).filter(tag=tag).first()
         try:
             document = (
                 Document.objects
