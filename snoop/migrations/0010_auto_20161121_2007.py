@@ -18,14 +18,13 @@ def generate_default_ocr_sets(apps, schema_editor):
     Collection = apps.get_model('snoop', 'Collection')
     Document = apps.get_model('snoop', 'Document')
 
-    try:
-        default_collection = (
-            Collection.objects
-            .using(db_alias)
-            .order_by('id')
-            .first()
-        )
-    except Collection.NotFound:
+    default_collection = (
+        Collection.objects
+        .using(db_alias)
+        .order_by('id')
+        .first()
+    )
+    if not default_collection:
         return
 
     tags = {ocr.tag for ocr in Ocr.objects.using(db_alias).distinct('tag')}
