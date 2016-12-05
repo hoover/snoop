@@ -27,7 +27,7 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             '--set-es-index',
-            dest='index',
+            dest='es_index',
             default=None,
             help='Modify the Elasticsearch index for the collection'
         )
@@ -101,7 +101,7 @@ def modify_collection(collection, **options):
     keys = {
         'path',
         'slug',
-        'index',
+        'es_index',
         'title',
         'description'
     }
