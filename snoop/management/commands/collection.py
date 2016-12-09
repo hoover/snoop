@@ -78,12 +78,13 @@ def print_all_collections():
 
 
 def print_info_for_collections(collections):
-    template = "{:4s} {:15s} {:20s} {:20s} {:35s} {:s}"
-    head_line = template.format("ID", "SLUG", "ES INDEX", "TITLE", "DESCRIPTION", "OCR")
-    print(head_line)
     for c in collections:
-        c_line = template.format(str(c.id), c.slug, c.es_index, c.title, c.description, str(c.ocr))
-        print(c_line)
+        print("===", c.id, c.slug, "===")
+        print("title:", c.title)
+        print("es_index:", c.es_index)
+        print("description:", c.description)
+        print("ocr:", c.ocr)
+        print()
 
 def modify_ocr_data(collection, **options):
     modified = False
