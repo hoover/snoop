@@ -9,16 +9,16 @@ import django.db.models.deletion
 
 
 def generate_default_ocr_sets(apps, schema_editor):
+    Ocr = apps.get_model('snoop', 'Ocr')
+    Collection = apps.get_model('snoop', 'Collection')
+    Document = apps.get_model('snoop', 'Document')
+
     if not Ocr.objects.exists():
         return
 
     if not hasattr(settings, 'SNOOP_OCR_ROOT'):
         raise RuntimeError("SNOOP_OCR_ROOT is not set in the django config")
     old_root = Path(settings.SNOOP_OCR_ROOT)
-
-    Ocr = apps.get_model('snoop', 'Ocr')
-    Collection = apps.get_model('snoop', 'Collection')
-    Document = apps.get_model('snoop', 'Document')
 
     default_collection = (
         Collection.objects
