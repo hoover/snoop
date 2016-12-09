@@ -90,7 +90,7 @@ def modify_ocr_data(collection, **options):
     modified = False
     if options['ocr'] is not None:
         tag, path = options['ocr']
-        collection.ocr[tag] = path
+        collection.ocr[tag] = str(Path(path).resolve())
         modified = True
     if options['remove_ocr'] is not None:
         del collection.ocr[options['remove_ocr']]
