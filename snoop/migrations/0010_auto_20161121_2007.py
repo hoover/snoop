@@ -16,27 +16,24 @@ def generate_default_ocr_sets(apps, schema_editor):
         raise RuntimeError("SNOOP_OCR_ROOT is not set in the django config")
     old_root = Path(settings.SNOOP_OCR_ROOT)
 
-    db_alias = schema_editor.connection.alias
     Ocr = apps.get_model('snoop', 'Ocr')
     Collection = apps.get_model('snoop', 'Collection')
     Document = apps.get_model('snoop', 'Document')
 
     default_collection = (
         Collection.objects
-        .using(db_alias)
         .order_by('id')
         .first()
     )
     if not default_collection:
         raise RuntimeError("There are OCR objects but no Collection object!")
 
-    tags = {ocr.tag for ocr in Ocr.objects.using(db_alias).distinct('tag')}
+    tags = {ocr.tag for ocr in Ocr.objects.distinct('tag')}
     for tag in tags:
-        ocrDocument = Ocr.objects.using(db_alias).filter(tag=tag).first()
+        ocrDocument = Ocr.objects.filter(tag=tag).first()
         try:
             document = (
                 Document.objects
-                .using(db_alias)
                 .filter(md5=ocrDocument.md5)
                 .first()
             )
@@ -45,8 +42,8 @@ def generate_default_ocr_sets(apps, schema_editor):
             collection = default_collection
         collection.ocr[tag] = str(old_root / tag)
         collection.save()
-        Ocr.objects.using(db_alias).filter(tag=tag).update(collection=collection)
-    Ocr.objects.using(db_alias).filter(collection_id__isnull=True).update(collection_id=default_collection.id)
+        Ocr.objects.filter(tag=tag).update(collection=collection)
+    Ocr.objects.filter(collection_id__isnull=True).update(collection_id=default_collection.id)
 
 def do_nothing(*args):
     pass
