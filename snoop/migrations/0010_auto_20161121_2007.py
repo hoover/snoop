@@ -9,9 +9,12 @@ import django.db.models.deletion
 
 
 def generate_default_ocr_sets(apps, schema_editor):
-    if not hasattr(settings, 'SNOOP_OCR_ROOT'):
+    if not Ocr.objects.exists():
         return
-    old_root = settings.SNOOP_OCR_ROOT
+
+    if not hasattr(settings, 'SNOOP_OCR_ROOT'):
+        raise RuntimeError("SNOOP_OCR_ROOT is not set in the django config")
+    old_root = Path(settings.SNOOP_OCR_ROOT)
 
     db_alias = schema_editor.connection.alias
     Ocr = apps.get_model('snoop', 'Ocr')
@@ -25,7 +28,7 @@ def generate_default_ocr_sets(apps, schema_editor):
         .first()
     )
     if not default_collection:
-        return
+        raise RuntimeError("There are OCR objects but no Collection object!")
 
     tags = {ocr.tag for ocr in Ocr.objects.using(db_alias).distinct('tag')}
     for tag in tags:
@@ -40,8 +43,7 @@ def generate_default_ocr_sets(apps, schema_editor):
             collection = document.collection
         except Document.NotFound:
             collection = default_collection
-        path = Path(old_root) / tag
-        collection.ocr[tag] = str(path.resolve())
+        collection.ocr[tag] = str(old_root / tag)
         collection.save()
         Ocr.objects.using(db_alias).filter(tag=tag).update(collection=collection)
     Ocr.objects.using(db_alias).filter(collection_id__isnull=True).update(collection_id=default_collection.id)
