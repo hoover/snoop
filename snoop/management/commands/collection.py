@@ -70,21 +70,22 @@ class Command(BaseCommand):
 
         modify_collection(collection, **options)
         modify_ocr_data(collection, **options)
-        print_info_for_collections([collection])
+        print_collection(collection)
 
 
 def print_all_collections():
-    print_info_for_collections(models.Collection.objects.all().order_by('id'))
-
-
-def print_info_for_collections(collections):
+    collections = models.Collection.objects.all().order_by('id')
     for c in collections:
-        print("===", c.id, c.slug, "===")
-        print("title:", c.title)
-        print("es_index:", c.es_index)
-        print("description:", c.description)
-        print("ocr:", c.ocr)
-        print()
+        print_collection(c)
+
+
+def print_collection(c):
+    print("===", c.id, c.slug, "===")
+    print("title:", c.title)
+    print("es_index:", c.es_index)
+    print("description:", c.description)
+    print("ocr:", c.ocr)
+    print()
 
 def modify_ocr_data(collection, **options):
     modified = False
