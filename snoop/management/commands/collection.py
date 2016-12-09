@@ -2,6 +2,15 @@ import sys
 from django.core.management.base import BaseCommand
 from ... import models
 
+COLLECTION_FIELDS = [
+    'path',
+    'slug',
+    'es_index',
+    'title',
+    'description'
+]
+OCR_OPTIONS = ['ocr', 'remove_ocr']
+
 class Command(BaseCommand):
 
     help = "View and modify a document collection"
@@ -59,6 +68,11 @@ class Command(BaseCommand):
 
     def handle(self, collection_slug, **options):
         if not collection_slug:
+            for k in COLLECTION_FIELDS + OCR_OPTIONS:
+                if options[k]:
+                    print("Option `{}` requires a `collection_slug`".format(k))
+                    sys.exit(1)
+
             print_all_collections()
             return
 
@@ -100,15 +114,8 @@ def modify_ocr_data(collection, **options):
         collection.save()
 
 def modify_collection(collection, **options):
-    keys = {
-        'path',
-        'slug',
-        'es_index',
-        'title',
-        'description'
-    }
     modified = False
-    for key in keys:
+    for key in COLLECTION_FIELDS:
         if options[key] is not None:
             setattr(collection, key, options[key])
             modified = True
