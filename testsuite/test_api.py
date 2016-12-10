@@ -30,7 +30,7 @@ def test_get_data(testdata):
     email = testdata.document_set.get(path='message-without-subject.eml')
     data = views._process_document(testdata.slug, email.id)
     content = data['content']
-    assert content['date'] == '10 October 2013'
+    assert content['date'] == '2013-10-10T10:04:49-07:00'
     assert content['type'] == 'email'
     assert content['filename'] == 'message-without-subject.eml'
     assert content['path'] == 'message-without-subject.eml'

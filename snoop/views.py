@@ -140,10 +140,6 @@ def _process_document(collection_slug, id, data=None):
 
     as_eml = _as_eml(doc)
 
-    for field in ['date', 'date-created']:
-        if data.get(field):
-            data[field] = _format_date(data[field])
-
     return {
         'id': id,
         'parent_id': parent_id,
