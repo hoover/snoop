@@ -13,6 +13,7 @@ from . import models, html
 from .digest import digest
 from .walker import files_in
 from .emails import open_msg
+from .index import get_index_data
 BOOTSTRP_CSS = ""
 
 path = Path(settings.BASE_DIR) / 'assets' / 'bootstrap.min.css'
@@ -179,6 +180,7 @@ def feed(request, collection_slug):
     def dump(digest):
         digest_data = json.loads(digest.data)
         data = _process_document(collection_slug, digest.id, digest_data)
+        data['content'] = get_index_data(data['content'])
         version = digest.updated_at.isoformat().replace('+00:00', 'Z')
         data['version'] = version
         return data
