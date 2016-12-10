@@ -197,6 +197,9 @@ def feed(request, collection_slug):
 def collection(request, collection_slug):
     collection = get_object_or_404(models.Collection, slug=collection_slug)
     return json_response(request, {
+        'name': collection.slug,
         'title': collection.title,
         'feed': 'feed',
+        'description': collection.description,
+        'data_urls': '{id}/json',
     })
