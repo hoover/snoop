@@ -13,7 +13,7 @@ from . import models, html
 from .digest import digest
 from .walker import files_in
 from .emails import open_msg
-from .index import get_index_data
+
 BOOTSTRP_CSS = ""
 
 path = Path(settings.BASE_DIR) / 'assets' / 'bootstrap.min.css'
@@ -133,6 +133,38 @@ def _process_document(collection_slug, id, data=None):
         'children': children,
         'as_eml': as_eml,
     }
+
+def get_index_data(digest_data):
+    copy_keys = {
+        'path',
+        'text',
+        'subject',
+        'date',
+        'to',
+        'from',
+        'sha1',
+        'md5',
+        'lang',
+        'date-created',
+        'message-id',
+        'in-reply-to',
+        'thread-index',
+        'references',
+        'message',
+        'filename',
+        'rev',
+        'pgp',
+        'word-count',
+    }
+
+    data = {key: digest_data.get(key) for key in copy_keys}
+    data['filetype'] = digest_data.get('type')
+    data['attachments'] = bool(digest_data.get('attachments'))
+    data['people'] = ' '.join([digest_data.get('from', '')] + digest_data.get('to', []))
+    data['ocr'] = bool(digest_data.get('ocr'))
+    data['ocrtext'] = digest_data.get('ocr')
+
+    return data
 
 def document(request, collection_slug, id):
     embed = request.GET.get('embed') == 'on'
