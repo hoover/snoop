@@ -93,7 +93,6 @@ def document_as_eml(request, collection_slug, id):
 
 def _process_document(collection_slug, id, data=None):
     parent_id = None
-    attachments = []
     children = []
 
     doc = _find_doc(collection_slug, id)
@@ -114,22 +113,8 @@ def _process_document(collection_slug, id, data=None):
             for file in data['files']:
                 file['size_pretty'] = _format_size(file['size'])
 
-        def attachment_id(n):
-            try:
-                a = doc.contained_set.get(path=n)
-            except models.Document.DoesNotExist:
-                return None
-            else:
-                return a.id
-
         if data.get('tree'):
             data['tree'] = pformat(data.get('tree'), indent=4, width=120)
-
-        attachments = [{
-            'filename': a['filename'],
-            'id': attachment_id(n),
-            'content_type': a['content_type'],
-        } for n, a in data.get('attachments', {}).items()]
 
         children = [{
             'id': str(doc.id),
@@ -145,7 +130,6 @@ def _process_document(collection_slug, id, data=None):
         'id': id,
         'parent_id': parent_id,
         'content': data,
-        'attachments': attachments,
         'children': children,
         'as_eml': as_eml,
     }
