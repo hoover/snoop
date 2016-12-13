@@ -14,20 +14,6 @@ from .digest import digest
 from .walker import files_in
 from .emails import open_msg
 
-BOOTSTRP_CSS = ""
-
-path = Path(settings.BASE_DIR) / 'assets' / 'bootstrap.min.css'
-with path.open('r') as f:
-    BOOTSTRP_CSS += f.read() + "\n"
-
-def environment(**options):
-    env = Environment(**options)
-    env.globals.update({
-        'css': BOOTSTRP_CSS,
-        'uriencode': filepath_to_uri,
-    })
-    return env
-
 def json_response(request, data):
     json_dumps_params = {'separators': [',', ':']}
     if 'text/html' in request.META.get('HTTP_ACCEPT', ''):
@@ -167,12 +153,6 @@ def _get_index_data_format(digest_data):
     data['ocrtext'] = digest_data.get('ocr')
 
     return data
-
-def document(request, collection_slug, id):
-    embed = request.GET.get('embed') == 'on'
-    data = _process_document(collection_slug, id)
-    data['embed'] = embed
-    return render(request, 'document.html', data)
 
 def document_json(request, collection_slug, id):
     return json_response(request, _process_document(collection_slug, id))
