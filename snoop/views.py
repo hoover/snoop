@@ -126,6 +126,8 @@ def _process_document(collection_slug, id, data=None):
 
     as_eml = _as_eml(doc)
 
+    data = _get_index_data_format(data)
+
     return {
         'id': id,
         'parent_id': parent_id,
@@ -134,7 +136,7 @@ def _process_document(collection_slug, id, data=None):
         'as_eml': as_eml,
     }
 
-def get_index_data(digest_data):
+def _get_index_data_format(digest_data):
     copy_keys = {
         'path',
         'text',
@@ -196,7 +198,6 @@ def feed(request, collection_slug):
     def dump(digest):
         digest_data = json.loads(digest.data)
         data = _process_document(collection_slug, digest.id, digest_data)
-        data['content'] = get_index_data(data['content'])
         version = digest.updated_at.isoformat().replace('+00:00', 'Z')
         data['version'] = version
         return data

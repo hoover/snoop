@@ -31,7 +31,7 @@ def test_get_data(testdata):
     data = views._process_document(testdata.slug, email.id)
     content = data['content']
     assert content['date'] == '2013-10-10T10:04:49-07:00'
-    assert content['type'] == 'email'
+    assert content['filetype'] == 'email'
     assert content['filename'] == 'message-without-subject.eml'
     assert content['path'] == 'message-without-subject.eml'
     assert content['from'] == \
