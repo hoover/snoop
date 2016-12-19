@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 from django.core.management.base import BaseCommand
 from ... import models
 
@@ -121,4 +122,3 @@ def modify_collection(collection, **options):
             modified = True
     if modified:
         collection.save()
-
