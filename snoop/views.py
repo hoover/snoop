@@ -1,7 +1,7 @@
 import re
 import json
 from pathlib import Path
-from dateutil import parser
+from dateutil.parser import parse as dateutil_parse
 from pprint import pformat
 from django.http import HttpResponse, FileResponse, HttpResponseNotFound, JsonResponse
 from django.shortcuts import get_object_or_404, render
@@ -32,7 +32,7 @@ def _format_size(num):
     return "%3.1f %s" % (num, 'PB')
 
 def _format_date(date_value):
-    return parser.parse(date_value).strftime("%d %B %Y")
+    return dateutil_parse(date_value).strftime("%d %B %Y")
 
 def _find_doc(collection_slug, id):
     return get_object_or_404(
@@ -166,7 +166,7 @@ def feed(request, collection_slug):
 
     if 'lt' in request.GET:
         try:
-            lt = parser.parse(request.GET['lt'])
+            lt = dateutil_parse(request.GET['lt'])
         except ValueError:
             pass
         else:
