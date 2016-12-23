@@ -22,8 +22,6 @@ class Command(BaseCommand):
     def handle(self, verbosity, queue, stop_first_error, **options):
         if queue == 'digest':
             from ...digest import worker
-        elif queue == 'index':
-            from ...index import worker
         elif queue == 'ocr':
             from ...ocr import worker
         elif queue == 'hotfix':

@@ -190,5 +190,3 @@ def worker(id, verbose):
         )
 
         if verbose: print('type:', data.get('type'))
-
-        queues.put('index', {'id': document.id}, verbose=verbose)
