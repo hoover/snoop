@@ -48,6 +48,9 @@ class Collection(models.Model):
     description = models.TextField(blank=True)
     ocr = JSONField(default=dict, blank=True)
 
+    def __str__(self):
+        return self.slug
+
 class Document(models.Model):
     collection = models.ForeignKey('Collection')
     container = models.ForeignKey('Document',
