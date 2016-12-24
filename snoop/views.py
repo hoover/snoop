@@ -100,10 +100,10 @@ def _process_document(collection_slug, id, data=None):
             data['tree'] = pformat(data.get('tree'), indent=4, width=120)
 
         children = [{
-            'id': str(doc.id),
-            'filename': str(doc.filename),
-            'content_type': doc.content_type,
-        } for doc in doc.child_set.order_by('id')]
+            'id': str(child_doc.id),
+            'filename': str(child_doc.filename),
+            'content_type': child_doc.content_type,
+        } for child_doc in doc.child_set.order_by('id')]
 
         parent_id = doc.parent_id
 
