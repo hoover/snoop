@@ -1,14 +1,11 @@
-import re
 import json
 from pathlib import Path
 from dateutil.parser import parse as dateutil_parse
 from pprint import pformat
 from django.http import HttpResponse, FileResponse, HttpResponseNotFound, JsonResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from django.conf import settings
-from django.utils.encoding import filepath_to_uri
 from django.db.models.expressions import RawSQL
-from jinja2 import Environment
 from . import models, html
 from .digest import digest
 from .walker import files_in
