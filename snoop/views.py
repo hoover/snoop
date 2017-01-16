@@ -91,6 +91,9 @@ def _process_document(collection_slug, id, data=None):
         data = {'type': 'ERROR: ' + error_message}
 
     else:
+        data['size'] = doc.disk_size
+        data['content-type'] = doc.content_type
+
         if data.get('type') in ['folder', 'archive', 'email-archive']:
             data['files'] = files_in(doc)
             for file in data['files']:
@@ -140,6 +143,8 @@ def _get_index_data_format(digest_data):
         'rev',
         'pgp',
         'word-count',
+        'content-type',
+        'size',
     }
 
     data = {key: digest_data.get(key) for key in copy_keys}
