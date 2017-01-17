@@ -14,14 +14,8 @@ ROOT_URLCONF = 'snoop.site.urls'
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.jinja2.Jinja2',
-        'DIRS': [
-            os.path.join(BASE_DIR, 'templates'),
-        ],
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'APP_DIRS': True,
-        'OPTIONS': {
-            'environment': 'snoop.views.environment',
-        },
     },
 ]
 
