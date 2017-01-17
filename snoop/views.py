@@ -112,7 +112,7 @@ def _process_document(collection_slug, id, data=None):
     data = _get_index_data_format(data)
 
     return {
-        'id': id,
+        'id': str(id),
         'parent_id': parent_id,
         'content': data,
         'children': children,
