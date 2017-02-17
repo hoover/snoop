@@ -149,7 +149,7 @@ the mbox format.
 
 ```shell
 $ brew install libpst  #  mac
-$ apt-get install libpst pst-utils  #  debian / ubuntu
+$ sudo apt-get install pst-utils  #  debian / ubuntu
 ```
 
 Set `SNOOP_READPST_BINARY` to the binary's path.
