@@ -94,9 +94,10 @@ $ ./manage.py digest 123
 
 Tika is used for text, language and metadata extraction.
 
-You can download the server .jar and run it with:
+You can download the server .jar from the [Apache archive](http://archive.apache.org/dist/tika/) and run it:
 
 ```shell
+$ wget http://archive.apache.org/dist/tika/tika-server-1.13.jar
 $ java -jar tika-server-1.13.jar
 ```
 
