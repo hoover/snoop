@@ -26,6 +26,8 @@ MAPPINGS = {
             "message": {"type": "string", "index": "not_analyzed"},
             "word-count": {"type": "integer"},
             "rev": {"type" : "integer"},
+            "content-type": {"type": "string", "index": "not_analyzed"},
+            "size": {"type": "integer"},
         }
     }
 }
