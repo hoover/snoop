@@ -1,9 +1,13 @@
+# encoding: utf-8
+
 import pytest
 from snoop import digest, models
 from snoop.content_types import guess_content_type
 
 PATH_TEXT = "disk-files/pdf-doc-txt/easychair.txt"
-PATH_HTML = "disk-files/bad-html/alert.html"
+PATH_HTML_WITH_XSS = "disk-files/bad-html/alert.html"
+XML_DECLARATION_LATIN1 = "disk-files/html-encodings/xml_declaration_latin1.html"
+META_ENCODING_LATIN1 = "disk-files/html-encodings/meta_encoding_latin1.html"
 PATH_IMAGE = 'disk-files/images/bikes.jpg'
 
 @pytest.fixture(autouse=True)
@@ -42,12 +46,25 @@ def test_text(document_collection):
     assert data['word-count'] == 72
 
 def test_html_text(document_collection):
-    data = digest_path(PATH_HTML, document_collection)
+    data = digest_path(PATH_HTML_WITH_XSS, document_collection)
 
     assert 'html' == data['type']
     assert "HAHAHAHAH" in data['text']
     assert "more text" in data['text']
     assert data['word-count'] == 5
+
+def test_html_xml_declaration(document_collection):
+    xml_declaration_latin1 = digest_path(XML_DECLARATION_LATIN1,
+        document_collection)
+    assert 'html' == xml_declaration_latin1['type']
+    assert 'foo' in xml_declaration_latin1['text']
+    assert u'bär' in xml_declaration_latin1['text']
+
+    meta_encoding_latin1 = digest_path(META_ENCODING_LATIN1,
+        document_collection)
+    assert 'html' == meta_encoding_latin1['type']
+    assert 'foo' in meta_encoding_latin1['text']
+    assert u'bär' in meta_encoding_latin1['text']
 
 def test_digest_image_exif(document_collection):
     data = digest_path(PATH_IMAGE, document_collection)

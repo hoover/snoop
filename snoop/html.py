@@ -72,6 +72,10 @@ def clean_html(html):
         else:
             html = html
 
+    print(html)
+    html = re.sub(r'^<\?xml\s*[^>]*>', '', html)
+    print(html)
+
     # extract all links and move them to an index
     extracted_links = _extract_links(html)
 
