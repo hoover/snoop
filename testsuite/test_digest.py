@@ -54,3 +54,23 @@ def test_digest_image_exif(document_collection):
 
     assert data['location'] == '33.87546081542969, -116.3016196017795'
     assert data['date-created'] == '2006-02-11T11:06:37'
+
+def test_digest_magic_file_types(document_collection):
+    expected_types = {
+        "no-extension/file_pst": "email-archive",
+        "no-extension/file_7z": "archive",
+        "no-extension/file_zip": "archive",
+        "no-extension/file_eml": "text",
+        "no-extension/file_html": "html",
+        "no-extension/file_jpg": "image",
+        "no-extension/file_json": "text",
+        "no-extension/file_text": "text",
+        "no-extension/file_pdf": "pdf",
+        "no-extension/file_docx": "doc",
+        "no-extension/file_doc": "doc",
+        "no-extension/file_odt": "doc",
+        "no-extension/file_msg": "email",
+    }
+    for path in expected_types:
+        data = digest_path(path, document_collection)
+        assert data['type'] == expected_types[path]
