@@ -12,7 +12,7 @@ from . import pst
 from . import exceptions
 from . import pgp
 from . import html
-from .content_types import guess_content_type, guess_filetype
+from .content_types import guess_filetype
 from .utils import chunks, word_count, worker_metrics, extract_exif
 
 INHERITABLE_DOCUMENT_FLAGS = [

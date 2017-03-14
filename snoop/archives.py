@@ -6,7 +6,6 @@ from django.conf import settings
 import shutil
 from . import models
 from . import exceptions
-from .content_types import guess_filetype
 from .walker import Walker
 
 KNOWN_TYPES = {
