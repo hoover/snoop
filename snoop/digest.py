@@ -12,7 +12,7 @@ from . import pst
 from . import exceptions
 from . import pgp
 from . import html
-from .content_types import guess_filetype
+from .content_types import guess_filetype, libmagic_guess_content_type
 from .utils import chunks, word_count, worker_metrics, extract_exif
 
 INHERITABLE_DOCUMENT_FLAGS = [
@@ -46,6 +46,9 @@ def digest(doc):
     if not doc.sha1:
         with doc.open() as f:
             md5, sha1, fsize = _calculate_hashes(f)
+            if not doc.content_type:
+                f.seek(0)
+                doc.content_type = libmagic_guess_content_type(f, fsize)
         if not doc.disk_size:
             doc.disk_size = fsize
         doc.sha1 = sha1

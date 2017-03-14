@@ -73,21 +73,20 @@ MAGIC_DESCRIPTION_TYPES = {
 
 MAGIC_READ_LIMIT = 24 * 1024 * 1024
 
+def libmagic_guess_content_type(file, filesize):
+    buffer = file.read(min(MAGIC_READ_LIMIT, filesize))
+    content_type = magic.from_buffer(buffer, mime=True)
+    if content_type in FILE_TYPES:
+        return content_type
+    magic_description = magic.from_buffer(buffer, mime=False)
+    return MAGIC_DESCRIPTION_TYPES.get(magic_description, content_type or '')
+
 def guess_filetype(doc):
     content_type = doc.content_type.split(';')[0]
-    magic_description = None
-    if not content_type:
-        with doc.open() as f:
-            buffer = f.read(min(doc.disk_size, MAGIC_READ_LIMIT))
-            content_type = magic.from_buffer(buffer, mime=True)
-            magic_description = magic.from_buffer(buffer, mime=False)
     if content_type in FILE_TYPES:
         return FILE_TYPES[content_type]
     else:
         supertype = content_type.split('/')[0]
         if supertype in ['audio', 'video', 'image']:
             return supertype
-        else:
-            if magic_description in MAGIC_DESCRIPTION_TYPES:
-                return FILE_TYPES.get(MAGIC_DESCRIPTION_TYPES[magic_description])
     return None

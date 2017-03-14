@@ -1,6 +1,7 @@
 import pytest
 from snoop import digest, models
 from snoop.content_types import guess_content_type
+from snoop import pst, archives
 
 PATH_TEXT = "disk-files/pdf-doc-txt/easychair.txt"
 PATH_HTML = "disk-files/bad-html/alert.html"
@@ -11,6 +12,8 @@ def no_ocr_models(monkeypatch):
     func_empty_list = lambda *a, **k: []
     monkeypatch.setattr(models.Ocr.objects, "filter", func_empty_list)
     monkeypatch.setattr(models.Ocr.objects, "all", func_empty_list)
+    monkeypatch.setattr(pst, "extract_to_base", func_empty_list)
+    monkeypatch.setattr(archives, "extract_to_base", func_empty_list)
 
 def digest_path(path, collection):
     content_type = guess_content_type(path)
