@@ -15,3 +15,4 @@ chardet
 python-gnupg
 lxml
 exifread
+python-magic
