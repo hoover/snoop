@@ -1,4 +1,6 @@
+from datetime import datetime
 from django.conf import settings
+from django.utils.timezone import utc
 import hashlib
 import json
 from pathlib import Path
@@ -189,5 +191,7 @@ def worker(id, verbose):
             id=document.id,
             defaults={'data': json.dumps(data)},
         )
+        document.digested_at = datetime.utcnow().replace(tzinfo=utc)
+        document.save()
 
         if verbose: print('type:', data.get('type'))
