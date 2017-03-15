@@ -111,6 +111,7 @@ def _process_document(collection_slug, id, data=None):
         parent_id = doc.parent_id
 
     as_eml = _as_eml(doc)
+    safe_html = data.get('safe_html')
 
     data = _get_index_data_format(data)
 
@@ -120,6 +121,7 @@ def _process_document(collection_slug, id, data=None):
         'content': data,
         'children': children,
         'as_eml': as_eml,
+        'safe_html': safe_html,
     }
 
 def _get_index_data_format(digest_data):
