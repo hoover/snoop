@@ -162,9 +162,11 @@ def document_json(request, collection_slug, id):
 def feed(request, collection_slug):
     collection = get_object_or_404(models.Collection, slug=collection_slug)
 
-    ids = RawSQL("(SELECT id FROM snoop_document WHERE collection_id=%s)",
-        (collection.id,))
-    query = models.Digest.objects.filter(id__in=ids).order_by('-updated_at')
+    query = (
+        collection.document_set
+        .filter(digested_at__isnull=False)
+        .order_by('-digested_at')
+    )
 
     if 'lt' in request.GET:
         try:
@@ -172,19 +174,20 @@ def feed(request, collection_slug):
         except ValueError:
             pass
         else:
-            query = query.filter(updated_at__lt=lt)
+            query = query.filter(digested_at__lt=lt)
 
     page_size = settings.SNOOP_FEED_PAGE_SIZE
-    page = query[:page_size]
+    page = list(query[:page_size])
 
-    def dump(digest):
+    def dump(digest, digested_at):
         digest_data = json.loads(digest.data)
         data = _process_document(collection_slug, digest.id, digest_data)
-        version = digest.updated_at.isoformat().replace('+00:00', 'Z')
+        version = digested_at.isoformat().replace('+00:00', 'Z')
         data['version'] = version
         return data
 
-    documents = [dump(digest) for digest in page]
+    digest_objects = models.Digest.objects.in_bulk([doc.id for doc in page])
+    documents = [dump(digest_objects[doc.id], doc.digested_at) for doc in page]
     rv = {'documents': documents}
     if documents:
         last_document = documents[-1]

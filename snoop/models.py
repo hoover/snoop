@@ -68,10 +68,12 @@ class Document(models.Model):
     broken = models.CharField(max_length=100, blank=True)
     rev = models.IntegerField(null=True)
     flags = JSONField(default=dict, blank=True)
+    digested_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         # TODO: constraint does not apply to container=None rows
         unique_together = ('container', 'path')
+        index_together = ('collection', 'digested_at')
 
     def __str__(self):
         return str(self.path)
@@ -152,7 +154,6 @@ class Ocr(models.Model):
 class Digest(models.Model):
     id = models.IntegerField(primary_key=True)
     data = models.TextField()
-    updated_at = models.DateTimeField(auto_now=True)
 
 class Job(models.Model):
     queue = models.CharField(max_length=100)
