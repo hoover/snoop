@@ -18,7 +18,7 @@ available for each indexed document.
 ## Installation
 Snoop depends on _lxml_ (which compiles against _libxml2_ and _libxslt_) and
 _psycopg2_ (which compiles against the PostgreSQL client headers). On
-Debian/Ubuntu the required packages are `build-essential`, `python3-dev`,
+Debian/Ubuntu the required packages are `build-essential`, `libmagic`, `python3-dev`,
 `libxml2-dev`, `libxslt1-dev` and `postgresql-server-dev-9.4` (or newer).
 
 Snoop can talk to a bunch of tools. Some understand a certain data format,

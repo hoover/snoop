@@ -1,4 +1,5 @@
 import mimetypes
+import magic
 
 mimetypes.add_type('message/x-emlx', '.emlx')
 mimetypes.add_type('message/x-emlxpart', '.emlxpart')
@@ -66,6 +67,19 @@ FILE_TYPES = {
     'application/x-rar-compressed': 'archive',
 }
 
+MAGIC_DESCRIPTION_TYPES = {
+    "Microsoft Outlook email folder (>=2003)": "application/x-hoover-pst",
+}
+
+MAGIC_READ_LIMIT = 24 * 1024 * 1024
+
+def libmagic_guess_content_type(file, filesize):
+    buffer = file.read(min(MAGIC_READ_LIMIT, filesize))
+    content_type = magic.from_buffer(buffer, mime=True)
+    if content_type in FILE_TYPES:
+        return content_type
+    magic_description = magic.from_buffer(buffer, mime=False)
+    return MAGIC_DESCRIPTION_TYPES.get(magic_description, content_type or '')
 
 def guess_filetype(doc):
     content_type = doc.content_type.split(';')[0]
