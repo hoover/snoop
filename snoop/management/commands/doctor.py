@@ -10,10 +10,10 @@ from django.conf import settings
 from django.db import connections
 from django.db.utils import OperationalError
 
-MIN_ELASTICSEARCH_VERSION = (2, 0, 0)
-MAX_ELASTICSEARCH_VERSION = (2, 4, 4)
+ELASTICSEARCH_MIN_VERSION = (2, 0, 0)
+ELASTICSEARCH_MAX_VERSION = (2, 4, 4)
 PST_MIN_VERSION = (0, 2, 0)
-MIN_TIKA_VERSION = (1, 13)
+TIKA_MIN_VERSION = (1, 13)
 
 
 def path_exists(path):
@@ -168,11 +168,11 @@ class Command(BaseCommand):
         version_string = re.sub(r'[^\d\.]+', '', version_string)
         version = tuple(int(x) for x in version_string.split('.'))
 
-        if not MIN_ELASTICSEARCH_VERSION < version < MAX_ELASTICSEARCH_VERSION:
+        if not ELASTICSEARCH_MIN_VERSION < version < ELASTICSEARCH_MAX_VERSION:
             self.print_error("elasticsearch is version {}, but".format(version))
             self.print_error("Hoover needs elasticsearch to be in between versions")
-            self.print_error("{} and {}".format(MIN_ELASTICSEARCH_VERSION,
-                                                MAX_ELASTICSEARCH_VERSION))
+            self.print_error("{} and {}".format(ELASTICSEARCH_MIN_VERSION,
+                                                ELASTICSEARCH_MAX_VERSION))
             return False
         return True
 
@@ -194,9 +194,9 @@ class Command(BaseCommand):
         version_string = matches.group(1)
         version = tuple(int(x) for x in version_string.split('.'))
 
-        if version < MIN_TIKA_VERSION:
+        if version < TIKA_MIN_VERSION:
             self.print_error("tika is version {}, but")
-            self.print_error("Hoover needs tika to be at least version {}".format(MIN_TIKA_VERSION))
+            self.print_error("Hoover needs tika to be at least version {}".format(TIKA_MIN_VERSION))
             self.print_error("Download tika from https://tika.apache.org/download")
             return False
         return True
