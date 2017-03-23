@@ -168,7 +168,7 @@ class Command(BaseCommand):
         version_string = re.sub(r'[^\d\.]+', '', version_string)
         version = tuple(int(x) for x in version_string.split('.'))
 
-        if not ELASTICSEARCH_MIN_VERSION < version < ELASTICSEARCH_MAX_VERSION:
+        if not ELASTICSEARCH_MIN_VERSION <= version <= ELASTICSEARCH_MAX_VERSION:
             self.print_error("elasticsearch is version {}, but".format(version))
             self.print_error("Hoover needs elasticsearch to be in between versions")
             self.print_error("{} and {}".format(ELASTICSEARCH_MIN_VERSION,
