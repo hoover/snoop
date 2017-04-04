@@ -8,7 +8,7 @@ appdirs==1.4.3            # via setuptools
 beautifulsoup4==4.5.3
 chardet==2.3.0
 click==6.7                # via pip-tools
-Django==1.10.6
+django==1.10.6
 elasticsearch==2.4.0
 exifread==2.1.2
 first==2.0.1              # via pip-tools
@@ -27,10 +27,9 @@ python-magic==0.4.13
 requests==2.13.0          # via tika
 simplejson==3.10.0
 six==1.10.0               # via packaging, pip-tools, python-dateutil, setuptools
-tika==1.14
+tika==1.14.1
 urllib3==1.20             # via elasticsearch
 waitress==1.0.2
 
-# The following packages are commented out because they are
-# considered to be unsafe in a requirements file:
+# The following packages are considered to be unsafe in a requirements file:
 # setuptools                # via pytest, tika

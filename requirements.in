@@ -7,7 +7,7 @@ elasticsearch==2.4.0
 simplejson
 waitress
 lxml
-tika
+tika==1.14.1
 python-dateutil
 pytest
 pytest-django
