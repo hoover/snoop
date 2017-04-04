@@ -2,10 +2,14 @@ from django.conf import settings
 from . import models
 from dateutil import parser
 import os
+import hashlib
+import tempfile
+
+os.environ['TIKA_LOG_PATH'] = tempfile.mkdtemp(prefix="snoop_tika_")
+
 import tika
 import tika.parser
 import tika.language
-import hashlib
 
 tika.tika.TikaClientOnly = True
 tika.language.ServerEndpoint = settings.SNOOP_TIKA_SERVER_ENDPOINT
