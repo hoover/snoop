@@ -69,6 +69,7 @@ FILE_TYPES = {
 
 MAGIC_DESCRIPTION_TYPES = {
     "Microsoft Outlook email folder (>=2003)": "application/x-hoover-pst",
+    "Composite Document File V2 Document": "application/vnd.ms-outlook",
 }
 
 MAGIC_READ_LIMIT = 24 * 1024 * 1024
