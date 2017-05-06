@@ -182,6 +182,9 @@ class EmailParser(object):
 
     def _message(self):
         if self._parsed_message is None:
+            first_three_bytes = self.file.read(3)
+            if first_three_bytes != bytes([0xef, 0xbb, 0xbf]):
+                self.file.seek(0)
             data = self.file.read()
             if pgp.contains_pgp_block(data):
                 self.pgp = True

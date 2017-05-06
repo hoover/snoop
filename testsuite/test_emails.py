@@ -19,6 +19,8 @@ MAIL_PATH_OCTET_STREAM_CONTENT_TYPE = "eml-2-attachment/attachments-have-" \
 MAIL_PATH_DOUBLE_DECODE_ATTACHMENT_FILENAME = "eml-8-double-encoded/double-" \
                                               "encoding.eml"
 
+MAIL_PATH_BYTE_ORDER_MARK = "eml-bom/with-bom.eml"
+
 def parse_email(path, collection):
     doc = models.Document(
         path=path,
@@ -114,3 +116,10 @@ def test_attachment_with_octet_stream_content_type(document_collection):
     assert data['attachments']['2']['content_type'] == 'application/msword'
     assert data['attachments']['3']['content_type'] == 'application/zip'
     assert data['attachments']['4']['content_type'] == 'image/png'
+
+def test_email_with_byte_order_mark(document_collection):
+    data = parse_email(MAIL_PATH_BYTE_ORDER_MARK, document_collection)
+
+    assert data['subject'] == "xxxxxxxxxx"
+    assert data['from'] == 'yyy <yyyyyyyyyyyyyyy@gmail.com>'
+    assert 'YYYYYY YYYYY <xxxxxxxxxxxxxxx@gmail.com>' in data['to']
