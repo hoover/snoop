@@ -134,7 +134,7 @@ Current setup uses the `msgconvert` script to convert `.msg` emails to `.eml`.
 Docs: http://www.matijs.net/software/msgconv/
 
 ```shell
-$ cpan -i Email::Outlook::Message
+$ cpanm --notest Email::Outlook::Message
 ```
 
 Set `SNOOP_MSGCONVERT_SCRIPT` to the script's path.
