@@ -159,7 +159,16 @@ def _get_index_data_format(digest_data):
     return data
 
 def document_json(request, collection_slug, id):
-    return json_response(request, _process_document(collection_slug, id))
+    doc = _find_doc(collection_slug, id)
+    if not doc.digested_at:
+        digest.worker(id, False)
+        doc.refresh_from_db()
+    diggie = models.Digest.objects.get(id=id)
+    digest_data = json.loads(models.Digest.objects.get(id=id).data)
+    data = _process_document(collection_slug, id, digest_data)
+    version = doc.digested_at.isoformat().replace('+00:00', 'Z')
+    data['version'] = version
+    return json_response(request, data)
 
 def feed(request, collection_slug):
     collection = get_object_or_404(models.Collection, slug=collection_slug)
