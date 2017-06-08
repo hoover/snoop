@@ -161,7 +161,11 @@ def _get_index_data_format(digest_data):
 def document_json(request, collection_slug, id):
     doc = _find_doc(collection_slug, id)
     if not doc.digested_at:
-        digest.worker(id, False)
+        success = digest.worker(id, False)
+        if not success:
+            resp = HttpResponse(status=503)
+            resp['X-Snoop-Digest-Error'] = 'yes'
+            return resp
         doc.refresh_from_db()
     diggie = models.Digest.objects.get(id=id)
     digest_data = json.loads(models.Digest.objects.get(id=id).data)

@@ -168,7 +168,7 @@ def worker(id, verbose):
         except models.Document.DoesNotExist:
             if verbose: print('MISSING')
             metrics.update({'outcome': 'error', 'error': 'document_missing'})
-            return
+            return False
         try:
             data = digest(document)
 
@@ -178,7 +178,7 @@ def worker(id, verbose):
             document.save()
             if verbose: print(e.flag)
             metrics.update({'outcome': 'broken', 'broken': document.broken})
-            return
+            return False
 
         else:
             if document.broken:
@@ -198,3 +198,5 @@ def worker(id, verbose):
         document.save()
 
         if verbose: print('type:', data.get('type'))
+
+        return True
