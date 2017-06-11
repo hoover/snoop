@@ -5,9 +5,10 @@ import pytest
 from django.conf import settings
 from snoop import models, walker, views
 
-skip_if_no_db = pytest.mark.skipif(not settings.DATABASES,
-    reason="DATABASES not set")
-pytestmark = [pytest.mark.django_db, skip_if_no_db]
+pytestmark = [
+    pytest.mark.django_db,
+    pytest.mark.skipif(not settings.DATABASES, reason="DATABASES not set"),
+]
 
 def _collection(**kwargs):
     col = models.Collection.objects.create(**kwargs)
