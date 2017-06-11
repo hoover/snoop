@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 import os, sys
-from ... import models
+from ... import collections
+from ...walker import FOLDER
 
 class Command(BaseCommand):
 
@@ -40,13 +41,11 @@ class Command(BaseCommand):
             print("Please provide an absolute path.")
             sys.exit(1)
 
-        c = models.Collection(
+        c = collections.create_collection(
             path=path,
             slug=slug,
             es_index=es_index,
             title=title,
             description=description,
         )
-        c.save()
         print("Collection saved with id", c.id)
-

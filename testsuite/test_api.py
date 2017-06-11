@@ -82,18 +82,8 @@ def test_collection_metadata_and_feed(mockdata, client):
     assert {d['content']['path'] for d in docs} == expected_paths
 
 def test_incremental(client):
-    def _create_collection(slug, path):
-        from snoop.walker import FOLDER
-        collection = models.Collection.objects.create(slug=slug, path=path)
-        models.Document.objects.get_or_create(
-            path='',
-            disk_size=0,
-            content_type=FOLDER,
-            filename='',
-            collection=collection,
-        )
-
-    _create_collection('testdata', settings.SNOOP_ROOT)
+    from snoop import collections
+    collections.create_collection('testdata', settings.SNOOP_ROOT)
 
     col_url = '/testdata/json'
     col = client.get(col_url).json()
