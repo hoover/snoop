@@ -80,3 +80,44 @@ def test_collection_metadata_and_feed(mockdata, client):
 
     expected_paths = {''} ^ {"doc_{}.txt".format(n) for n in range(42)}
     assert {d['content']['path'] for d in docs} == expected_paths
+
+def test_incremental(client):
+    def _create_collection(slug, path):
+        from snoop.walker import FOLDER
+        collection = models.Collection.objects.create(slug=slug, path=path)
+        models.Document.objects.get_or_create(
+            path='',
+            disk_size=0,
+            content_type=FOLDER,
+            filename='',
+            collection=collection,
+        )
+
+    _create_collection('testdata', settings.SNOOP_ROOT)
+
+    col_url = '/testdata/json'
+    col = client.get(col_url).json()
+
+    def doc(id):
+        root_url = col['data_urls'].format(id=id)
+        return client.get(urljoin(col_url, root_url)).json()
+
+    def children(doc):
+        return {c['filename']: c['id'] for c in doc['children']}
+
+    # root folder
+    root = doc(col['root_document'])
+    assert root['content']['content-type'] == 'application/x-directory'
+
+    # eml-7-recursive/d.7z//this/is/deep/recursivitate.eml//a.zip//a/a.txt
+    eml_7_recursive = doc(children(root)['eml-7-recursive'])
+    d_7z = doc(children(eml_7_recursive)['d.7z'])
+    this = doc(children(d_7z)['this'])
+    is_ = doc(children(this)['is'])
+    deep = doc(children(is_)['deep'])
+    recursivitate_eml = doc(children(deep)['recursivitate.eml'])
+    a_zip = doc(children(recursivitate_eml)['a.zip'])
+    a = doc(children(a_zip)['a'])
+    a_txt = doc(children(a)['a.txt'])
+
+    assert a_txt['content']['text'] == 'UNIQUE STRING A\n\n'

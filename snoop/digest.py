@@ -5,6 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 from .tikalib import tika_parse, extract_meta, tika_lang
+from . import folders
 from . import emails
 from . import text
 from . import queues
@@ -146,6 +147,8 @@ def create_children(doc, data, verbose=True):
         children = archives.list_children(doc)
     elif pst.is_pst_file(doc):
         children = pst.list_children(doc)
+    elif folders.is_folder(doc):
+        children = folders.list_children(doc)
 
     new_children = 0
     for doc_id, created in children:
