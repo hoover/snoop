@@ -13,7 +13,9 @@ RUN cpanm --notest Email::Outlook::Message
 RUN mkdir -p /opt/hoover/snoop
 WORKDIR /opt/hoover/snoop
 
-ADD requirements.txt /opt/hoover/snoop/
+ADD requirements.txt ./
 RUN pip install -r requirements.txt
 
-ADD . /opt/hoover/snoop/
+COPY . .
+
+CMD waitress-serve --port 80 snoop.site.wsgi:application
