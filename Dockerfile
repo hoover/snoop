@@ -1,14 +1,14 @@
 FROM python:3
 ENV PYTHONUNBUFFERED 1
 
-RUN echo 'deb http://deb.debian.org/debian jessie non-free' >> /etc/apt/sources.list
-RUN echo 'deb http://deb.debian.org/debian jessie-updates non-free' >> /etc/apt/sources.list
-RUN echo 'deb http://security.debian.org jessie/updates non-free' >> /etc/apt/sources.list
-
-RUN apt-get update
-RUN apt-get install -y --no-install-recommends p7zip-full p7zip-rar pst-utils cpanminus
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-RUN cpanm --notest Email::Outlook::Message
+RUN set -x \
+ && echo 'deb http://deb.debian.org/debian jessie non-free' >> /etc/apt/sources.list \
+ && echo 'deb http://deb.debian.org/debian jessie-updates non-free' >> /etc/apt/sources.list \
+ && echo 'deb http://security.debian.org jessie/updates non-free' >> /etc/apt/sources.list \
+ && apt-get update \
+ && apt-get install -y --no-install-recommends p7zip-full p7zip-rar pst-utils cpanminus \
+ && cpanm --notest Email::Outlook::Message \
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /opt/hoover/snoop
 WORKDIR /opt/hoover/snoop
