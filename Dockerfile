@@ -1,7 +1,7 @@
 FROM python:3
 ENV PYTHONUNBUFFERED 1
 
-RUN set -x \
+RUN set -e \
  && echo 'deb http://deb.debian.org/debian jessie non-free' >> /etc/apt/sources.list \
  && echo 'deb http://deb.debian.org/debian jessie-updates non-free' >> /etc/apt/sources.list \
  && echo 'deb http://security.debian.org jessie/updates non-free' >> /etc/apt/sources.list \
