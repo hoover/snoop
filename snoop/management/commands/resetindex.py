@@ -4,7 +4,10 @@ from django.conf import settings
 from elasticsearch import Elasticsearch
 from ... import models
 
-es = Elasticsearch(settings.SNOOP_ELASTICSEARCH_URL)
+es = Elasticsearch(
+    settings.SNOOP_ELASTICSEARCH_URL,
+    timeout=settings.SNOOP_ELASTICSEARCH_TIMEOUT,
+)
 
 MAPPINGS = {
     "doc": {
