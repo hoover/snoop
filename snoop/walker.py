@@ -1,5 +1,7 @@
+import os
 from pathlib import Path
 from . import models
+from . import queues
 from .content_types import guess_content_type
 
 FOLDER = 'application/x-directory'
@@ -28,18 +30,22 @@ class Walker(object):
         return file.relative_to(self.root)
 
     def handle(self, item, parent):
+        print("WALK ENTER   ", str(self._path(item)))
         if item.is_dir():
             self.handle_folder(item, parent)
         else:
             self.handle_file(item, parent)
+        print("WALK EXIT    ", str(self._path(item)))
 
     def handle_folder(self, folder, parent):
         path = self._path(folder)
+        print("HANDLE FOLDER", str(path))
         if str(path) == '.':
             if self.container_doc:
                 new_doc = self.container_doc
+                created = True
             else:
-                new_doc, _ = models.Document.objects.get_or_create(
+                new_doc, created = models.Document.objects.get_or_create(
                     path='',
                     disk_size=0,
                     content_type=FOLDER,
@@ -57,11 +63,20 @@ class Walker(object):
                 collection=self.collection,
             )
             self.documents.append((new_doc, created))
+
+        folder_mtime = os.path.getmtime(str(folder.resolve()))
+        if created or \
+                not new_doc.digested_at or \
+                new_doc.digested_at.timestamp() <= folder_mtime:
+            if new_doc.path:  # avoid digesting / indexing the root
+                queues.put('digest', {'id': new_doc.id})
+
         for child in folder.iterdir():
             self.handle(child, new_doc)
 
     def handle_file(self, file, parent):
         path = self._path(file)
+        print("HANDLE FILE  ", str(path))
         new_doc, created = models.Document.objects.get_or_create(
             path=path,
             parent=parent,
@@ -74,6 +89,11 @@ class Walker(object):
             },
         )
         self.documents.append((new_doc, created))
+        file_mtime = os.path.getmtime(str(file.resolve()))
+        if created or \
+                not new_doc.digested_at or \
+                new_doc.digested_at.timestamp() <= file_mtime:
+            queues.put('digest', {'id': new_doc.id})
 
 def files_in(doc):
     child_documents = models.Document.objects.filter(parent=doc)
