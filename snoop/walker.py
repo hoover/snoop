@@ -60,10 +60,12 @@ class Walker(object):
                 collection=self.collection,
             )
             self.documents.append((new_doc, created))
-            if created or \
-                    not new_doc.digested_at or \
-                    new_doc.digested_at.timestamp() < os.path.getmtime(folder.resolve()):
-                queues.put('digest', {'id': new_doc.id})
+
+        if created or \
+                not new_doc.digested_at or \
+                new_doc.digested_at.timestamp() < os.path.getmtime(str(folder.resolve())):
+            queues.put('digest', {'id': new_doc.id})
+
         for child in folder.iterdir():
             self.handle(child, new_doc)
 
@@ -83,7 +85,7 @@ class Walker(object):
         self.documents.append((new_doc, created))
         if created or \
                 not new_doc.digested_at or \
-                new_doc.digested_at.timestamp() < os.path.getmtime(file.resolve()):
+                new_doc.digested_at.timestamp() < os.path.getmtime(str(file.resolve())):
             queues.put('digest', {'id': new_doc.id})
 
 def files_in(doc):
