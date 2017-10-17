@@ -39,8 +39,9 @@ class Walker(object):
         if str(path) == '.':
             if self.container_doc:
                 new_doc = self.container_doc
+                created = True
             else:
-                new_doc, _ = models.Document.objects.get_or_create(
+                new_doc, created = models.Document.objects.get_or_create(
                     path='',
                     disk_size=0,
                     content_type=FOLDER,
@@ -58,7 +59,10 @@ class Walker(object):
                 collection=self.collection,
             )
             self.documents.append((new_doc, created))
-            queues.put('digest', {'id': new_doc.id})
+            if created or \
+                    not new_doc.digested_at or \
+                    new_doc.digested_at.timestamp() < os.path.getmtime((folder.resolve()):
+                queues.put('digest', {'id': new_doc.id})
         for child in folder.iterdir():
             self.handle(child, new_doc)
 
@@ -76,7 +80,10 @@ class Walker(object):
             },
         )
         self.documents.append((new_doc, created))
-        queues.put('digest', {'id': new_doc.id})
+        if created or \
+                not new_doc.digested_at or \
+                new_doc.digested_at.timestamp() < os.path.getmtime((file.resolve()):
+            queues.put('digest', {'id': new_doc.id})
 
 def files_in(doc):
     child_documents = models.Document.objects.filter(parent=doc)
