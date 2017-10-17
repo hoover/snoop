@@ -30,13 +30,16 @@ class Walker(object):
         return file.relative_to(self.root)
 
     def handle(self, item, parent):
+        print("WALK ENTER   ", str(self._path(item)))
         if item.is_dir():
             self.handle_folder(item, parent)
         else:
             self.handle_file(item, parent)
+        print("WALK EXIT    ", str(self._path(item)))
 
     def handle_folder(self, folder, parent):
         path = self._path(folder)
+        print("HANDLE FOLDER", str(path))
         if str(path) == '.':
             if self.container_doc:
                 new_doc = self.container_doc
@@ -71,6 +74,7 @@ class Walker(object):
 
     def handle_file(self, file, parent):
         path = self._path(file)
+        print("HANDLE FILE  ", str(path))
         new_doc, created = models.Document.objects.get_or_create(
             path=path,
             parent=parent,
