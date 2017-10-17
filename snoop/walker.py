@@ -1,5 +1,6 @@
 from pathlib import Path
 from . import models
+from . import queues
 from .content_types import guess_content_type
 
 FOLDER = 'application/x-directory'
@@ -57,6 +58,7 @@ class Walker(object):
                 collection=self.collection,
             )
             self.documents.append((new_doc, created))
+            queues.put('digest', {'id': new_doc.id})
         for child in folder.iterdir():
             self.handle(child, new_doc)
 
@@ -74,6 +76,7 @@ class Walker(object):
             },
         )
         self.documents.append((new_doc, created))
+        queues.put('digest', {'id': new_doc.id})
 
 def files_in(doc):
     child_documents = models.Document.objects.filter(parent=doc)
