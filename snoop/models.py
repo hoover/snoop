@@ -13,9 +13,9 @@ class Collection(models.Model):
 
 
 class Blob(models.Model):
-    md5 = models.BytesField(max_length=16, db_index=True)
-    sha1 = models.BytesField(max_length=20, db_index=True)
-    sha3_256 = models.BytesField(max_length=32, unique=True)
+    md5 = models.BinaryField(max_length=16, db_index=True)
+    sha1 = models.BinaryField(max_length=20, db_index=True)
+    sha3_256 = models.BinaryField(max_length=32, unique=True)
     size = models.BigIntegerField()
     mime_type = models.CharField(max_length=100, blank=True)
     mime_encoding = models.CharField(max_length=100, blank=True)
@@ -27,7 +27,7 @@ class Document(models.Model):
     parent = models.ForeignKey('Document',
                                related_name='child_set',
                                null=True)
-    filename_bytes = models.BytesField(max_length=1000)
+    filename_bytes = models.BinaryField(max_length=1000)
 
     class Meta:
         unique_together = ('parent', 'filename_bytes')
