@@ -324,7 +324,6 @@ def open_email(doc):
 def get_email_part(doc, part):
     return open_email(doc).open_part(part)
 
-@models.cache(models.EmailCache, lambda doc: doc.id)
 def raw_parse_email(doc):
     email = open_email(doc)
     return {

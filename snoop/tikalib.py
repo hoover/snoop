@@ -63,13 +63,10 @@ def extract_meta(meta):
     return data
 
 
-@models.cache(models.TikaCache, lambda sha1, open_file: sha1)
 def tika_parse(sha1, open_file):
     with open_file() as f:
         return tika.parser.from_buffer(f, settings.SNOOP_TIKA_SERVER_ENDPOINT)
 
-@models.cache(models.TikaLangCache,
-    lambda text: hashlib.sha1(text.encode('utf-8')).hexdigest())
 def tika_lang(text):
     lang = tika.language.from_buffer(text)
     if 'error' in lang.lower():
