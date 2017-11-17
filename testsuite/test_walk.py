@@ -4,6 +4,7 @@ import pytest
 from django.conf import settings
 from snoop import models
 from snoop.utils import chunks
+from snoop.magic import Magic
 
 pytestmark = pytest.mark.django_db
 
@@ -29,6 +30,7 @@ def walk(doc):
                 'sha1': hashlib.sha1(),
                 'sha3_256': hashlib.sha3_256(),
             }
+            magic = Magic()
 
             with path.open('rb') as f:
                 size = 0
@@ -36,9 +38,11 @@ def walk(doc):
                     size += len(block)
                     for h in hashes.values():
                         h.update(block)
+                    magic.update(block)
 
             fields = {name: hash.hexdigest() for name, hash in hashes.items()}
             fields['size'] = size
+            (fields['mime_type'], fields['mime_encoding']) = magic.get_result()
 
             blob, _ = models.Blob.objects.get_or_create(
                 sha3_256=fields['sha3_256'],
@@ -84,3 +88,5 @@ def test_walk_testdata():
     assert words.blob.md5 == WORDS_MD5
     assert words.blob.sha1 == WORDS_SHA1
     assert words.blob.sha3_256 == WORDS_SHA3_256
+    assert words.blob.mime_type == 'text/plain'
+    assert words.blob.mime_encoding == 'utf-8'
