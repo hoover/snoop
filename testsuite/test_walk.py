@@ -108,8 +108,14 @@ def test_walk_testdata():
     assert words.blob.mime_type == 'text/plain'
     assert words.blob.mime_encoding == 'utf-8'
 
+    with words.blob.open() as f:
+        assert hashlib.sha1(f.read()).hexdigest() == WORDS_SHA1
+
     mouse = lookup(col, '/disk-files/archives/tim-and-merry'
         '/archives.zip/jerry/etc/jerry.7z/mouse'
         '/stock-photo-house-mouse-standing'
         '-on-rear-feet-mus-musculus-137911070.jpg')
     assert mouse.blob.sha1 == MOUSE_SHA1
+
+    with mouse.blob.open() as f:
+        assert hashlib.sha1(f.read()).hexdigest() == MOUSE_SHA1
