@@ -1,12 +1,6 @@
 from pathlib import Path
-from io import BytesIO
-import json
-from contextlib import contextmanager
-import tempfile
-import shutil
-from django.db import models, transaction
+from django.db import models
 from django.contrib.postgres.fields import JSONField
-from django.conf import settings
 
 
 class Collection(models.Model):
@@ -14,10 +8,9 @@ class Collection(models.Model):
     name = models.CharField(max_length=100, unique=True)
     ocr = JSONField(default=dict, blank=True)
 
-    filesystem_path = ceva(null=True)
-
     def __str__(self):
-        return self.slug
+        return self.name
+
 
 class Blob(models.Model):
     md5 = models.BytesField(max_length=16, db_index=True)
@@ -38,6 +31,7 @@ class Document(models.Model):
 
     class Meta:
         unique_together = ('parent', 'filename_bytes')
+
 
 class Ocr(models.Model):
     collection = models.ForeignKey(
