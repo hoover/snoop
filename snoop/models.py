@@ -13,9 +13,9 @@ class Collection(models.Model):
 
 
 class Blob(models.Model):
-    md5 = models.BinaryField(max_length=16, db_index=True)
-    sha1 = models.BinaryField(max_length=20, db_index=True)
-    sha3_256 = models.BinaryField(max_length=32, unique=True)
+    md5 = models.CharField(max_length=32, db_index=True)
+    sha1 = models.CharField(max_length=40, db_index=True)
+    sha3_256 = models.CharField(max_length=64, unique=True)
     size = models.BigIntegerField()
     mime_type = models.CharField(max_length=100, blank=True)
     mime_encoding = models.CharField(max_length=100, blank=True)
