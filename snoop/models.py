@@ -4,7 +4,7 @@ from django.contrib.postgres.fields import JSONField
 
 
 class Collection(models.Model):
-    root = models.CharField(max_length=4000)
+    path = models.CharField(max_length=4000)
     name = models.CharField(max_length=100, unique=True)
     ocr = JSONField(default=dict, blank=True)
 
