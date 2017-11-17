@@ -80,7 +80,10 @@ def lookup(col, path):
 
 
 def test_walk_testdata():
-    col = models.Collection.objects.create(root=settings.SNOOP_ROOT)
+    col = models.Collection.objects.create(
+        name='testdata',
+        root=settings.SNOOP_ROOT,
+    )
     walk(col.get_root())
 
     words = lookup(col, '/words/usr-share-dict-words.txt')

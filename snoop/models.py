@@ -39,6 +39,19 @@ class Document(models.Model):
     def filename(self):
         return bytes(self.filename_bytes).decode('utf8')
 
+    @property
+    def path(self):
+        doc = self
+        names = []
+        while doc:
+            names.append(doc.filename)
+            doc = doc.parent
+        names.reverse()
+        return '/'.join(names)
+
+    def __str__(self):
+        return f"{self.collection}:{self.path}"
+
     class Meta:
         unique_together = ('parent', 'filename_bytes')
 
