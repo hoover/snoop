@@ -11,6 +11,12 @@ class Collection(models.Model):
     def __str__(self):
         return self.name
 
+    def get_root(self):
+        try:
+            return self.document_set.filter(parent__isnull=True).get()
+        except Document.DoesNotExist:
+            return self.document_set.create()
+
 
 class Blob(models.Model):
     md5 = models.CharField(max_length=32, db_index=True)
@@ -28,6 +34,10 @@ class Document(models.Model):
                                related_name='child_set',
                                null=True)
     filename_bytes = models.BinaryField(max_length=1000)
+
+    @property
+    def filename(self):
+        return bytes(self.filename_bytes).decode('utf8')
 
     class Meta:
         unique_together = ('parent', 'filename_bytes')
