@@ -4,7 +4,7 @@ set -ex
 export DEBIAN_FRONTEND=noninteractive
 
 apt-get update -qq > /dev/null
-apt-get install -yqq --no-install-recommends p7zip-full p7zip-rar pst-utils cpanminus poppler-utils postgresql postgresql-server-dev-all build-essential file python3-dev libxml2-dev libxslt1-dev > /dev/null
+apt-get install -yqq --no-install-recommends p7zip-full p7zip-rar pst-utils cpanminus poppler-utils postgresql postgresql-server-dev-all build-essential file python3-dev libxml2-dev libxslt1-dev virtualenv > /dev/null
 cpanm --notest Email::Outlook::Message > /dev/null
 
 virtualenv -p python3 /tmp/venv
