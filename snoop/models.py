@@ -1,5 +1,8 @@
 from pathlib import Path
+from contextlib import contextmanager
+import tempfile
 from django.db import models
+from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 
 
@@ -18,6 +21,36 @@ class Collection(models.Model):
             return self.document_set.create()
 
 
+class BlobWriter:
+
+    def __init__(self, file):
+        self.file = file
+
+    def write(self, data):
+        self.file.write(data)
+
+    def set_filename(self, filename):
+        self.filename = filename
+
+
+class FlatBlobStorage:
+
+    def __init__(self, root):
+        self.root = Path(root)
+        self.tmp = self.root / 'tmp'
+
+    @contextmanager
+    def save(self):
+        self.tmp.mkdir(exist_ok=True)
+        with tempfile.NamedTemporaryFile(dir=self.tmp, delete=False) as f:
+            writer = BlobWriter(f)
+            yield writer
+        Path(f.name).rename(self.root / writer.filename)
+
+    def open(self, sha3_256):
+        return (self.root / sha3_256).open('rb')
+
+
 class Blob(models.Model):
     md5 = models.CharField(max_length=32, db_index=True)
     sha1 = models.CharField(max_length=40, db_index=True)
@@ -25,6 +58,10 @@ class Blob(models.Model):
     size = models.BigIntegerField()
     mime_type = models.CharField(max_length=100, blank=True)
     mime_encoding = models.CharField(max_length=100, blank=True)
+
+    def open(self):
+        blob_storage = FlatBlobStorage(settings.SNOOP_BLOB_STORAGE)
+        return blob_storage.open(self.sha3_256)
 
 
 class Document(models.Model):

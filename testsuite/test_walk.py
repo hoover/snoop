@@ -2,6 +2,7 @@ import hashlib
 from pathlib import Path
 import pytest
 from django.conf import settings
+from django.test.utils import override_settings
 from snoop import models
 from snoop.utils import chunks
 from snoop.magic import Magic
@@ -40,15 +41,21 @@ def make_blob(doc, path):
     }
     magic = Magic()
 
-    with path.open('rb') as f:
-        size = 0
-        for block in chunks(f):
-            size += len(block)
-            for h in hashes.values():
-                h.update(block)
-            magic.update(block)
+    blob_storage = models.FlatBlobStorage(settings.SNOOP_BLOB_STORAGE)
+    with blob_storage.save() as b:
+        with path.open('rb') as f:
+            size = 0
+            for block in chunks(f):
+                size += len(block)
+                for h in hashes.values():
+                    h.update(block)
+                magic.update(block)
+                b.write(block)
 
-    fields = {name: hash.hexdigest() for name, hash in hashes.items()}
+        digest = {name: hash.hexdigest() for name, hash in hashes.items()}
+        b.set_filename(digest['sha3_256'])
+
+    fields = dict(digest)
     fields['size'] = size
     (fields['mime_type'], fields['mime_encoding']) = magic.get_result()
 
@@ -93,7 +100,14 @@ def lookup(col, path):
     return doc
 
 
-def test_walk_testdata():
+@pytest.fixture
+def mock_blob_storage(tmpdir):
+    with override_settings():
+        settings.SNOOP_BLOB_STORAGE = str(tmpdir.mkdir('blob_storage'))
+        yield
+
+
+def test_walk_testdata(mock_blob_storage):
     col = models.Collection.objects.create(
         name='testdata',
         path=settings.SNOOP_ROOT,
