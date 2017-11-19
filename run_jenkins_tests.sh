@@ -12,7 +12,7 @@ source /tmp/venv/bin/activate
 cd /mnt/snoop
 pip install -r requirements.txt
 
-sudo -u postgres createsuperuser root
+sudo -u postgres createuser -s root
 createdb snoop
 
 ( cd /tmp; git clone https://github.com/hoover/testdata )
