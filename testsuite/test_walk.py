@@ -17,8 +17,6 @@ WORDS_SHA3_256 = ('5490ccb75c33798427f7e746150e74f1'
 
 MOUSE_SHA1 = 'dd0c5fad4180f3ae71aa401285b803b9434deac6'
 
-container_cache = Path(settings.SNOOP_CONTAINER_CACHE)
-
 
 def walk_children(doc, path):
     children = {c.filename_bytes: c for c in doc.child_set.all()}
@@ -76,6 +74,7 @@ def walk(doc, path):
         walk_children(doc, path)
 
     elif doc.blob.mime_type in archives.KNOWN_TYPES:
+        container_cache = Path(settings.SNOOP_CONTAINER_CACHE)
         cache = container_cache / doc.blob.sha3_256
         if not cache.exists():
             cache.mkdir()
@@ -101,13 +100,14 @@ def lookup(col, path):
 
 
 @pytest.fixture
-def mock_blob_storage(tmpdir):
+def mock_folders(tmpdir):
     with override_settings():
         settings.SNOOP_BLOB_STORAGE = str(tmpdir.mkdir('blob_storage'))
+        settings.SNOOP_CONTAINER_CACHE = str(tmpdir.mkdir('container_cache'))
         yield
 
 
-def test_walk_testdata(mock_blob_storage):
+def test_walk_testdata(mock_folders):
     col = models.Collection.objects.create(
         name='testdata',
         path=settings.SNOOP_ROOT,
