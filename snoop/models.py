@@ -1,138 +1,97 @@
 from pathlib import Path
-from io import BytesIO
-import json
 from contextlib import contextmanager
 import tempfile
-import shutil
-from django.db import models, transaction
-from django.contrib.postgres.fields import JSONField
+from django.db import models
 from django.conf import settings
+from django.contrib.postgres.fields import JSONField
 
-def cache(model, keyfunc):
-
-    def decorator(func):
-
-        if not settings.SNOOP_CACHE:
-            return func
-
-        @transaction.atomic
-        def wrapper(*args, **kwargs):
-            key = keyfunc(*args, **kwargs)
-
-            row, created = model.objects.get_or_create(pk=key)
-            if not created:
-                return json.loads(row.value)
-
-            value = func(*args, **kwargs)
-
-            row.value = json.dumps(value)
-            row.save()
-
-            return value
-
-        wrapper.no_cache = func
-        return wrapper
-
-    return decorator
-
-class EmailCache(models.Model):
-    id = models.IntegerField(primary_key=True)
-    value = models.TextField()
-    time = models.DateTimeField(auto_now=True)
 
 class Collection(models.Model):
     path = models.CharField(max_length=4000)
-    slug = models.CharField(max_length=100, unique=True)
-    title = models.CharField(max_length=200)
-    es_index = models.CharField(max_length=200)
-    description = models.TextField(blank=True)
+    name = models.CharField(max_length=100, unique=True)
     ocr = JSONField(default=dict, blank=True)
 
     def __str__(self):
-        return self.slug
+        return self.name
+
+    def get_root(self):
+        try:
+            return self.document_set.filter(parent__isnull=True).get()
+        except Document.DoesNotExist:
+            return self.document_set.create()
+
+
+class BlobWriter:
+
+    def __init__(self, file):
+        self.file = file
+
+    def write(self, data):
+        self.file.write(data)
+
+    def set_filename(self, filename):
+        self.filename = filename
+
+
+class FlatBlobStorage:
+
+    def __init__(self, root):
+        self.root = Path(root)
+        self.tmp = self.root / 'tmp'
+
+    @contextmanager
+    def save(self):
+        self.tmp.mkdir(exist_ok=True)
+        with tempfile.NamedTemporaryFile(dir=self.tmp, delete=False) as f:
+            writer = BlobWriter(f)
+            yield writer
+        Path(f.name).rename(self.root / writer.filename)
+
+    def open(self, sha3_256):
+        return (self.root / sha3_256).open('rb')
+
+
+class Blob(models.Model):
+    md5 = models.CharField(max_length=32, db_index=True)
+    sha1 = models.CharField(max_length=40, db_index=True)
+    sha3_256 = models.CharField(max_length=64, unique=True)
+    size = models.BigIntegerField()
+    mime_type = models.CharField(max_length=100, blank=True)
+    mime_encoding = models.CharField(max_length=100, blank=True)
+
+    def open(self):
+        blob_storage = FlatBlobStorage(settings.SNOOP_BLOB_STORAGE)
+        return blob_storage.open(self.sha3_256)
+
 
 class Document(models.Model):
+    blob = models.ForeignKey('Blob', null=True, blank=True)
     collection = models.ForeignKey('Collection')
-    container = models.ForeignKey('Document',
-                                  related_name='contained_set',
-                                  null=True)
     parent = models.ForeignKey('Document',
                                related_name='child_set',
                                null=True)
-    path = models.CharField(max_length=4000)
-    content_type = models.CharField(max_length=100, blank=True)
-    filename = models.CharField(max_length=1000)
-    disk_size = models.BigIntegerField()
-    md5 = models.CharField(max_length=40, blank=True, db_index=True)
-    sha1 = models.CharField(max_length=50, blank=True, db_index=True)
-    broken = models.CharField(max_length=100, blank=True)
-    rev = models.IntegerField(null=True)
-    flags = JSONField(default=dict, blank=True)
-    digested_at = models.DateTimeField(null=True, blank=True)
-
-    class Meta:
-        # TODO: constraint does not apply to container=None rows
-        unique_together = ('container', 'path')
-        index_together = ('collection', 'digested_at')
-
-    def __str__(self):
-        return str(self.path)
+    filename_bytes = models.BinaryField(max_length=1000)
 
     @property
-    def absolute_path(self):
-        assert self.container is None
-        return Path(self.collection.path) / self.path
+    def filename(self):
+        return bytes(self.filename_bytes).decode('utf8')
 
-    def _open_file(self):
-        if self.content_type == 'application/x-directory':
-            return BytesIO()
+    @property
+    def path(self):
+        doc = self
+        names = []
+        while doc:
+            names.append(doc.filename)
+            doc = doc.parent
+        names.reverse()
+        return '/'.join(names)
 
-        if self.container is None:
-            return self.absolute_path.open('rb')
+    def __str__(self):
+        return f"{self.collection}:{self.path}"
 
-        else:
-            from . import emails, archives, pst
+    class Meta:
+        unique_together = ('parent', 'filename_bytes')
 
-            if emails.is_email(self.container):
-                return emails.get_email_part(self.container, self.path)
-
-            if archives.is_archive(self.container):
-                return archives.open_file(self.container, self.path)
-
-            if pst.is_pst_file(self.container):
-                return pst.open_file(self.container, self.path)
-
-        raise RuntimeError
-
-    @contextmanager
-    def open(self, filesystem=False):
-        """ Open the document as a file. If the document is inside an email or
-        archive, it will be copied to a temporary file:
-
-            with doc.open() as f:
-                f.read()
-
-        If ``filesystem`` is True, ``f`` will have a ``path`` attribute, which
-        is the absolute path of the file on disk.
-        """
-
-        with self._open_file() as f:
-            if filesystem:
-                if self.container:
-                    MB = 1024*1024
-                    suffix = Path(self.filename).suffix
-                    with tempfile.NamedTemporaryFile(suffix=suffix) as tmp:
-                        shutil.copyfileobj(f, tmp, length=4*MB)
-                        tmp.flush()
-                        tmp.path = Path(tmp.name)
-                        yield tmp
-
-                else:
-                    f.path = self.absolute_path
-                    yield f
-
-            else:
-                yield f
 
 class Ocr(models.Model):
     collection = models.ForeignKey(
@@ -150,31 +109,3 @@ class Ocr(models.Model):
     @property
     def absolute_path(self):
         return Path(self.collection.ocr[self.tag]) / self.path
-
-class Digest(models.Model):
-    id = models.IntegerField(primary_key=True)
-    data = models.TextField()
-
-class Job(models.Model):
-    queue = models.CharField(max_length=100)
-    data = JSONField(null=True)
-    started = models.BooleanField(default=False)
-
-    class Meta:
-        unique_together = ('queue', 'data')
-        index_together = ('queue', 'started')
-
-class TikaCache(models.Model):
-    sha1 = models.CharField(max_length=50, primary_key=True)
-    value = models.TextField()
-    time = models.DateTimeField(auto_now=True)
-
-class TikaLangCache(models.Model):
-    sha1 = models.CharField(max_length=50, primary_key=True)
-    value = models.CharField(max_length=20)
-    time = models.DateTimeField(auto_now=True)
-
-class HtmlTextCache(models.Model):
-    sha1 = models.CharField(max_length=50, primary_key=True)
-    value = models.TextField()
-    time = models.DateTimeField(auto_now=True)
