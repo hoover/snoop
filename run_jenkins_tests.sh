@@ -26,4 +26,4 @@ createdb snoop
   cp example_local.py local.py;
 )
 
-pytest --junit-xml junit.xml
+pytest --ignore=factory --junit-xml junit.xml
