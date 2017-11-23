@@ -16,14 +16,14 @@ sudo -u postgres createuser -s root
 createdb snoop
 
 (
-  cd /tmp;
-  git clone https://github.com/hoover/testdata;
+  cd /tmp
+  git clone https://github.com/hoover/testdata
 )
 
 (
-  cd /mnt/snoop/snoop/site/settings;
-  cp example_testing.py testing_local.py;
-  cp example_local.py local.py;
+  cd /mnt/snoop/snoop/site/settings
+  cp example_testing.py testing_local.py
+  cp example_local.py local.py
 )
 
 pytest --ignore=factory --junit-xml junit.xml
