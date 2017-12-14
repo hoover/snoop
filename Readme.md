@@ -97,8 +97,8 @@ Tika is used for text, language and metadata extraction.
 You can download the server .jar from the [Apache archive](http://archive.apache.org/dist/tika/) and run it:
 
 ```shell
-$ wget http://archive.apache.org/dist/tika/tika-server-1.13.jar
-$ java -jar tika-server-1.13.jar
+$ wget http://archive.apache.org/dist/tika/tika-server-1.17.jar
+$ java -jar tika-server-1.17.jar
 ```
 
 After that, configure the following settings:
