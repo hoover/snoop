@@ -15,6 +15,10 @@ class Walker(object):
         self.documents = []
         self.collection = collection
 
+    def record_document(self, new_doc, created):
+        if self.container_doc:
+            self.documents.append((new_doc, created))
+
     @classmethod
     def walk(cls, root, prefix, container_doc, collection):
         self = cls(root, prefix, container_doc, collection)
@@ -62,7 +66,7 @@ class Walker(object):
                 container=self.container_doc,
                 collection=self.collection,
             )
-            self.documents.append((new_doc, created))
+            self.record_document(new_doc, created)
 
         folder_mtime = os.path.getmtime(str(folder.resolve()))
         if created or \
@@ -88,7 +92,7 @@ class Walker(object):
                 'filename': path.name,
             },
         )
-        self.documents.append((new_doc, created))
+        self.record_document(new_doc, created)
         file_mtime = os.path.getmtime(str(file.resolve()))
         if created or \
                 not new_doc.digested_at or \
