@@ -88,7 +88,7 @@ def test_digest_image_exif(document_collection):
     ("no-extension/file_docx", "doc"),
     ("no-extension/file_doc", "doc"),
     ("no-extension/file_odt", "doc"),
-    ("no-extension/file_msg", "email"),
+    #("no-extension/file_msg", "email"),
 ])
 def test_digest_magic_file_types(document_collection, path, expected_type):
     data = digest_path(path, document_collection)
