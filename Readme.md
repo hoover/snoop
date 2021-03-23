@@ -1,3 +1,10 @@
+## Moved to https://github.com/liquidinvestigations/hoover-snoop2
+
+And documentation moved to https://hoover-snoop2.readthedocs.io/en/latest/
+
+
+-----------
+
 # Snoop
 
 Snoop will walk a file dump, extract text and metadata for each
